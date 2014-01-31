@@ -49,7 +49,7 @@ bool SystemClass::setup(int width, int height)
 	}
 	if(!inputManager_->setup(instanceHandler_, windowHandler_, width, height))
 	{
-		MessageBox(windowHandler_, L"Could not initialize the input object.", L"Error", MB_ICONERROR | MB_OK);
+		MessageBox(windowHandler_, L"Could not initialize the input object.", L"SystemClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -352,7 +352,7 @@ void SystemClass::notify(InputManager* notifier, int arg)
 	switch(arg){
 		case 27:
 			{
-				if(MessageBoxA(windowHandler_, "Really quit?", "My application", MB_OKCANCEL) == IDOK)
+				if(MessageBoxA(windowHandler_, "Really quit?", "Pico's Adventure", MB_OKCANCEL) == IDOK)
 				{
 					isRunning_ = false;
 				}

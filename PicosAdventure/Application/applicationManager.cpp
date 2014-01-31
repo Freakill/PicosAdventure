@@ -27,9 +27,9 @@ bool ApplicationManager::setup(HWND windowsHandler, InputManager* inputManager, 
 		return false;
 	}
 
-	if(!graphicsManager_->setup(width, height, false, windowsHandler, fullscreen, 1000.0f, 0.1f))
+	if(!graphicsManager_->setup(windowsHandler, false, fullscreen, 1000.0f, 0.1f))
 	{
-		MessageBox(NULL, L"Could not initialize DirectX11", L"Error", MB_ICONERROR | MB_OK);
+		MessageBox(NULL, L"Could not initialize DirectX11.", L"ApplicationManager - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
