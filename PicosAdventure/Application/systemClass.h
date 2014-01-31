@@ -11,7 +11,11 @@
 #include <fstream>
 #include <sstream>
 
-class SystemClass
+#include "inputManager.h"
+#include "../Utils/listenerClass.h"
+#include "applicationManager.h"
+
+class SystemClass : public Listener<InputManager, int>
 {
 	public:
 		SystemClass();
@@ -34,6 +38,8 @@ class SystemClass
 		bool createWindow(int width, int height, bool fullscreen);
 		void setupPixelFormat(void);
 
+		virtual void notify(InputManager* notifier, int arg);
+
 		bool isRunning_;
 		bool fullscreen_;
 
@@ -47,6 +53,9 @@ class SystemClass
 		DWORD windowExtendedStyle_; //Window Extended Style
 		DWORD windowStyle_; //Window Style
 		DEVMODE deviceModeSettings_;
+
+		InputManager* inputManager_;
+		ApplicationManager* appManager_;
 };
 
 #endif //_SYSTEM_CLASS_H_

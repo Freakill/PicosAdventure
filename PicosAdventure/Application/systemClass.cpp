@@ -3,7 +3,8 @@
 SystemClass::SystemClass()
 {
 	// Initializing objects at 0 for control
-	
+	inputManager_ = 0;
+	appManager_ = 0;
 }
 
 SystemClass::SystemClass(const SystemClass& other)
@@ -41,9 +42,30 @@ bool SystemClass::setup(int width, int height)
 		return false;
 	}
 
-	ShowWindow(windowHandler_, SW_SHOW);
-	UpdateWindow(windowHandler_); // update the window
-	SetFocus(windowHandler_);
+	inputManager_ = new InputManager;
+	if(!inputManager_)
+	{
+		return false;
+	}
+	if(!inputManager_->setup(instanceHandler_, windowHandler_, width, height))
+	{
+		MessageBox(windowHandler_, L"Could not initialize the input object.", L"Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	// Initialize the Application Manager
+	appManager_ = new ApplicationManager;
+	if(!appManager_)
+	{
+		return false;
+	}
+	if(!appManager_->setup(windowHandler_, inputManager_, width, height, fullscreen_))
+	{
+		return false;
+	}
+
+	// Initialize the listeners for input
+	inputManager_->addListener(*this);
 
 	return true;
 }
@@ -54,6 +76,12 @@ void SystemClass::run()
 	{
 		processEvents(); //Process any window events
 
+		// Do the input frame processing.
+		inputManager_->update();
+
+		appManager_->update();
+		appManager_->draw();
+
 		swapBuffers();
 	}
 
@@ -63,6 +91,22 @@ void SystemClass::run()
 
 void SystemClass::destroy()
 {
+	// Delete application manager to ensure all resources will be freed
+	if(appManager_)
+	{
+		appManager_->destroy();
+		delete appManager_;
+		appManager_ = 0;
+	}
+
+	// Delete input manager
+	if(inputManager_)
+	{
+		inputManager_->destroy();
+		delete inputManager_;
+		inputManager_ = 0;
+	}
+
 	// Show the mouse cursor.
 	ShowCursor(true);
 
@@ -183,6 +227,10 @@ bool SystemClass::createWindow(int width, int height, bool fullscreen)
 		return false;
 	}
 
+	ShowWindow(windowHandler_, SW_SHOW);
+	UpdateWindow(windowHandler_); // update the window
+	SetFocus(windowHandler_);
+
 	return true;
 }
 
@@ -251,11 +299,13 @@ LRESULT SystemClass::WindowProcess(HWND windowHandler, UINT messageCode, WPARAM 
 		break;
 		case WM_KEYDOWN:
 		{
+			inputManager_->keyDown((unsigned int)wAdditionalData);
 			return 0;
 		}
 		break;
 		case WM_KEYUP:
 		{
+			inputManager_->keyUp((unsigned int)wAdditionalData);
 			return 0;
 		}
 		break;
@@ -295,4 +345,20 @@ LRESULT SystemClass::StaticWindowProcess(HWND windowHandler, UINT messageCode, W
 
     //Call our window's member WndProc (allows us to access member variables)
 	return window->WindowProcess(windowHandler, messageCode, wAdditionalData, lAdditionalData);
+}
+
+void SystemClass::notify(InputManager* notifier, int arg)
+{
+	switch(arg){
+		case 27:
+			{
+				if(MessageBoxA(windowHandler_, "Really quit?", "My application", MB_OKCANCEL) == IDOK)
+				{
+					isRunning_ = false;
+				}
+			}
+			break;
+		default:
+			break;
+	}
 }

@@ -13,18 +13,99 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Application">
+      <UniqueIdentifier>{218d90ef-c303-4a57-9ff0-8397b25534f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Application">
+      <UniqueIdentifier>{b23cea05-c2ff-4a21-b73c-94eb8ebb4f76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Math">
+      <UniqueIdentifier>{7c3dfb52-f3af-46f0-ada0-37dc5c8db8c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utils">
+      <UniqueIdentifier>{8d0f5294-0a4c-4d86-9fa2-01b8e8504640}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Math">
+      <UniqueIdentifier>{e9c778b2-5188-4eef-8ed3-c01df76e85b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{ac7e0d93-28e2-48e5-9d44-0b5fac63b071}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics">
+      <UniqueIdentifier>{775537c0-87c1-4650-8276-cfcb8d20c6b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics">
+      <UniqueIdentifier>{453a9dae-511b-4145-a641-22ec3d9e0c58}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="systemClass.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Application\systemClass.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\pointClass.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\vectorClass.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\pugixml.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\applicationManager.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\applicationState.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\inputManager.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\clockClass.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\graphicsmanager.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="systemClass.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Application\systemClass.h">
+      <Filter>Header Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\pointClass.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\vectorClass.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\listenerClass.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\notifierClass.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\pugiconfig.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\pugixml.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\applicationManager.h">
+      <Filter>Header Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\applicationState.h">
+      <Filter>Header Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\inputManager.h">
+      <Filter>Header Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\clockClass.h">
+      <Filter>Header Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\graphicsManager.h">
+      <Filter>Header Files\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

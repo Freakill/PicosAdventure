@@ -44,12 +44,16 @@
     <IntDir>$(SolutionDir)Temp\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Build\$(Configuration)\</OutDir>
     <TargetName>$(ProjectName)$(Configuration)</TargetName>
+    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)$(Configuration)</TargetName>
     <IntDir>$(SolutionDir)Temp\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Build\$(Configuration)\</OutDir>
+    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -88,11 +92,30 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application\applicationManager.cpp" />
+    <ClCompile Include="Application\applicationState.cpp" />
+    <ClCompile Include="Application\inputManager.cpp" />
+    <ClCompile Include="Application\systemClass.cpp" />
+    <ClCompile Include="Graphics\graphicsmanager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="systemClass.cpp" />
+    <ClCompile Include="Math\pointClass.cpp" />
+    <ClCompile Include="Math\vectorClass.cpp" />
+    <ClCompile Include="Utils\clockClass.cpp" />
+    <ClCompile Include="Utils\pugixml.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="systemClass.h" />
+    <ClInclude Include="Application\applicationManager.h" />
+    <ClInclude Include="Application\applicationState.h" />
+    <ClInclude Include="Application\inputManager.h" />
+    <ClInclude Include="Application\systemClass.h" />
+    <ClInclude Include="Graphics\graphicsManager.h" />
+    <ClInclude Include="Math\pointClass.h" />
+    <ClInclude Include="Math\vectorClass.h" />
+    <ClInclude Include="Utils\clockClass.h" />
+    <ClInclude Include="Utils\listenerClass.h" />
+    <ClInclude Include="Utils\notifierClass.h" />
+    <ClInclude Include="Utils\pugiconfig.h" />
+    <ClInclude Include="Utils\pugixml.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

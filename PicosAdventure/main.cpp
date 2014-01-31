@@ -1,4 +1,4 @@
-#include "systemClass.h"
+#include "Application/systemClass.h"
 
 int WINAPI wWinMain(HINSTANCE hInstance, //The handle of the application's current instance
 					HINSTANCE prevInstance,	//The handle to previous instance of the application. According to MSDN is always NULL.
