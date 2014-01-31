@@ -89,6 +89,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="systemClass.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="systemClass.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
