@@ -26,6 +26,10 @@ Debug/
 Debug/*
 Release/
 Release/*
+Build/
+Build/*
+Temp/
+Temp/*
 */Debug/
 */Debug/*
 */Release/
