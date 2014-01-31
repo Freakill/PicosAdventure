@@ -11,3 +11,22 @@
 *.lai
 *.la
 *.a
+
+# Temporal files
+*.~
+
+#Visual Studio files
+*.opensdf
+*.sdf
+
+# Directory of objects
+ipch/
+ipch/*
+Debug/
+Debug/*
+Release/
+Release/*
+*/Debug/
+*/Debug/*
+*/Release/
+*/Release/*
