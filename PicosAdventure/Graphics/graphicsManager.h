@@ -56,6 +56,7 @@ class GraphicsManager
 		ID3D11DeviceContext* d3dDeviceContext_;
 		IDXGISwapChain* swapChain_;
 		ID3D11RenderTargetView* renderTargetView_;
+		ID3D11DepthStencilView* depthStencilView_;
 
 		XMMATRIX projectionMatrix_;
 		XMMATRIX worldMatrix_;

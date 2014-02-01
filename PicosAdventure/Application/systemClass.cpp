@@ -61,6 +61,7 @@ bool SystemClass::setup(int width, int height)
 	}
 	if(!appManager_->setup(windowHandler_, inputManager_, width, height, fullscreen_))
 	{
+		MessageBox(windowHandler_, L"Could not initialize the application manager.", L"SystemClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 

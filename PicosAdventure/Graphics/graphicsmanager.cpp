@@ -29,6 +29,8 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
     screenWidth_ = dimensions.right - dimensions.left;
     screenHeight_ = dimensions.bottom - dimensions.top;
 
+	HRESULT result;
+
 	//All the driver types we want to try to set when initializing i preference order
     D3D_DRIVER_TYPE driverTypes[] = 
     {
@@ -54,21 +56,23 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
     swapChainDesc.BufferDesc.Width = screenWidth_; //Resolution width
     swapChainDesc.BufferDesc.Height = screenHeight_; //Resolution height
     swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; //Format of the buffer in 32bit per pixel with alpha channel
-    swapChainDesc.BufferDesc.RefreshRate.Numerator = 60; //The refresh rate for the change of buffer
+    swapChainDesc.BufferDesc.RefreshRate.Numerator = 0; //The refresh rate for the change of buffer
     swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
     swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; //This allows the swap chain to be used as rendering output
 	swapChainDesc.OutputWindow = windowHandler;
     swapChainDesc.Windowed = true; //Specify if the application works in windowed mode
-    swapChainDesc.SampleDesc.Count = 1; 
-    swapChainDesc.SampleDesc.Quality = 0;
+	swapChainDesc.SampleDesc.Count = 1; 
+	swapChainDesc.SampleDesc.Quality = 0;
+	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
-    unsigned int creationFlags = 0; //Create a bitwise ORed list of flags to activate when creating the device and context
+	unsigned int creationFlags = D3D11_CREATE_DEVICE_SINGLETHREADED; //Create a bitwise ORed list of flags to activate when creating the device and context
 
 #ifdef _DEBUG
     creationFlags |= D3D11_CREATE_DEVICE_DEBUG; //If in debug mode we set the runtime layer to debug.
 #endif
 
-    HRESULT result;
     unsigned int driver = 0;
 
     for(driver = 0; driver < totalDriverTypes; ++driver) //For each one of the possible specified objective drivers we try to create the device, context and swap chain
@@ -99,10 +103,11 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
         return false;
     }
 
-	//Creating the Render Target View
+	// Creating the Render Target View
     ID3D11Texture2D* backBufferTexture;
 
-    result = swapChain_->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*) &backBufferTexture);
+	// We obtain a pointer to the swap chain's back buffer
+	result = swapChain_->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBufferTexture));
 
     if(FAILED(result))
     {
@@ -110,6 +115,8 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
         return false;
     }
 
+	// We create a view to access the pipeline resource because DirectX does not allow to bind
+	// resources directly to the pipeline, we need to access through the views
     result = d3dDevice_->CreateRenderTargetView(backBufferTexture, 0, &renderTargetView_);
 
     if(backBufferTexture)
@@ -121,7 +128,39 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
         return false;
     }
 
-	d3dDeviceContext_->OMSetRenderTargets(1, &renderTargetView_, 0);
+	// Creating the Depth/Stencil buffer
+	D3D11_TEXTURE2D_DESC depthStencilDesc;
+	ZeroMemory( &depthStencilDesc, sizeof( depthStencilDesc ) );
+	depthStencilDesc.Width = screenWidth_;
+	depthStencilDesc.Height = screenHeight_;
+	depthStencilDesc.MipLevels = 1;
+	depthStencilDesc.ArraySize = 1;
+	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilDesc.SampleDesc.Count = 1;
+	depthStencilDesc.SampleDesc.Quality = 0;
+	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthStencilDesc.CPUAccessFlags = 0;
+	depthStencilDesc.MiscFlags = 0;
+
+	ID3D11Texture2D* depthStencilBuffer;
+	result = d3dDevice_->CreateTexture2D(
+		&depthStencilDesc,					// Description of the texture to create
+		0,
+		&depthStencilBuffer);				// Return pointer to depth/stencil buffer
+
+	if(FAILED(result))
+	{
+		MessageBox(NULL, L"Failed to get the depth/stencil buffer.", L"GraphicsManager - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	result = d3dDevice_->CreateDepthStencilView(
+		depthStencilBuffer,							// Resource we want to create a view
+		0,
+		&depthStencilView_);						// The view to the depth/stencil buffer
+
+	d3dDeviceContext_->OMSetRenderTargets(1, &renderTargetView_, depthStencilView_);
 
 	//Creating the viewport
     D3D11_VIEWPORT viewport;

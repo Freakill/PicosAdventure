@@ -1,26 +1,4 @@
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <sys/time.h>
-#endif
-
 #include "clockClass.h"
-
-#include <ctime>
-
-#ifdef __unix__
-
-unsigned int GetTickCount() {
-    struct timeval t;
-    gettimeofday(&t, NULL);
-
-    unsigned long secs = t.tv_sec * 1000;
-    secs += (t.tv_usec / 1000);
-
-    return secs;
-}
-
-#endif
 
 ClockClass::ClockClass():
 	totalTime_(0.0f),

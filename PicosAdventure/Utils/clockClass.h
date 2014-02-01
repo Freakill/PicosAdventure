@@ -1,6 +1,9 @@
 #ifndef _CLOCK_CLASS_H_
 #define _CLOCK_CLASS_H_
 
+#include <windows.h>
+#include <ctime>
+
 class ClockClass 
 {
 	public:
