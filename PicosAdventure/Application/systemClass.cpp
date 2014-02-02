@@ -275,41 +275,46 @@ LRESULT SystemClass::WindowProcess(HWND windowHandler, UINT messageCode, WPARAM 
     switch (messageCode)
 	{
 		case WM_CREATE:
-		{
-			deviceContextHandler_ = GetDC(windowHandler);
-			setupPixelFormat();
+			{
+				deviceContextHandler_ = GetDC(windowHandler);
+				setupPixelFormat();
 
-			isRunning_ = true; //Mark our window as running
-		}
-		break;
+				isRunning_ = true; //Mark our window as running
+			}
+			break;
 		case WM_CLOSE:
-		{
-			//if (MessageBox(windowHandler, (LPCWSTR)L"Really quit?", (LPCWSTR)L"My application", MB_OKCANCEL) == IDOK)
-			DestroyWindow(windowHandler);
-			//else
-			//	return 0;
-		}
-		break;
+			{
+				//if (MessageBox(windowHandler, (LPCWSTR)L"Really quit?", (LPCWSTR)L"My application", MB_OKCANCEL) == IDOK)
+				DestroyWindow(windowHandler);
+				//else
+				//	return 0;
+			}
+			break;
 		case WM_DESTROY:
-		{
-			isRunning_ = false;
+			{
+				isRunning_ = false;
 
-			PostQuitMessage(0);
-			return 0;
-		}
-		break;
+				PostQuitMessage(0);
+				return 0;
+			}
+			break;
+		case WM_MOUSEMOVE:
+			{
+				inputManager_->setMouseLocation(GET_X_LPARAM(lAdditionalData), GET_Y_LPARAM(lAdditionalData));
+			}
+			break;
 		case WM_KEYDOWN:
-		{
-			inputManager_->keyDown((unsigned int)wAdditionalData);
-			return 0;
-		}
-		break;
+			{
+				inputManager_->keyDown((unsigned int)wAdditionalData);
+				return 0;
+			}
+			break;
 		case WM_KEYUP:
-		{
-			inputManager_->keyUp((unsigned int)wAdditionalData);
-			return 0;
-		}
-		break;
+			{
+				inputManager_->keyUp((unsigned int)wAdditionalData);
+				return 0;
+			}
+			break;
 		default:
 			break;
     }

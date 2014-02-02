@@ -6,6 +6,7 @@
 #define WIN32_EXTRA_LEAN
 
 #include <windows.h>
+#include <Windowsx.h>
 
 #include <iostream>
 #include <fstream>

@@ -6,7 +6,6 @@
 #include "../Graphics/graphicsManager.h"
 
 #include "inputManager.h"
-//#include "kinectClass.h"
 
 #include "../Utils/clockClass.h"
 

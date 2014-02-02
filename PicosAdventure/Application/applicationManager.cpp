@@ -7,7 +7,6 @@ ApplicationManager::ApplicationManager()
 	appState_ = 0;
 	graphicsManager_ = 0;
 	clockClass_ = 0;
-	//kinectClass_ = 0;
 }
 
 ApplicationManager::~ApplicationManager()
@@ -38,18 +37,7 @@ bool ApplicationManager::setup(HWND windowsHandler, InputManager* inputManager, 
 	{
 		return false;
 	}
-	clockClass_->setup();
-
-	/*kinectClass_ = new KinectClass;
-	if(!kinectClass_)
-	{
-		return false;
-	}
-	
-	if(!kinectClass_->setup(windowHandler_, graphicsManager_->getSwapChain()))
-	{
-		return false;
-	}*/
+	clockClass_->reset();
 
 	/*if(!changeState(FirstScreenState::Instance()))
 	{
@@ -61,16 +49,13 @@ bool ApplicationManager::setup(HWND windowsHandler, InputManager* inputManager, 
 
 void ApplicationManager::update()
 {
+	clockClass_->tick();
+
 	// we update the State with the frame elapsed time
 	if(appState_ != 0)
 	{
-		appState_->update(clockClass_->calculateDeltaSeconds());
+		appState_->update(clockClass_->getDeltaTime());
 	}
-
-	/*if(kinectClass_)
-	{
-		kinectClass_->update();
-	}*/
 }
 
 void ApplicationManager::draw()
@@ -82,21 +67,6 @@ void ApplicationManager::draw()
 	{
 		appState_->draw();
 	}
-
-	/*if(kinectClass_)
-	{
-		graphicsManager_->turnZBufferOff();
-
-		// Turn on the alpha blending before rendering the text.
-		graphicsManager_->turnOnAlphaBlending();
-
-		kinectClass_->draw();
-
-		// Turn off alpha blending after rendering the text.
-		graphicsManager_->turnOffAlphaBlending();
-
-		graphicsManager_->turnZBufferOn();
-	}*/
 
 	graphicsManager_->endDraw();
 }
@@ -113,13 +83,6 @@ void ApplicationManager::destroy()
 	{
 		appState_->destroy();
 	}
-
-	/*if(kinectClass_)
-	{
-		kinectClass_->destroy();
-		delete kinectClass_;
-		kinectClass_ = 0;
-	}*/
 
 	if(graphicsManager_)
 	{

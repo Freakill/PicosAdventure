@@ -25,8 +25,12 @@ bool InputManager::setup(HINSTANCE hinstance, HWND hwnd, int screenWidth, int sc
 	screenHeight_ = screenHeight;
 
 	// Initialize the location of the mouse on the screen.
-	mouseX_ = 0;
-	mouseY_ = 0;
+	mousePosition_.x = 0;
+	mousePosition_.y = 0;
+
+	// Initialize the movement of the mouse to 0
+	mouseDelta_.x = 0;
+	mouseDelta_.y = 0;
 
 	// Initialize the main direct input interface.
 	result = DirectInput8Create(hinstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput_, NULL);
@@ -110,8 +114,21 @@ void InputManager::destroy()
 
 void InputManager::getMouseLocation(int& mouseX, int& mouseY)
 {
-	mouseX = mouseX_;
-	mouseY = mouseY_;
+	mouseX = mousePosition_.x;
+	mouseY = mousePosition_.y;
+	return;
+}
+
+void InputManager::setMouseLocation(int mouseX, int mouseY)
+{
+	mousePosition_.x = mouseX;
+	mousePosition_.y = mouseY;
+}
+
+void InputManager::getMouseMovement(int& mouseDeltaX, int& mouseDeltaY)
+{
+	mouseDeltaX = mouseDelta_.x;
+	mouseDeltaY = mouseDelta_.y;
 	return;
 }
 
@@ -169,27 +186,27 @@ bool InputManager::readMouse()
 void InputManager::processInput()
 {
 	// Update the location of the mouse cursor based on the change of the mouse location during the frame.
-	mouseX_ += mouseState_.lX;
-	mouseY_ += mouseState_.lY;
+	mouseDelta_.x += mouseState_.lX;
+	mouseDelta_.y += mouseState_.lY;
 
 	// Ensure the mouse location doesn't exceed the screen width or height.
-	if(mouseX_ < 0)
+	if(mousePosition_.x < 0)
 	{ 
-		mouseX_ = 0; 
+		mousePosition_.x = 0; 
 	}
-	if(mouseY_ < 0)
+	if(mousePosition_.y < 0)
 	{
-		mouseY_ = 0;
+		mousePosition_.y = 0;
 	}
 	
-	if(mouseX_ > screenWidth_)
+	if(mousePosition_.x > screenWidth_)
 	{ 
-		mouseX_ = screenWidth_; 
+		mousePosition_.x = screenWidth_; 
 	}
-	if(mouseY_ > screenHeight_)
+	if(mousePosition_.y > screenHeight_)
 	{
-		mouseY_ = screenHeight_;
+		mousePosition_.y = screenHeight_;
 	}
-	
+
 	return;
 }

@@ -10,16 +10,25 @@ class ClockClass
 		ClockClass();
 		~ClockClass();
 
-		void setup();
-		float calculateDeltaSeconds();
-		void update(float dtRealSeconds);
-		void setPaused(bool paused);
-		bool isPaused();
+		float getTime() const;
+		float getDeltaTime() const;
+
+		void reset();
+		void start();
+		void stop();
+		void tick();
 		
 	private:
-		long double totalTime_;
-		float lastTime_;
-		bool paused_;
+		double secondsPerCount_;
+		double deltaTime_;
+
+		__int64 baseTime_;
+		__int64 pausedTime_;
+		__int64 stopTime_;
+		__int64 previousTime_;
+		__int64 currentTime_;
+
+		bool stopped_;
 
 };
 

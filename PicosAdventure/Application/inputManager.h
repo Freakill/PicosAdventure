@@ -14,6 +14,7 @@
 #include <sstream>
 
 #include "../Utils/notifierClass.h"
+#include "../math/PointClass.h"
 
 class InputManager : public Notifier<InputManager, int>
 {
@@ -26,11 +27,13 @@ class InputManager : public Notifier<InputManager, int>
 		bool update();
 		void destroy();
 
-		void getMouseLocation(int&, int&);
+		void getMouseLocation(int& mouseX, int& mouseY);
+		void setMouseLocation(int mouseX, int mouseY);
+		void getMouseMovement(int& mouseDeltaX, int& mouseDeltaY);
 		bool isLeftMouseButtonDown();
 
 		void keyDown(unsigned int input);
-	void keyUp(unsigned int input);
+		void keyUp(unsigned int input);
 
 	private:
 		bool readMouse();
@@ -42,7 +45,8 @@ class InputManager : public Notifier<InputManager, int>
 		bool keys_[256];
 		
 		DIMOUSESTATE mouseState_;
-		int mouseX_, mouseY_;
+		Point mousePosition_;
+		Point mouseDelta_;
 
 		int screenWidth_, screenHeight_;
 };
