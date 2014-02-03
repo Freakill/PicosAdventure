@@ -13,9 +13,6 @@
 #include <fstream>
 #include <sstream>
 
-//#include "shader3DClass.h"
-//#include "shader2DClass.h"
-
 class GraphicsManager
 {
 	public:

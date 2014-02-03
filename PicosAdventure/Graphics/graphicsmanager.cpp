@@ -174,7 +174,7 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
     d3dDeviceContext_->RSSetViewports(1, &viewport);
 
 	// Setup the projection matrix.
-	float fieldOfView = (float)XM_PI / 4.0f;
+	float fieldOfView = (float)XM_PIDIV4;
 	float screenAspect = (float)screenWidth_ / (float)screenHeight_;
 
 	// Create the projection matrix for 3D rendering.

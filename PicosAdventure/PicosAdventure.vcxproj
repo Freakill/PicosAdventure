@@ -96,18 +96,21 @@
     <ClCompile Include="Application\applicationState.cpp" />
     <ClCompile Include="Application\inputManager.cpp" />
     <ClCompile Include="Application\systemClass.cpp" />
+    <ClCompile Include="Graphics\cameraClass.cpp" />
     <ClCompile Include="Graphics\graphicsmanager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Math\pointClass.cpp" />
     <ClCompile Include="Math\vectorClass.cpp" />
     <ClCompile Include="Utils\clockClass.cpp" />
     <ClCompile Include="Utils\pugixml.cpp" />
+    <ClCompile Include="Visualizer\visualizerScreenState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\applicationManager.h" />
     <ClInclude Include="Application\applicationState.h" />
     <ClInclude Include="Application\inputManager.h" />
     <ClInclude Include="Application\systemClass.h" />
+    <ClInclude Include="Graphics\cameraClass.h" />
     <ClInclude Include="Graphics\graphicsManager.h" />
     <ClInclude Include="Math\pointClass.h" />
     <ClInclude Include="Math\vectorClass.h" />
@@ -116,6 +119,7 @@
     <ClInclude Include="Utils\notifierClass.h" />
     <ClInclude Include="Utils\pugiconfig.h" />
     <ClInclude Include="Utils\pugixml.h" />
+    <ClInclude Include="Visualizer\visualizerScreenState.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

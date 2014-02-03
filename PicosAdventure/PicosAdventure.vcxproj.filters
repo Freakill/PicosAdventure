@@ -37,6 +37,12 @@
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{453a9dae-511b-4145-a641-22ec3d9e0c58}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Visualizer">
+      <UniqueIdentifier>{1f8b09b1-3178-4239-b38f-8fb9720522a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Visualizer">
+      <UniqueIdentifier>{2d66f2dd-078d-4790-aa78-dc2d6ca45da1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -67,6 +73,12 @@
       <Filter>Source Files\Application</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\graphicsmanager.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Visualizer\visualizerScreenState.cpp">
+      <Filter>Source Files\Visualizer</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\cameraClass.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -105,6 +117,12 @@
       <Filter>Header Files\Application</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\graphicsManager.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Visualizer\visualizerScreenState.h">
+      <Filter>Header Files\Visualizer</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\cameraClass.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
