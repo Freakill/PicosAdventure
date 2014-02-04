@@ -12,6 +12,9 @@ VisualizerScreenState VisualizerScreenState::visualizerScreenState_;
 VisualizerScreenState::VisualizerScreenState()
 {
 	camera_ = 0;
+
+	tempText_[0] = 0;
+	tempText_[1] = 0;
 }
 
 VisualizerScreenState::~VisualizerScreenState()
@@ -60,12 +63,22 @@ bool VisualizerScreenState::setup(ApplicationManager* appManager, GraphicsManage
 	}
 
 	// Initialize the texture object.
-	bool result = texture_->setup(graphicsManager->getDevice(), "carne");
+	std::string strFilename = "carne";
+	std::string filePath = "./Data/models/" + strFilename + "/d-" + strFilename + ".dds";
+	bool result = texture_->setup(graphicsManager->getDevice(), filePath);
 	if(!result)
 	{
 		MessageBoxA(NULL, "Could not load texture!", "Visualizer - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
+
+	// Instantiate text
+	XMFLOAT4X4 baseViewMatrix;
+	camera_->getViewMatrix(baseViewMatrix);
+
+	int screenWidth, screenHeight;
+	graphicsManager_->getScreenSize(screenWidth, screenHeight);
+
 	return true;
 }
 
@@ -85,7 +98,7 @@ void VisualizerScreenState::draw()
 	graphicsManager_->getOrthoMatrix(orthoMatrix);
 
 	model_->draw(graphicsManager_->getDevice(), graphicsManager_->getDeviceContext());
-	graphicsManager_->draw3D(graphicsManager_->getDeviceContext(), model_->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, texture_->getTexture());
+	graphicsManager_->draw3D(model_->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, texture_->getTexture());
 }
 
 void VisualizerScreenState::destroy()

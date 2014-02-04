@@ -24,13 +24,11 @@ bool TextureClass::setup(ID3D11Device* device, const std::string& strFilename)
 {
 	HRESULT result;
 
-	std::string filePath = "./Data/models/" + strFilename + "/d-" + strFilename + ".dds";
-
 	// Load the texture in.
-	result = D3DX11CreateShaderResourceViewFromFileA(device, filePath.c_str(), NULL, NULL, &texture_, NULL);
+	result = D3DX11CreateShaderResourceViewFromFileA(device, strFilename.c_str(), NULL, NULL, &texture_, NULL);
 	if(FAILED(result))
 	{
-		MessageBoxA(NULL, "Could not create the shader resource from path.", "Texture - Error", MB_ICONERROR | MB_OK);
+		MessageBoxA(NULL, "Could not create the texture shader resource from path.", "Texture - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 

@@ -17,6 +17,7 @@
 #include <fstream>
 #include <sstream>
 
+#include "shader2DClass.h"
 #include "shader3DClass.h"
 
 class GraphicsManager
@@ -32,10 +33,11 @@ class GraphicsManager
 		void beginDraw(float red, float green, float blue, float alpha);
 		void endDraw();
 
-		bool setupShaders(HWND windowHandler);
+		bool setupShaders();
 	
-		void draw3D(ID3D11DeviceContext* deviceContext, int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, 
-					ID3D11ShaderResourceView* texture);
+		void draw2D(int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix, ID3D11ShaderResourceView* texture, 
+	                XMFLOAT4 color);
+		void draw3D(int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture);
 
 		ID3D11Device* getDevice();
 		ID3D11DeviceContext* getDeviceContext();
@@ -46,6 +48,12 @@ class GraphicsManager
 		void getOrthoMatrix(XMFLOAT4X4& orthoMatrix);
 
 		void getScreenSize(int&, int&);
+
+		void turnZBufferOn();
+		void turnZBufferOff();
+
+		void turnOnAlphaBlending();
+		void turnOffAlphaBlending();
 
 	private:
 		HINSTANCE instanceHandler_;
@@ -64,15 +72,23 @@ class GraphicsManager
 		ID3D11DeviceContext* d3dDeviceContext_;
 		IDXGISwapChain* swapChain_;
 		ID3D11RenderTargetView* renderTargetView_;
+
 		ID3D11Texture2D* depthStencilBuffer_;
 		ID3D11DepthStencilState* depthStencilState_;
 		ID3D11DepthStencilView* depthStencilView_;
+		ID3D11DepthStencilState* depthDisabledStencilState_;
+
+		ID3D11RasterizerState* rasterState_;
+		
+		ID3D11BlendState* alphaEnableBlendingState_;
+		ID3D11BlendState* alphaDisableBlendingState_;
 
 		XMFLOAT4X4 projectionMatrix_;
 		XMFLOAT4X4 worldMatrix_;
 		XMFLOAT4X4 orthoMatrix_;
 
 		// Pointers to shaders
+		Shader2DClass* shader2D_;
 		Shader3DClass* shader3D_;
 };
 

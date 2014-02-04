@@ -5,7 +5,15 @@ GraphicsManager::GraphicsManager()
 	swapChain_ = 0;
 	d3dDevice_ = 0;
 	d3dDeviceContext_ = 0;
+
 	renderTargetView_ = 0;
+
+	depthStencilBuffer_ = 0;
+	depthStencilState_ = 0;
+	depthStencilView_ = 0;
+
+	shader2D_ = 0;
+	shader3D_ = 0;
 }
 
 GraphicsManager::GraphicsManager(const GraphicsManager& other)
@@ -203,6 +211,109 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
 		return false;
 	}
 
+	// Initailze the depth stencil view.
+	ZeroMemory(&depthStencilViewDescription, sizeof(depthStencilViewDescription));
+
+	// Set up the depth stencil view description.
+	depthStencilViewDescription.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDescription.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDescription.Texture2D.MipSlice = 0;
+
+	// Create the depth stencil view.
+	result = d3dDevice_->CreateDepthStencilView(depthStencilBuffer_, &depthStencilViewDescription, &depthStencilView_);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Clear the second depth stencil state before setting the parameters.
+	D3D11_DEPTH_STENCIL_DESC depthDisabledStencilDesc;
+	ZeroMemory(&depthDisabledStencilDesc, sizeof(depthDisabledStencilDesc));
+
+	// Now create a second depth stencil state which turns off the Z buffer for 2D rendering.  The only difference is 
+	// that DepthEnable is set to false, all other parameters are the same as the other depth stencil state.
+	depthDisabledStencilDesc.DepthEnable = false;
+	depthDisabledStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthDisabledStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthDisabledStencilDesc.StencilEnable = true;
+	depthDisabledStencilDesc.StencilReadMask = 0xFF;
+	depthDisabledStencilDesc.StencilWriteMask = 0xFF;
+	depthDisabledStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthDisabledStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	depthDisabledStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthDisabledStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Create the state using the device.
+	result = d3dDevice_->CreateDepthStencilState(&depthDisabledStencilDesc, &depthDisabledStencilState_);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Clear the blend state description.
+	D3D11_BLEND_DESC blendStateDescription;
+	ZeroMemory(&blendStateDescription, sizeof(D3D11_BLEND_DESC));
+
+	// Create an alpha enabled blend state description.
+	blendStateDescription.RenderTarget[0].BlendEnable = TRUE;
+	blendStateDescription.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	blendStateDescription.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendStateDescription.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendStateDescription.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendStateDescription.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendStateDescription.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendStateDescription.RenderTarget[0].RenderTargetWriteMask = 0x0f;
+
+	// Create the blend state using the description.
+	result = d3dDevice_->CreateBlendState(&blendStateDescription, &alphaEnableBlendingState_);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Modify the description to create an alpha disabled blend state description.
+	blendStateDescription.RenderTarget[0].BlendEnable = FALSE;
+
+	// Create the blend state using the description.
+	result = d3dDevice_->CreateBlendState(&blendStateDescription, &alphaDisableBlendingState_);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Bind the render target view and depth stencil buffer to the output render pipeline.
+	d3dDeviceContext_->OMSetRenderTargets(1, &renderTargetView_, depthStencilView_);
+
+	// Clear the raster description.
+	D3D11_RASTERIZER_DESC rasterDescription;
+	ZeroMemory(&rasterDescription, sizeof(D3D11_RASTERIZER_DESC));
+
+	// Setup the raster description which will determine how and what polygons will be drawn.
+	rasterDescription.AntialiasedLineEnable = false;
+	rasterDescription.CullMode = D3D11_CULL_BACK;
+	rasterDescription.DepthBias = 0;
+	rasterDescription.DepthBiasClamp = 0.0f;
+	rasterDescription.DepthClipEnable = true;
+	rasterDescription.FillMode = D3D11_FILL_SOLID;
+	rasterDescription.FrontCounterClockwise = false;
+	rasterDescription.MultisampleEnable = false;
+	rasterDescription.ScissorEnable = false;
+	rasterDescription.SlopeScaledDepthBias = 0.0f;
+
+	// Create the rasterizer state from the description we just filled out.
+	result = d3dDevice_->CreateRasterizerState(&rasterDescription, &rasterState_);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Now set the rasterizer state.
+	d3dDeviceContext_->RSSetState(rasterState_);
+
 	// Bind the render target view and depth stencil buffer to the output render pipeline.
 	d3dDeviceContext_->OMSetRenderTargets(1, &renderTargetView_, depthStencilView_);
 
@@ -231,7 +342,7 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
 	XMStoreFloat4x4(&orthoMatrix_, XMMatrixOrthographicLH((float)screenWidth_, (float)screenHeight_, screenNearPlane, screenDepthPlane));
 
 	// We call the function to setup the shaders
-	if(!setupShaders(windowHandler))
+	if(!setupShaders())
 	{
 		MessageBoxA(windowHandler, "Could not setup shaders.", "Error", MB_ICONERROR | MB_OK);
 		return false;
@@ -242,7 +353,41 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
 
 void GraphicsManager::destroy()
 {
+	// Release the 2D shader object.
+	if(shader2D_)
+	{
+		shader2D_->destroy();
+		delete shader2D_;
+		shader2D_ = 0;
+	}
+
+	// Release the 3D shader object.
+	if(shader3D_)
+	{
+		shader3D_->destroy();
+		delete shader3D_;
+		shader3D_ = 0;
+	}
+
 	// Before shutting down set to windowed mode or when you release the swap chain it will throw an exception.
+	if(depthStencilView_)
+	{
+		depthStencilView_->Release();
+		depthStencilView_ = 0;
+	}
+
+	if(depthStencilState_)
+	{
+		depthStencilState_->Release();
+		depthStencilState_ = 0;
+	}
+
+	if(depthStencilBuffer_)
+	{
+		depthStencilBuffer_->Release();
+		depthStencilBuffer_ = 0;
+	}
+
 	if(swapChain_)
 	{
 		swapChain_->SetFullscreenState(false, NULL);
@@ -306,8 +451,22 @@ void GraphicsManager::endDraw()
 	return;
 }
 
-bool GraphicsManager::setupShaders(HWND windowHandler)
+bool GraphicsManager::setupShaders()
 {
+	// Create the 2D shader object.
+	shader2D_ = new Shader2DClass;
+	if(!shader2D_)
+	{
+		return false;
+	}
+
+	// Initialize the color shader object.
+	if(!shader2D_->setup(d3dDevice_))
+	{
+		MessageBoxA(NULL, "Could not initialize the 2D shader object.", "Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
 	// Create the 3D shader object.
 	shader3D_ = new Shader3DClass;
 	if(!shader3D_)
@@ -316,7 +475,7 @@ bool GraphicsManager::setupShaders(HWND windowHandler)
 	}
 
 	// Initialize the color shader object.
-	if(!shader3D_->setup(d3dDevice_, windowHandler))
+	if(!shader3D_->setup(d3dDevice_))
 	{
 		MessageBoxA(NULL, "Could not initialize the 3D shader object.", "Error", MB_ICONERROR | MB_OK);
 		return false;
@@ -324,8 +483,14 @@ bool GraphicsManager::setupShaders(HWND windowHandler)
 
 	return true;
 }
-void GraphicsManager::draw3D(ID3D11DeviceContext* deviceContext, int indexCount, XMFLOAT4X4 worldMatrix,  XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, 
-	                         ID3D11ShaderResourceView* texture)
+
+void GraphicsManager::draw2D(int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix, ID3D11ShaderResourceView* texture, 
+	                         XMFLOAT4 color)
+{
+	shader2D_->draw(d3dDeviceContext_, indexCount, worldMatrix, viewMatrix, orthoMatrix, texture, color);
+}
+
+void GraphicsManager::draw3D(int indexCount, XMFLOAT4X4 worldMatrix,  XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	shader3D_->draw(d3dDeviceContext_, indexCount, worldMatrix, viewMatrix, projectionMatrix, texture);
 }
@@ -367,5 +532,52 @@ void GraphicsManager::getScreenSize(int& width, int& height)
 {
 	width = screenWidth_;
 	height = screenHeight_;
+	return;
+}
+
+void GraphicsManager::turnZBufferOn()
+{
+	d3dDeviceContext_->OMSetDepthStencilState(depthStencilState_, 1);
+	return;
+}
+
+
+void GraphicsManager::turnZBufferOff()
+{
+	d3dDeviceContext_->OMSetDepthStencilState(depthDisabledStencilState_, 1);
+	return;
+}
+
+void GraphicsManager::turnOnAlphaBlending()
+{
+	float blendFactor[4];
+	
+
+	// Setup the blend factor.
+	blendFactor[0] = 0.0f;
+	blendFactor[1] = 0.0f;
+	blendFactor[2] = 0.0f;
+	blendFactor[3] = 0.0f;
+	
+	// Turn on the alpha blending.
+	d3dDeviceContext_->OMSetBlendState(alphaEnableBlendingState_, blendFactor, 0xffffffff);
+
+	return;
+}
+
+void GraphicsManager::turnOffAlphaBlending()
+{
+	float blendFactor[4];
+	
+
+	// Setup the blend factor.
+	blendFactor[0] = 0.0f;
+	blendFactor[1] = 0.0f;
+	blendFactor[2] = 0.0f;
+	blendFactor[3] = 0.0f;
+	
+	// Turn off the alpha blending.
+	d3dDeviceContext_->OMSetBlendState(alphaDisableBlendingState_, blendFactor, 0xffffffff);
+
 	return;
 }

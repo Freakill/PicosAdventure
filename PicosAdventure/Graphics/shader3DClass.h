@@ -32,16 +32,16 @@ class Shader3DClass
 		Shader3DClass(const Shader3DClass&);
 		~Shader3DClass();
 
-		bool setup(ID3D11Device* device, HWND windowHandler);
+		bool setup(ID3D11Device* device);
 		void destroy();
 		bool draw(ID3D11DeviceContext* deviceContext, int indexCount, XMFLOAT4X4 worldMatrix, 
 			      XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture);
 
 	private:
-		bool setupShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename);
+		bool setupShader(ID3D11Device* device, WCHAR* vsFilename, WCHAR* psFilename);
 		void drawShader(ID3D11DeviceContext* deviceContext, int indexCount);
 		void destroyShader();
-		void outputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename);
+		void outputShaderErrorMessage(ID3D10Blob* errorMessage, WCHAR* shaderFilename);
 
 		bool setShaderParameters(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, 
 								 XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture);

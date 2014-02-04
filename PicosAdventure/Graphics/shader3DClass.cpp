@@ -19,12 +19,12 @@ Shader3DClass::~Shader3DClass()
 {
 }
 
-bool Shader3DClass::setup(ID3D11Device* device, HWND windowHandler)
+bool Shader3DClass::setup(ID3D11Device* device)
 {
 	bool result;
 
 	// Initialize the vertex and pixel shaders.
-	result = setupShader(device, windowHandler, L"./Data/shaders/vertex_shader_3d.vs", L"./Data/shaders/pixel_shader_3d.ps");
+	result = setupShader(device, L"./Data/shaders/vertex_shader_3d.vs", L"./Data/shaders/pixel_shader_3d.ps");
 	if(!result)
 	{
 		return false;
@@ -60,7 +60,7 @@ void Shader3DClass::destroy()
 	return;
 }
 
-bool Shader3DClass::setupShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+bool Shader3DClass::setupShader(ID3D11Device* device, WCHAR* vsFilename, WCHAR* psFilename)
 {
 	HRESULT result;
 	ID3D10Blob* errorMessage;
@@ -84,12 +84,12 @@ bool Shader3DClass::setupShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilena
 		// If the shader failed to compile it should have writen something to the error message.
 		if(errorMessage)
 		{
-			outputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+			outputShaderErrorMessage(errorMessage, vsFilename);
 		}
 		// If there was nothing in the error message then it simply could not find the shader file itself.
 		else
 		{
-			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_ICONERROR | MB_OK);
+			MessageBox(NULL, vsFilename, L"Shader 3D - Error", MB_ICONERROR | MB_OK);
 		}
 
 		return false;
@@ -103,12 +103,12 @@ bool Shader3DClass::setupShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilena
 		// If the shader failed to compile it should have writen something to the error message.
 		if(errorMessage)
 		{
-			outputShaderErrorMessage(errorMessage, hwnd, psFilename);
+			outputShaderErrorMessage(errorMessage, psFilename);
 		}
 		// If there was  nothing in the error message then it simply could not find the file itself.
 		else
 		{
-			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_ICONERROR | MB_OK);
+			MessageBox(NULL, psFilename, L"Shader 3D - Error", MB_ICONERROR | MB_OK);
 		}
 
 		return false;
@@ -118,7 +118,7 @@ bool Shader3DClass::setupShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilena
 	result = device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &vertexShader_);
 	if(FAILED(result))
 	{
-		MessageBox(hwnd, L"Could not create Vertex Shader", L"Error",  MB_ICONERROR | MB_OK);
+		MessageBox(NULL, L"Could not create Vertex Shader", L"Shader 3D - Error",  MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -126,7 +126,7 @@ bool Shader3DClass::setupShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilena
 	result = device->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, &pixelShader_);
 	if(FAILED(result))
 	{
-		MessageBox(hwnd, L"Could not create Pixel Shader", L"Error", MB_ICONERROR | MB_OK);
+		MessageBox(NULL, L"Could not create Pixel Shader", L"Shader 3D - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -164,7 +164,7 @@ bool Shader3DClass::setupShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilena
 					   vertexShaderBuffer->GetBufferSize(), &layout_);
 	if(FAILED(result))
 	{
-		MessageBox(hwnd, L"Could not create Shader's Layout", L"Error", MB_ICONERROR | MB_OK);
+		MessageBox(NULL, L"Could not create Shader's Layout", L"Shader 3D - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -273,7 +273,7 @@ void Shader3DClass::destroyShader()
 	return;
 }
 
-void Shader3DClass::outputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+void Shader3DClass::outputShaderErrorMessage(ID3D10Blob* errorMessage, WCHAR* shaderFilename)
 {
 	char* compile_errors;
 	unsigned long buffer_size, i;
@@ -303,7 +303,7 @@ void Shader3DClass::outputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd
 	errorMessage = 0;
 
 	// Pop a message up on the screen to notify the user to check the text file for compile errors.
-	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_ICONERROR | MB_OK);
+	MessageBox(NULL, L"Error compiling shader.  Check shader-error.txt for message.", L"Shader 3D - Error", MB_ICONERROR | MB_OK);
 
 	return;
 }

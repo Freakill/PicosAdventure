@@ -6,6 +6,8 @@
 #include "../Graphics/staticModelClass.h"
 #include "../Graphics/textureClass.h"
 
+#include "../Utils/textClass.h"
+
 #include <mmsystem.h>
 
 class VisualizerScreenState: public ApplicationState
@@ -29,6 +31,8 @@ class VisualizerScreenState: public ApplicationState
 
 		StaticModelClass*	model_;
 		TextureClass*		texture_;
+
+		TextClass*			tempText_[2];
 };
 
 #endif //_SPLASH_SCREEN_STATE_H_
