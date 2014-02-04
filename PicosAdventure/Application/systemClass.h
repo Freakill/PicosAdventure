@@ -16,7 +16,7 @@
 #include "../Utils/listenerClass.h"
 #include "applicationManager.h"
 
-class SystemClass : public Listener<InputManager, int>
+class SystemClass : public Listener<InputManager, InputStruct>
 {
 	public:
 		SystemClass();
@@ -39,7 +39,7 @@ class SystemClass : public Listener<InputManager, int>
 		bool createWindow(int width, int height, bool fullscreen);
 		void setupPixelFormat(void);
 
-		virtual void notify(InputManager* notifier, int arg);
+		virtual void notify(InputManager* notifier, InputStruct arg);
 
 		bool isRunning_;
 		bool fullscreen_;

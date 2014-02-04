@@ -72,6 +72,10 @@ bool InputManager::setup(HINSTANCE hinstance, HWND hwnd, int screenWidth, int sc
 	// Acquire the mouse.
 	result = mouse_->Acquire();
 
+	// We set that mouse buttorns are pressed to false so when they get to true we know there has been a change
+	leftPressed_ = false;
+	rightPressed_ = false;
+
 	return true;
 }
 
@@ -143,10 +147,24 @@ bool InputManager::isLeftMouseButtonDown()
 	return false;
 }
 
+bool InputManager::isRightMouseButtonDown()
+{
+	// Check if the left mouse button is currently pressed.
+	if(mouseState_.rgbButtons[1] & 0x80)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 void InputManager::keyDown(unsigned int input)
 {
 	if(!keys_[input]){
-		notifyListeners((int)input);
+		// We create a structure with the InputManager information where whe set the key introduced and mouse to 0 for control
+		InputStruct inputStruct = {(int)input, NO_BUTTON, Point(0.0f, 0.0f, 0.0f)};
+
+		notifyListeners(inputStruct);
 	}
 
 	// If a key is pressed then save that state in the key array.
@@ -185,7 +203,7 @@ bool InputManager::readMouse()
 
 void InputManager::processInput()
 {
-	// Update the location of the mouse cursor based on the change of the mouse location during the frame.
+	// Update the delta of the mouse cursor based on the change of the mouse location during the frame.
 	mouseDelta_.x += mouseState_.lX;
 	mouseDelta_.y += mouseState_.lY;
 
@@ -206,6 +224,35 @@ void InputManager::processInput()
 	if(mousePosition_.y > screenHeight_)
 	{
 		mousePosition_.y = screenHeight_;
+	}
+
+	// Check whether a button has been pressed or not
+	if(isLeftMouseButtonDown() && !leftPressed_)
+	{
+		// We create a structure with the InputManager information where whe set the key introduced and mouse to 0 for control
+		InputStruct inputStruct = {0, LEFT_BUTTON, mousePosition_};
+		notifyListeners(inputStruct);
+
+		leftPressed_ = true;
+	}
+	
+	if(!isLeftMouseButtonDown())
+	{
+		leftPressed_ = false;
+	}
+
+	if(isRightMouseButtonDown() && !rightPressed_)
+	{
+		// We create a structure with the InputManager information where whe set the key introduced and mouse to 0 for control
+		InputStruct inputStruct = {0, RIGHT_BUTTON, mousePosition_};
+		notifyListeners(inputStruct);
+
+		rightPressed_ = true;
+	}
+	
+	if(!isRightMouseButtonDown())
+	{
+		rightPressed_ = false;
 	}
 
 	return;

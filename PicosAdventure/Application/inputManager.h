@@ -16,7 +16,21 @@
 #include "../Utils/notifierClass.h"
 #include "../math/PointClass.h"
 
-class InputManager : public Notifier<InputManager, int>
+enum MouseButton
+	{
+		NO_BUTTON,
+		LEFT_BUTTON,
+		RIGHT_BUTTON
+	};
+
+struct InputStruct
+	{
+		int keyPressed;
+		MouseButton mouseButton;
+		Point mousePosition;
+	};
+
+class InputManager : public Notifier<InputManager, InputStruct>
 {
 	public:
 		InputManager();
@@ -30,7 +44,9 @@ class InputManager : public Notifier<InputManager, int>
 		void getMouseLocation(int& mouseX, int& mouseY);
 		void setMouseLocation(int mouseX, int mouseY);
 		void getMouseMovement(int& mouseDeltaX, int& mouseDeltaY);
+		
 		bool isLeftMouseButtonDown();
+		bool isRightMouseButtonDown();
 
 		void keyDown(unsigned int input);
 		void keyUp(unsigned int input);
@@ -49,6 +65,8 @@ class InputManager : public Notifier<InputManager, int>
 		Point mouseDelta_;
 
 		int screenWidth_, screenHeight_;
+		bool leftPressed_;
+		bool rightPressed_;
 };
 
 #endif

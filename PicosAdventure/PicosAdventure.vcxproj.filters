@@ -43,6 +43,12 @@
     <Filter Include="Source Files\Visualizer">
       <UniqueIdentifier>{2d66f2dd-078d-4790-aa78-dc2d6ca45da1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\GUI">
+      <UniqueIdentifier>{331c9c4e-41e5-414f-bcb2-f04a893d219e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GUI">
+      <UniqueIdentifier>{754be603-5b7e-4aa2-8fc9-d8bfdff22eee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -81,9 +87,6 @@
     <ClCompile Include="Utils\clockClass.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Application\inputManager.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\modelClass.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
@@ -104,6 +107,12 @@
     </ClCompile>
     <ClCompile Include="Utils\textClass.cpp">
       <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\GUIManager.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\inputManager.cpp">
+      <Filter>Source Files\Application</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -146,12 +155,6 @@
     <ClInclude Include="Graphics\shader3DClass.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Utils\clockClass.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\inputManager.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\modelClass.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
@@ -171,6 +174,15 @@
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Utils\textClass.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\GUIManager.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\inputManager.h">
+      <Filter>Header Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\clockClass.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>

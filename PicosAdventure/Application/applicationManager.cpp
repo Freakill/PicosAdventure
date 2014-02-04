@@ -53,6 +53,8 @@ void ApplicationManager::update()
 {
 	clockClass_->tick();
 
+	inputManager_->update();
+
 	// we update the State with the frame elapsed time
 	if(appState_ != 0)
 	{

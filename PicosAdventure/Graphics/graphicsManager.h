@@ -1,8 +1,6 @@
 #ifndef _GRAPHICS_MANAGER_H_
 #define _GRAPHICS_MANAGER_H_
 
-#pragma warning disable C4005
-
 //Including DirectX libraries
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")

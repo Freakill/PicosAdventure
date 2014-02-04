@@ -13,8 +13,8 @@ VisualizerScreenState::VisualizerScreenState()
 {
 	camera_ = 0;
 
-	tempText_[0] = 0;
-	tempText_[1] = 0;
+	//tempText_[0] = 0;
+	//tempText_[1] = 0;
 }
 
 VisualizerScreenState::~VisualizerScreenState()
@@ -31,6 +31,10 @@ bool VisualizerScreenState::setup(ApplicationManager* appManager, GraphicsManage
 {
 	// We get a pointer to the graphicsManager
 	graphicsManager_ = graphicsManager;
+
+	// Create GUI
+	visualizerGUI = new GUIManager;
+	inputManager->addListener(*visualizerGUI);
 
 	// Create the camera object.
 	camera_ = new CameraClass();
@@ -106,14 +110,12 @@ void VisualizerScreenState::destroy()
 	
 }
 
-void VisualizerScreenState::notify(InputManager* notifier, int arg)
+void VisualizerScreenState::notify(InputManager* notifier, InputStruct arg)
 {
-	switch(arg){
+	switch(arg.keyPressed){
 		default:
 			{
-				/*std::stringstream keyStream;
-				keyStream << "Key pressed " << arg;
-				MessageBoxA(NULL, keyStream.str().c_str(), "First Screen", MB_OK);*/
+				
 			}
 			break;
 	}

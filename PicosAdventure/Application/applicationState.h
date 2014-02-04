@@ -4,13 +4,17 @@
 #include "applicationManager.h"
 
 #include "inputManager.h"
-#include "../Graphics/graphicsManager.h"
 
+#include "../Utils/listenerClass.h"
+
+#include "../Graphics/graphicsManager.h"
 #include "../Graphics/cameraClass.h"
+
+#include "../Math/pointClass.h"
 
 #include <string>
 
-class ApplicationState : public Listener<InputManager, int>
+class ApplicationState : public Listener<InputManager, InputStruct>
 {
 	public:
 		ApplicationState();
@@ -21,7 +25,7 @@ class ApplicationState : public Listener<InputManager, int>
 		virtual void draw() = 0;
 		virtual void destroy() = 0;
 
-		virtual void notify(InputManager* notifier, int arg) = 0;
+		virtual void notify(InputManager* notifier, InputStruct arg) = 0;
 
 		bool changeState(ApplicationState* appState);
 

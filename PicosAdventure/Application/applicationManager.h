@@ -30,7 +30,6 @@ class ApplicationManager
 		InputManager* inputManager_;
 		GraphicsManager* graphicsManager_;
 		ClockClass* clockClass_;
-		//KinectClass* kinectClass_;
 
 		HWND windowHandler_;
 };

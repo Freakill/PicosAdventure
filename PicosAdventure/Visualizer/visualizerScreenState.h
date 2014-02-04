@@ -8,6 +8,8 @@
 
 #include "../Utils/textClass.h"
 
+#include "../GUI/GUIManager.h"
+
 #include <mmsystem.h>
 
 class VisualizerScreenState: public ApplicationState
@@ -22,17 +24,19 @@ class VisualizerScreenState: public ApplicationState
 		virtual void draw();
 		virtual void destroy();
 
-		virtual void notify(InputManager* notifier, int arg);
+		virtual void notify(InputManager* notifier, InputStruct arg);
 
 	private:
 		static VisualizerScreenState visualizerScreenState_; //singleton
 
-		CameraClass*		camera_;
+		GUIManager*				visualizerGUI;
 
-		StaticModelClass*	model_;
-		TextureClass*		texture_;
+		CameraClass*			camera_;
 
-		TextClass*			tempText_[2];
+		StaticModelClass*		model_;
+		TextureClass*			texture_;
+
+		std::vector<TextClass*> tempText_;
 };
 
 #endif //_SPLASH_SCREEN_STATE_H_
