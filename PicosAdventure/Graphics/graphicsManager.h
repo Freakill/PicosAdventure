@@ -1,9 +1,13 @@
 #ifndef _GRAPHICS_MANAGER_H_
 #define _GRAPHICS_MANAGER_H_
 
+#pragma warning disable C4005
+
 //Including DirectX libraries
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d3dx11.lib")
+#pragma comment(lib, "d3dx10.lib")
 
 #include <dxgi.h>
 #include <d3d11.h>
@@ -12,6 +16,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
+#include "shader3DClass.h"
 
 class GraphicsManager
 {
@@ -26,13 +32,18 @@ class GraphicsManager
 		void beginDraw(float red, float green, float blue, float alpha);
 		void endDraw();
 
+		bool setupShaders(HWND windowHandler);
+	
+		void draw3D(ID3D11DeviceContext* deviceContext, int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, 
+					ID3D11ShaderResourceView* texture);
+
 		ID3D11Device* getDevice();
 		ID3D11DeviceContext* getDeviceContext();
 		IDXGISwapChain* getSwapChain();
 
-		void getProjectionMatrix(XMMATRIX& projectionMatrix);
-		void getWorldMatrix(XMMATRIX& worldMatrix);
-		void getOrthoMatrix(XMMATRIX& orthoMatrix);
+		void getProjectionMatrix(XMFLOAT4X4& projectionMatrix);
+		void getWorldMatrix(XMFLOAT4X4& worldMatrix);
+		void getOrthoMatrix(XMFLOAT4X4& orthoMatrix);
 
 		void getScreenSize(int&, int&);
 
@@ -53,11 +64,16 @@ class GraphicsManager
 		ID3D11DeviceContext* d3dDeviceContext_;
 		IDXGISwapChain* swapChain_;
 		ID3D11RenderTargetView* renderTargetView_;
+		ID3D11Texture2D* depthStencilBuffer_;
+		ID3D11DepthStencilState* depthStencilState_;
 		ID3D11DepthStencilView* depthStencilView_;
 
-		XMMATRIX projectionMatrix_;
-		XMMATRIX worldMatrix_;
-		XMMATRIX orthoMatrix_;
+		XMFLOAT4X4 projectionMatrix_;
+		XMFLOAT4X4 worldMatrix_;
+		XMFLOAT4X4 orthoMatrix_;
+
+		// Pointers to shaders
+		Shader3DClass* shader3D_;
 };
 
 #endif

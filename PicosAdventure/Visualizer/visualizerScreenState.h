@@ -3,6 +3,9 @@
 
 #include "../Application/applicationState.h"
 
+#include "../Graphics/staticModelClass.h"
+#include "../Graphics/textureClass.h"
+
 #include <mmsystem.h>
 
 class VisualizerScreenState: public ApplicationState
@@ -22,7 +25,10 @@ class VisualizerScreenState: public ApplicationState
 	private:
 		static VisualizerScreenState visualizerScreenState_; //singleton
 
-		CameraClass*	camera_;
+		CameraClass*		camera_;
+
+		StaticModelClass*	model_;
+		TextureClass*		texture_;
 };
 
 #endif //_SPLASH_SCREEN_STATE_H_

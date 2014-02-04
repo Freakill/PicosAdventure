@@ -26,6 +26,9 @@ VisualizerScreenState* VisualizerScreenState::Instance()
 
 bool VisualizerScreenState::setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager * inputManager)
 {
+	// We get a pointer to the graphicsManager
+	graphicsManager_ = graphicsManager;
+
 	// Create the camera object.
 	camera_ = new CameraClass();
 	if(!camera_)
@@ -37,6 +40,32 @@ bool VisualizerScreenState::setup(ApplicationManager* appManager, GraphicsManage
 	camera_->setPosition(0.0f, 2.5f, -10.0f);
 	camera_->setup(XMFLOAT3(0.0f, 2.5f, -10.0f), XMFLOAT3(0.0f, 0.0f, 0.0f));
 
+	model_ = new StaticModelClass;
+	if(!model_)
+	{
+		return false;
+	}
+
+	// Initialize the model object.
+	if(!model_->setup(graphicsManager->getDevice(), "carne"))
+	{
+		MessageBox(NULL, L"Could not initialize the model object.", L"Visualizer - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	texture_ = new TextureClass;
+	if(!texture_)
+	{
+		return false;
+	}
+
+	// Initialize the texture object.
+	bool result = texture_->setup(graphicsManager->getDevice(), "carne");
+	if(!result)
+	{
+		MessageBoxA(NULL, "Could not load texture!", "Visualizer - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
 	return true;
 }
 
@@ -47,9 +76,16 @@ void VisualizerScreenState::update(float elapsedTime)
 
 void VisualizerScreenState::draw()
 {
-	XMMATRIX viewMatrix;
-
+	XMFLOAT4X4 viewMatrix;
 	camera_->getViewMatrix(viewMatrix);
+
+	XMFLOAT4X4 projectionMatrix, worldMatrix, orthoMatrix;
+	graphicsManager_->getWorldMatrix(worldMatrix);
+	graphicsManager_->getProjectionMatrix(projectionMatrix);
+	graphicsManager_->getOrthoMatrix(orthoMatrix);
+
+	model_->draw(graphicsManager_->getDevice(), graphicsManager_->getDeviceContext());
+	graphicsManager_->draw3D(graphicsManager_->getDeviceContext(), model_->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, texture_->getTexture());
 }
 
 void VisualizerScreenState::destroy()

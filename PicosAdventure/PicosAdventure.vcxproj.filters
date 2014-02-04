@@ -66,12 +66,6 @@
     <ClCompile Include="Application\applicationState.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
-    <ClCompile Include="Application\inputManager.cpp">
-      <Filter>Source Files\Application</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\clockClass.cpp">
-      <Filter>Source Files\Application</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\graphicsmanager.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
@@ -79,6 +73,30 @@
       <Filter>Source Files\Visualizer</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\cameraClass.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\shader3DClass.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\clockClass.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\inputManager.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\modelClass.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\textureClass.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\animatedModelClass.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\staticModelClass.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\modelClassOld.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -110,12 +128,6 @@
     <ClInclude Include="Application\applicationState.h">
       <Filter>Header Files\Application</Filter>
     </ClInclude>
-    <ClInclude Include="Application\inputManager.h">
-      <Filter>Header Files\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils\clockClass.h">
-      <Filter>Header Files\Application</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\graphicsManager.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
@@ -123,6 +135,30 @@
       <Filter>Header Files\Visualizer</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\cameraClass.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\shader3DClass.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\clockClass.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\inputManager.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\modelClass.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\textureClass.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\animatedModelClass.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\staticModelClass.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\modelClassOld.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
   </ItemGroup>

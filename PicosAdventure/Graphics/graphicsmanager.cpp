@@ -128,38 +128,82 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
         return false;
     }
 
-	// Creating the Depth/Stencil buffer
-	D3D11_TEXTURE2D_DESC depthStencilDesc;
-	ZeroMemory( &depthStencilDesc, sizeof( depthStencilDesc ) );
-	depthStencilDesc.Width = screenWidth_;
-	depthStencilDesc.Height = screenHeight_;
-	depthStencilDesc.MipLevels = 1;
-	depthStencilDesc.ArraySize = 1;
-	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilDesc.SampleDesc.Count = 1;
-	depthStencilDesc.SampleDesc.Quality = 0;
-	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	depthStencilDesc.CPUAccessFlags = 0;
-	depthStencilDesc.MiscFlags = 0;
+	// Initialize the description of the depth buffer.
+	D3D11_TEXTURE2D_DESC depthBufferDescription;
+	ZeroMemory(&depthBufferDescription, sizeof(depthBufferDescription));
 
-	ID3D11Texture2D* depthStencilBuffer;
-	result = d3dDevice_->CreateTexture2D(
-		&depthStencilDesc,					// Description of the texture to create
-		0,
-		&depthStencilBuffer);				// Return pointer to depth/stencil buffer
+	// Set up the description of the depth buffer.
+	depthBufferDescription.Width = screenWidth_;
+	depthBufferDescription.Height = screenHeight_;
+	depthBufferDescription.MipLevels = 1;
+	depthBufferDescription.ArraySize = 1;
+	depthBufferDescription.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthBufferDescription.SampleDesc.Count = 1;
+	depthBufferDescription.SampleDesc.Quality = 0;
+	depthBufferDescription.Usage = D3D11_USAGE_DEFAULT;
+	depthBufferDescription.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthBufferDescription.CPUAccessFlags = 0;
+	depthBufferDescription.MiscFlags = 0;
 
+	// Create the texture for the depth buffer using the filled out description.
+	result = d3dDevice_->CreateTexture2D(&depthBufferDescription, NULL, &depthStencilBuffer_);
 	if(FAILED(result))
 	{
-		MessageBox(NULL, L"Failed to get the depth/stencil buffer.", L"GraphicsManager - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
-	result = d3dDevice_->CreateDepthStencilView(
-		depthStencilBuffer,							// Resource we want to create a view
-		0,
-		&depthStencilView_);						// The view to the depth/stencil buffer
+	// Initialize the description of the stencil state.
+	D3D11_DEPTH_STENCIL_DESC depthStencilDescription;
+	ZeroMemory(&depthStencilDescription, sizeof(depthStencilDescription));
 
+	// Set up the description of the stencil state.
+	depthStencilDescription.DepthEnable = true;
+	depthStencilDescription.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDescription.DepthFunc = D3D11_COMPARISON_LESS;
+
+	depthStencilDescription.StencilEnable = true;
+	depthStencilDescription.StencilReadMask = 0xFF;
+	depthStencilDescription.StencilWriteMask = 0xFF;
+
+	// Stencil operations if pixel is front-facing.
+	depthStencilDescription.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDescription.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthStencilDescription.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDescription.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Stencil operations if pixel is back-facing.
+	depthStencilDescription.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDescription.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthStencilDescription.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDescription.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Create the depth stencil state.
+	result = d3dDevice_->CreateDepthStencilState(&depthStencilDescription, &depthStencilState_);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set the depth stencil state.
+	d3dDeviceContext_->OMSetDepthStencilState(depthStencilState_, 1);
+
+	// Initailze the depth stencil view.
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDescription;
+	ZeroMemory(&depthStencilViewDescription, sizeof(depthStencilViewDescription));
+
+	// Set up the depth stencil view description.
+	depthStencilViewDescription.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDescription.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDescription.Texture2D.MipSlice = 0;
+
+	// Create the depth stencil view.
+	result = d3dDevice_->CreateDepthStencilView(depthStencilBuffer_, &depthStencilViewDescription, &depthStencilView_);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Bind the render target view and depth stencil buffer to the output render pipeline.
 	d3dDeviceContext_->OMSetRenderTargets(1, &renderTargetView_, depthStencilView_);
 
 	//Creating the viewport
@@ -178,13 +222,20 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
 	float screenAspect = (float)screenWidth_ / (float)screenHeight_;
 
 	// Create the projection matrix for 3D rendering.
-	projectionMatrix_ = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, screenNearPlane, screenDepthPlane);
+	XMStoreFloat4x4(&projectionMatrix_, XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, screenNearPlane, screenDepthPlane));
 
 	// Initialize the world matrix to the identity matrix.
-	worldMatrix_ = XMMatrixIdentity();
+	XMStoreFloat4x4(&worldMatrix_, XMMatrixIdentity());
 
 	// Create an orthographic projection matrix for 2D rendering.
-	orthoMatrix_ = XMMatrixOrthographicLH((float)screenWidth_, (float)screenHeight_, screenNearPlane, screenDepthPlane);
+	XMStoreFloat4x4(&orthoMatrix_, XMMatrixOrthographicLH((float)screenWidth_, (float)screenHeight_, screenNearPlane, screenDepthPlane));
+
+	// We call the function to setup the shaders
+	if(!setupShaders(windowHandler))
+	{
+		MessageBoxA(windowHandler, "Could not setup shaders.", "Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
 
 	return true;
 }
@@ -226,17 +277,14 @@ void GraphicsManager::destroy()
 
 void GraphicsManager::beginDraw(float red, float green, float blue, float alpha)
 {
-	float color[4];
-
-
 	// Setup the color to clear the buffer to.
-	color[0] = red;
-	color[1] = green;
-	color[2] = blue;
-	color[3] = alpha;
+	float color[] = {red, green, blue, alpha};
 
 	// Clear the back buffer.
 	d3dDeviceContext_->ClearRenderTargetView(renderTargetView_, color);
+
+	// Clear the depth buffer.
+	d3dDeviceContext_->ClearDepthStencilView(depthStencilView_, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	return;
 }
@@ -258,6 +306,30 @@ void GraphicsManager::endDraw()
 	return;
 }
 
+bool GraphicsManager::setupShaders(HWND windowHandler)
+{
+	// Create the 3D shader object.
+	shader3D_ = new Shader3DClass;
+	if(!shader3D_)
+	{
+		return false;
+	}
+
+	// Initialize the color shader object.
+	if(!shader3D_->setup(d3dDevice_, windowHandler))
+	{
+		MessageBoxA(NULL, "Could not initialize the 3D shader object.", "Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	return true;
+}
+void GraphicsManager::draw3D(ID3D11DeviceContext* deviceContext, int indexCount, XMFLOAT4X4 worldMatrix,  XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, 
+	                         ID3D11ShaderResourceView* texture)
+{
+	shader3D_->draw(d3dDeviceContext_, indexCount, worldMatrix, viewMatrix, projectionMatrix, texture);
+}
+
 ID3D11Device* GraphicsManager::getDevice()
 {
 	return d3dDevice_;
@@ -273,19 +345,19 @@ IDXGISwapChain* GraphicsManager::getSwapChain()
 	return swapChain_;
 }
 
-void GraphicsManager::getProjectionMatrix(XMMATRIX& projectionMatrix)
+void GraphicsManager::getProjectionMatrix(XMFLOAT4X4& projectionMatrix)
 {
 	projectionMatrix = projectionMatrix_;
 	return;
 }
 
-void GraphicsManager::getWorldMatrix(XMMATRIX& worldMatrix)
+void GraphicsManager::getWorldMatrix(XMFLOAT4X4& worldMatrix)
 {
 	worldMatrix = worldMatrix_;
 	return;
 }
 
-void GraphicsManager::getOrthoMatrix(XMMATRIX& orthoMatrix)
+void GraphicsManager::getOrthoMatrix(XMFLOAT4X4& orthoMatrix)
 {
 	orthoMatrix = orthoMatrix_;
 	return;

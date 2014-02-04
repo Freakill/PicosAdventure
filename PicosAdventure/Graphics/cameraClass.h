@@ -20,12 +20,12 @@ class CameraClass
 		XMFLOAT3 getPosition();
 		XMFLOAT3 getRotation();
 
-		void getViewMatrix(XMMATRIX& viewMatrix);
+		void getViewMatrix(XMFLOAT4X4& viewMatrix);
 
 	private:
 		float positionX_, positionY_, positionZ_;
 		float rotationX_, rotationY_, rotationZ_;
-		XMMATRIX viewMatrix_;
+		XMFLOAT4X4 viewMatrix_;
 };
 
 #endif //_CAMERA_CLASS_H_
