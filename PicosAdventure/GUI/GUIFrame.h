@@ -36,7 +36,7 @@ class GUIFrame
 
 		bool offer(Point mouseClick);
 
-		GUIButton* addButton(GraphicsManager* graphicsManager, std::string name, int height);
+		GUIButton* addButton(GraphicsManager* graphicsManager, std::string name, int height, ButtonPurpose buttonPurpose);
 
 	private:
 		bool checkInside(Point pos);

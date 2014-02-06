@@ -1,5 +1,15 @@
 #include "Object3D.h"
 
+void Object3D::setName(std::string newName)
+{
+	objectName_ = newName;
+}
+
+std::string Object3D::getName()
+{
+	return objectName_;
+}
+
 void Object3D::setPosition(Point position)
 {
 	position_.x = position.x;

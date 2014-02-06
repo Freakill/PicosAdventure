@@ -6,6 +6,8 @@ Object3DFactory::Object3DFactory()
 {
 	Register("StaticObject3D", &StaticObject3D::Create);
 	Register("AnimatedObject3D", &AnimatedObject3D::Create);
+
+	createdObjects_ = 0;
 }
 
 Object3DFactory::Object3DFactory(const Object3DFactory &)
@@ -32,6 +34,13 @@ Object3D* Object3DFactory::CreateObject3D(const std::string &object3DType, Graph
 {
 	std::map<std::string, CreateObject3DFn>::iterator it = factoryMap_.find(object3DType);
 	if( it != factoryMap_.end() )
-		return it->second(graphicsManager, modelName);
+	{
+		createdObjects_++;
+
+		std::stringstream uniqueName;
+		uniqueName << modelName << "_" << createdObjects_;
+
+		return it->second(graphicsManager, modelName, uniqueName.str());
+	}
 	return NULL;
 }

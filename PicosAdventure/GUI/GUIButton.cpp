@@ -16,12 +16,13 @@ GUIButton::~GUIButton()
 {
 }
 
-bool GUIButton::setup(GraphicsManager* graphicsManager, std::string name, Point position, int width, int height)
+bool GUIButton::setup(GraphicsManager* graphicsManager, std::string name, Point position, int width, int height, ButtonPurpose purpose)
 {
 	buttonName_ = name;
 	position_ = position;
 	width_ = width;
 	height_ = height;
+	buttonPurpose_ = purpose;
 
 	int screenWidth, screenHeight;
 	graphicsManager->getScreenSize(screenWidth, screenHeight);
@@ -104,7 +105,8 @@ bool GUIButton::offer(Point mouseClick)
 {
 	if(checkInside(mouseClick))
 	{
-		notifyListeners(buttonName_);
+		ButtonStruct buttonStruct = {buttonPurpose_, buttonName_};
+		notifyListeners(buttonStruct);
 	}
 
 	return false;

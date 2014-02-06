@@ -23,8 +23,10 @@ AnimatedObject3D::~AnimatedObject3D()
 {
 }
 
-bool AnimatedObject3D::setup(GraphicsManager* graphicsManager, std::string modelName)
+bool AnimatedObject3D::setup(GraphicsManager* graphicsManager, std::string modelName, std::string objectName)
 {
+	objectName_ = objectName;
+
 	model_ = new AnimatedModelClass;
 	if(!model_)
 	{
@@ -62,7 +64,11 @@ bool AnimatedObject3D::setup(GraphicsManager* graphicsManager, std::string model
 
 void AnimatedObject3D::update(float dt)
 {
-	// DO SOMETHING
+	AnimatedModelClass* animatedModel = dynamic_cast<AnimatedModelClass*>(model_);
+	if(animatedModel)
+	{
+		animatedModel->update(dt);
+	}
 }
 
 void AnimatedObject3D::draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix)
@@ -108,11 +114,11 @@ void AnimatedObject3D::destroy()
 	}
 }
 
-Object3D * __stdcall AnimatedObject3D::Create(GraphicsManager* graphicsManager, std::string modelName)
+Object3D * __stdcall AnimatedObject3D::Create(GraphicsManager* graphicsManager, std::string modelName, std::string objectName)
 {
 	AnimatedObject3D* animatedObject3DTemp = new AnimatedObject3D();
 
-	if(!animatedObject3DTemp->setup(graphicsManager, modelName))
+	if(!animatedObject3DTemp->setup(graphicsManager, modelName, objectName))
 	{
 
 		return NULL;

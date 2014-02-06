@@ -11,14 +11,26 @@
 #include "../Utils/textClass.h"
 #include "../Utils/notifierClass.h"
 
-class GUIButton : public Notifier<GUIButton, std::string>
+enum ButtonPurpose
+	{
+		LOAD_OBJECT,
+		SELECT_OBJECT
+	};
+
+struct ButtonStruct
+	{
+		ButtonPurpose	buttonPurpose;
+		std::string		buttonInfo;
+	};
+
+class GUIButton : public Notifier<GUIButton, ButtonStruct>
 {
 	public:
 		GUIButton();
 		GUIButton(const GUIButton& camera);
 		~GUIButton();
 
-		bool setup(GraphicsManager* graphicsManager, std::string name, Point position, int width, int height);
+		bool setup(GraphicsManager* graphicsManager, std::string name, Point position, int width, int height, ButtonPurpose purpose);
 		void draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix);
 
 		std::string getName();
@@ -44,6 +56,8 @@ class GUIButton : public Notifier<GUIButton, std::string>
 		Point position_;
 		int	  width_;
 		int   height_;
+
+		ButtonPurpose buttonPurpose_;
 		
 };
 

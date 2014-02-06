@@ -15,7 +15,7 @@
 
 #include <mmsystem.h>
 
-class VisualizerScreenState: public ApplicationState, public Listener<GUIButton, std::string>
+class VisualizerScreenState: public ApplicationState, public Listener<GUIButton, ButtonStruct>
 {
 	public:
 		VisualizerScreenState();
@@ -28,7 +28,7 @@ class VisualizerScreenState: public ApplicationState, public Listener<GUIButton,
 		virtual void destroy();
 
 		virtual void notify(InputManager* notifier, InputStruct arg);
-		virtual void notify(GUIButton* notifier, std::string arg);
+		virtual void notify(GUIButton* notifier, ButtonStruct arg);
 
 	private:
 		static VisualizerScreenState visualizerScreenState_; //singleton
@@ -37,12 +37,19 @@ class VisualizerScreenState: public ApplicationState, public Listener<GUIButton,
 		bool checkModelHasAnimations(const std::string &modelName);
 
 		void createLoadModelMenu();
+		void createLoadedObjectButton();
+
+		void moveSelectedObject(InputStruct arg);
+		void rotateSelectedObject(InputStruct arg);
+		void resizeSelectedObject(InputStruct arg);
 
 		GUIManager*				visualizerGUI_;
+		GUIFrame*				loadedObjectsMenu_;
 
 		CameraClass*			camera_;
 
 		std::vector<Object3D*>	loadedObjects_;
+		int						selectedLoadedObject_;
 };
 
 #endif //_SPLASH_SCREEN_STATE_H_

@@ -23,8 +23,10 @@ StaticObject3D::~StaticObject3D()
 {
 }
 
-bool StaticObject3D::setup(GraphicsManager* graphicsManager, std::string modelName)
+bool StaticObject3D::setup(GraphicsManager* graphicsManager, std::string modelName, std::string objectName)
 {
+	objectName_ = objectName;
+
 	model_ = new StaticModelClass;
 	if(!model_)
 	{
@@ -106,11 +108,11 @@ void StaticObject3D::destroy()
 	}
 }
 
-Object3D* __stdcall StaticObject3D::Create(GraphicsManager* graphicsManager, std::string modelName)
+Object3D* __stdcall StaticObject3D::Create(GraphicsManager* graphicsManager, std::string modelName, std::string objectName)
 {
 	StaticObject3D* staticObject3DTemp = new StaticObject3D();
 
-	if(!staticObject3DTemp->setup(graphicsManager, modelName))
+	if(!staticObject3DTemp->setup(graphicsManager, modelName, objectName))
 	{
 		return NULL;
 	}

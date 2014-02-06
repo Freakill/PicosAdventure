@@ -125,7 +125,7 @@ bool GUIFrame::offer(Point mouseClick)
 	return false;
 }
 
-GUIButton* GUIFrame::addButton(GraphicsManager* graphicsManager, std::string name, int height)
+GUIButton* GUIFrame::addButton(GraphicsManager* graphicsManager, std::string name, int height, ButtonPurpose buttonPurpose)
 {
 	GUIButton* button = new GUIButton();
 
@@ -138,7 +138,7 @@ GUIButton* GUIFrame::addButton(GraphicsManager* graphicsManager, std::string nam
 	}
 
 	// Having the final vertical position, we setup the button
-	button->setup(graphicsManager, name, Point(position_.x, position_.y+posY), width_, height);
+	button->setup(graphicsManager, name, Point(position_.x, position_.y+posY), width_, height, buttonPurpose);
 
 	// We add it to the map of buttons to keep track of it
 	guiButtons_.insert(std::pair<std::string, GUIButton*>(button->getName(), button));

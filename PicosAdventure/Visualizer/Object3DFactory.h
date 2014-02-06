@@ -26,6 +26,8 @@ class Object3DFactory
 		// Map where we are going to save the Create functions
 		std::map<std::string, CreateObject3DFn>	factoryMap_;
 
+		int createdObjects_;
+
 };
 
 #endif //_OBJECT_3D_FACTORY_H_

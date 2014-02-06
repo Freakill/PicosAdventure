@@ -12,6 +12,7 @@ VisualizerScreenState VisualizerScreenState::visualizerScreenState_;
 VisualizerScreenState::VisualizerScreenState()
 {
 	camera_ = 0;
+	selectedLoadedObject_ = 0;
 }
 
 VisualizerScreenState::~VisualizerScreenState()
@@ -34,6 +35,10 @@ bool VisualizerScreenState::setup(ApplicationManager* appManager, GraphicsManage
 	inputManager->addListener(*visualizerGUI_);
 
 	createLoadModelMenu();
+
+	loadedObjectsMenu_ = new GUIFrame();
+	loadedObjectsMenu_->setup(graphicsManager_, "Loaded Models", Point(150.0f, 0.0f), 150, 200);
+	visualizerGUI_->addFrame(loadedObjectsMenu_);
 
 	// Create the camera object.
 	camera_ = new CameraClass();
@@ -116,6 +121,26 @@ void VisualizerScreenState::destroy()
 void VisualizerScreenState::notify(InputManager* notifier, InputStruct arg)
 {
 	switch(arg.keyPressed){
+		case VK_LEFT:
+		case VK_RIGHT:
+		case VK_UP:
+		case VK_DOWN:
+		case 65: //A
+		case 81: //Q
+		case 97: //a
+		case 113: //q
+			{
+				moveSelectedObject(arg);
+			}
+			break;
+		case 79: //O
+		case 111: //o
+		case 80: //P
+		case 112: //p
+			{
+				rotateSelectedObject(arg);
+			}
+			break;
 		default:
 			{
 				
@@ -127,34 +152,7 @@ void VisualizerScreenState::notify(InputManager* notifier, InputStruct arg)
 	{
 		case WHEEL_SCROLL:
 			{
-				if(loadedObjects_.size() > 0)
-				{
-					// Create the new scaling vector
-					Vector newScale = loadedObjects_.back()->getScale();
-
-					// If wheel speen has been positive, whe calculate the new scaling vector
-					if(arg.mouseInfo.z > 0)
-					{
-						newScale.x += 0.01f;
-						newScale.y += 0.01f;
-						newScale.z += 0.01f;
-					}
-
-					// otherwise, if the speen has been negative, we calculate new scaling vector and check it does not arrive to 0
-					if(arg.mouseInfo.z < 0)
-					{
-						newScale.x -= 0.01f;
-						newScale.y -= 0.01f;
-						newScale.z -= 0.01f;
-
-						if(newScale.x < 0.01f)
-						{
-							newScale = Vector(0.01f, 0.01f, 0.01f);
-						}
-					}
-
-					loadedObjects_.back()->setScale(newScale);
-				}
+				resizeSelectedObject(arg);
 			}
 			break;
 		default:
@@ -165,9 +163,34 @@ void VisualizerScreenState::notify(InputManager* notifier, InputStruct arg)
 	}
 }
 
-void VisualizerScreenState::notify(GUIButton* notifier, std::string arg)
+void VisualizerScreenState::notify(GUIButton* notifier, ButtonStruct arg)
 {
-	createModel(arg);
+	switch(arg.buttonPurpose)
+	{
+		case(LOAD_OBJECT):
+			{
+				createModel(arg.buttonInfo);
+			}
+			break;
+		case(SELECT_OBJECT):
+			{
+				int index = 0;
+				std::vector<Object3D*>::iterator it;
+				for(it = loadedObjects_.begin(); it != loadedObjects_.end(); it++)
+				{
+					if(arg.buttonInfo == (*it)->getName())
+					{
+						selectedLoadedObject_ = index;
+					}
+					index++;
+				}
+			}
+			break;
+		default:
+			{
+			}
+			break;
+	}
 }
 
 void VisualizerScreenState::createModel(const std::string &modelName)
@@ -186,6 +209,7 @@ void VisualizerScreenState::createModel(const std::string &modelName)
 	if(objectLoadedTemp)
 	{
 		loadedObjects_.push_back(objectLoadedTemp);
+		createLoadedObjectButton();
 	}
 	else
 	{
@@ -247,8 +271,8 @@ void VisualizerScreenState::createLoadModelMenu()
     WIN32_FIND_DATA file_data;
 
 	// Access to the root model folder (this is given by the structure of the game Data)
-	GUIFrame* loadObjectsMenu = new GUIFrame();
-	loadObjectsMenu->setup(graphicsManager_, "Load Models", Point(0.0f, 0.0f), 150, 200);
+	GUIFrame* loadModelsMenu = new GUIFrame();
+	loadModelsMenu->setup(graphicsManager_, "Load Models", Point(0.0f, 0.0f), 150, 200);
 
 	// If we can access to that sctructure, then create a loadModel button for each found model
     if ((dir = FindFirstFile(L"./Data/models/*", &file_data)) != INVALID_HANDLE_VALUE)
@@ -266,10 +290,127 @@ void VisualizerScreenState::createLoadModelMenu()
 			const std::string s( file_name.begin(), file_name.end() );
 
 			// Create the button by calling the GUI frame where we want to add it
-			loadObjectsMenu->addButton(graphicsManager_, s, 25)->addListener(*this);
+			loadModelsMenu->addButton(graphicsManager_, s, 25, LOAD_OBJECT)->addListener(*this);
 
 		} while (FindNextFile(dir, &file_data));
 	}
 
-	visualizerGUI_->addFrame(loadObjectsMenu);
+	visualizerGUI_->addFrame(loadModelsMenu);
+}
+
+void VisualizerScreenState::createLoadedObjectButton()
+{
+	loadedObjectsMenu_->addButton(graphicsManager_, loadedObjects_.back()->getName(), 25, SELECT_OBJECT)->addListener(*this);
+}
+
+void VisualizerScreenState::moveSelectedObject(InputStruct arg)
+{
+	if(loadedObjects_.size() > 0)
+	{
+		// Create the new poisiton
+		Point newPosition = loadedObjects_.at(selectedLoadedObject_)->getPosition();
+
+		switch(arg.keyPressed){
+			case VK_LEFT:
+				{
+					newPosition.x -= 0.25f;
+				}
+				break;
+			case VK_RIGHT:
+				{
+					newPosition.x += 0.25f;
+				}
+				break;
+			case VK_UP:
+				{
+					newPosition.z += 0.25f;
+				}
+				break;
+			case VK_DOWN:
+				{
+					newPosition.z -= 0.25f;
+				}
+				break;
+			case 65: //A
+			case 97: //a
+				{
+					newPosition.y -= 0.1f;
+				}
+				break;
+			case 81: //Q
+			case 113: //q
+				{
+					newPosition.y += 0.1f;
+				}
+				break;
+		}
+
+		loadedObjects_.at(selectedLoadedObject_)->setPosition(newPosition);
+	}
+}
+
+void VisualizerScreenState::rotateSelectedObject(InputStruct arg)
+{
+	if(loadedObjects_.size() > 0)
+	{
+		// Create the new poisiton
+		float newRotY = loadedObjects_.at(selectedLoadedObject_)->getRotationY();
+
+		switch(arg.keyPressed){
+			case 79: //O
+			case 111: //o
+				{
+					newRotY += XM_PI/16.0f;
+					if(newRotY > XM_2PI)
+					{
+						newRotY -= XM_2PI;
+					}
+				}
+				break;
+			case 80: //P
+			case 112: //p
+				{
+					newRotY -= XM_PI/16.0f;
+					if(newRotY < 0.0f)
+					{
+						newRotY += XM_2PI;
+					}
+				}
+				break;
+		}
+
+		loadedObjects_.at(selectedLoadedObject_)->setRotationY(newRotY);
+	}
+}
+
+void VisualizerScreenState::resizeSelectedObject(InputStruct arg)
+{
+	if(loadedObjects_.size() > 0)
+	{
+		// Create the new scaling vector
+		Vector newScale = loadedObjects_.at(selectedLoadedObject_)->getScale();
+
+		// If wheel speen has been positive, whe calculate the new scaling vector
+		if(arg.mouseInfo.z > 0)
+		{
+			newScale.x += newScale.x*0.1f;
+			newScale.y += newScale.y*0.1f;
+			newScale.z += newScale.z*0.1f;
+		}
+
+		// otherwise, if the speen has been negative, we calculate new scaling vector and check it does not arrive to 0
+		if(arg.mouseInfo.z < 0)
+		{
+			newScale.x -= newScale.x*0.1f;
+			newScale.y -= newScale.y*0.1f;
+			newScale.z -= newScale.z*0.1f;
+
+			if(newScale.x < 0.01f)
+			{
+				newScale = Vector(0.01f, 0.01f, 0.01f);
+			}
+		}
+
+		loadedObjects_.at(selectedLoadedObject_)->setScale(newScale);
+	}
 }

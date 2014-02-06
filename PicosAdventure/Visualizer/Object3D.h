@@ -13,10 +13,13 @@
 class Object3D
 {
 	public:
-		virtual bool setup(GraphicsManager* graphicsManager, std::string modelName) = 0;
+		virtual bool setup(GraphicsManager* graphicsManager, std::string modelName, std::string objectName) = 0;
 		virtual void update(float dt) = 0;
 		virtual void draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix) = 0;
 		virtual void destroy() = 0;
+
+		void setName(std::string newName);
+		std::string getName();
 
 		void setPosition(Point newPosition);
 		Point getPosition();
@@ -37,6 +40,8 @@ class Object3D
 
 		Shader3DClass*	modelShader_;
 
+		std::string		objectName_;
+
 		Point			position_;
 		Vector			scaling_; 
 		float			rotX_;
@@ -45,6 +50,6 @@ class Object3D
 };
 
 // Create function pointer
-typedef Object3D* (__stdcall *CreateObject3DFn)(GraphicsManager*, std::string);
+typedef Object3D* (__stdcall *CreateObject3DFn)(GraphicsManager*, std::string, std::string);
 
 #endif //_OBJECT_3D_H_
