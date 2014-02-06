@@ -510,6 +510,16 @@ IDXGISwapChain* GraphicsManager::getSwapChain()
 	return swapChain_;
 }
 
+Shader2DClass* GraphicsManager::getShader2D()
+{
+	return shader2D_;
+}
+
+Shader3DClass* GraphicsManager::getShader3D()
+{
+	return shader3D_;
+}
+
 void GraphicsManager::getProjectionMatrix(XMFLOAT4X4& projectionMatrix)
 {
 	projectionMatrix = projectionMatrix_;

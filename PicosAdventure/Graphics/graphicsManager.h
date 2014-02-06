@@ -41,6 +41,9 @@ class GraphicsManager
 		ID3D11DeviceContext* getDeviceContext();
 		IDXGISwapChain* getSwapChain();
 
+		Shader2DClass* getShader2D();
+		Shader3DClass* getShader3D();
+
 		void getProjectionMatrix(XMFLOAT4X4& projectionMatrix);
 		void getWorldMatrix(XMFLOAT4X4& worldMatrix);
 		void getOrthoMatrix(XMFLOAT4X4& orthoMatrix);

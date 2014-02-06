@@ -19,8 +19,7 @@ TextClass::~TextClass()
 {
 }
 
-bool TextClass::setup(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int screenWidth, int screenHeight, int posX, int posY, std::string sentenceText,
-					  XMFLOAT4X4 baseViewMatrix)
+bool TextClass::setup(ID3D11Device* device, ID3D11DeviceContext* deviceContext, Shader2DClass* shader, int screenWidth, int screenHeight, int posX, int posY, std::string sentenceText)
 {
 	bool result;
 
@@ -32,9 +31,6 @@ bool TextClass::setup(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	// Store the position
 	positionX_ = posX;
 	positionY_ = posY;
-
-	// Store the base view matrix.
-	baseViewMatrix_ = baseViewMatrix;
 
 	// Create the font object.
 	font_ = new FontClass;
@@ -52,19 +48,7 @@ bool TextClass::setup(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	}
 
 	// Create the font shader object.
-	fontShader_ = new Shader2DClass;
-	if(!fontShader_)
-	{
-		return false;
-	}
-
-	// setup the font shader object.
-	result = fontShader_->setup(device);
-	if(!result)
-	{
-		MessageBoxA(NULL, "Could not setup the font shader object.", "Text - Error", MB_ICONERROR | MB_OK);
-		return false;
-	}
+	fontShader_ = shader;
 
 	// setup the first sentence.
 	result = setupSentence(&sentence_, 500, device);
@@ -83,13 +67,12 @@ bool TextClass::setup(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	return true;
 }
 
-bool TextClass::draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 orthoMatrix)
+bool TextClass::draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 baseViewMatrix, XMFLOAT4X4 orthoMatrix)
 {
 	bool result;
 
-
 	// Draw the first sentence.
-	result = drawSentence(deviceContext, sentence_, worldMatrix, orthoMatrix);
+	result = drawSentence(deviceContext, sentence_, worldMatrix, baseViewMatrix, orthoMatrix);
 	if(!result)
 	{
 		return false;
@@ -345,7 +328,7 @@ void TextClass::destroySentence(SentenceType** sentence)
 	return;
 }
 
-bool TextClass::drawSentence(ID3D11DeviceContext* deviceContext, SentenceType* sentence, XMFLOAT4X4 worldMatrix, 
+bool TextClass::drawSentence(ID3D11DeviceContext* deviceContext, SentenceType* sentence, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 baseViewMatrix, 
 							   XMFLOAT4X4 orthoMatrix)
 {
 	unsigned int stride, offset;
@@ -370,8 +353,7 @@ bool TextClass::drawSentence(ID3D11DeviceContext* deviceContext, SentenceType* s
 	pixelColor = XMFLOAT4(sentence->red, sentence->green, sentence->blue, 1.0f);
 
 	// draw the text using the font shader.
-	result = fontShader_->draw(deviceContext, sentence->indexCount, worldMatrix, baseViewMatrix_, orthoMatrix, font_->getTexture(), 
-								  pixelColor);
+	result = fontShader_->draw(deviceContext, sentence->indexCount, worldMatrix, baseViewMatrix, orthoMatrix, font_->getTexture(), pixelColor);
 	if(!result)
 	{
 		false;

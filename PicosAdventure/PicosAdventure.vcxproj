@@ -104,11 +104,14 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClCompile Include="Graphics\cameraClass.cpp" />
     <ClCompile Include="Graphics\fontClass.cpp" />
     <ClCompile Include="Graphics\graphicsmanager.cpp" />
+    <ClCompile Include="Graphics\imageClass.cpp" />
     <ClCompile Include="Graphics\modelClass.cpp" />
     <ClCompile Include="Graphics\shader2DClass.cpp" />
     <ClCompile Include="Graphics\shader3DClass.cpp" />
     <ClCompile Include="Graphics\staticModelClass.cpp" />
     <ClCompile Include="Graphics\textureClass.cpp" />
+    <ClCompile Include="GUI\GUIButton.cpp" />
+    <ClCompile Include="GUI\GUIFrame.cpp" />
     <ClCompile Include="GUI\GUIManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Math\pointClass.cpp" />
@@ -116,6 +119,10 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClCompile Include="Utils\clockClass.cpp" />
     <ClCompile Include="Utils\pugixml.cpp" />
     <ClCompile Include="Utils\textClass.cpp" />
+    <ClCompile Include="Visualizer\Object3D.cpp" />
+    <ClCompile Include="Visualizer\Object3DFactory.cpp" />
+    <ClCompile Include="Visualizer\AnimatedObject3D.cpp" />
+    <ClCompile Include="Visualizer\StaticObject3D.cpp" />
     <ClCompile Include="Visualizer\visualizerScreenState.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -127,11 +134,14 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClInclude Include="Graphics\cameraClass.h" />
     <ClInclude Include="Graphics\fontClass.h" />
     <ClInclude Include="Graphics\graphicsManager.h" />
+    <ClInclude Include="Graphics\imageClass.h" />
     <ClInclude Include="Graphics\modelClass.h" />
     <ClInclude Include="Graphics\shader2DClass.h" />
     <ClInclude Include="Graphics\shader3DClass.h" />
     <ClInclude Include="Graphics\staticModelClass.h" />
     <ClInclude Include="Graphics\textureClass.h" />
+    <ClInclude Include="GUI\GUIButton.h" />
+    <ClInclude Include="GUI\GUIFrame.h" />
     <ClInclude Include="GUI\GUIManager.h" />
     <ClInclude Include="Math\pointClass.h" />
     <ClInclude Include="Math\vectorClass.h" />
@@ -141,6 +151,10 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClInclude Include="Utils\pugiconfig.h" />
     <ClInclude Include="Utils\pugixml.h" />
     <ClInclude Include="Utils\textClass.h" />
+    <ClInclude Include="Visualizer\AnimatedObject3D.h" />
+    <ClInclude Include="Visualizer\StaticObject3D.h" />
+    <ClInclude Include="Visualizer\Object3D.h" />
+    <ClInclude Include="Visualizer\Object3DFactory.h" />
     <ClInclude Include="Visualizer\visualizerScreenState.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

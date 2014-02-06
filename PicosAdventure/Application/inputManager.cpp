@@ -31,6 +31,7 @@ bool InputManager::setup(HINSTANCE hinstance, HWND hwnd, int screenWidth, int sc
 	// Initialize the movement of the mouse to 0
 	mouseDelta_.x = 0;
 	mouseDelta_.y = 0;
+	mouseDelta_.z = 0;
 
 	// Initialize the main direct input interface.
 	result = DirectInput8Create(hinstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput_, NULL);
@@ -75,6 +76,7 @@ bool InputManager::setup(HINSTANCE hinstance, HWND hwnd, int screenWidth, int sc
 	// We set that mouse buttorns are pressed to false so when they get to true we know there has been a change
 	leftPressed_ = false;
 	rightPressed_ = false;
+	wheelPressed_ = false;
 
 	return true;
 }
@@ -158,6 +160,17 @@ bool InputManager::isRightMouseButtonDown()
 	return false;
 }
 
+bool InputManager::isWheelMouseDown()
+{
+	// Check if the left mouse button is currently pressed.
+	if(mouseState_.rgbButtons[2] & 0x80)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 void InputManager::keyDown(unsigned int input)
 {
 	if(!keys_[input]){
@@ -204,8 +217,8 @@ bool InputManager::readMouse()
 void InputManager::processInput()
 {
 	// Update the delta of the mouse cursor based on the change of the mouse location during the frame.
-	mouseDelta_.x += mouseState_.lX;
-	mouseDelta_.y += mouseState_.lY;
+	mouseDelta_.x = mouseState_.lX;
+	mouseDelta_.y = mouseState_.lY;
 
 	// Ensure the mouse location doesn't exceed the screen width or height.
 	if(mousePosition_.x < 0)
@@ -226,7 +239,7 @@ void InputManager::processInput()
 		mousePosition_.y = screenHeight_;
 	}
 
-	// Check whether a button has been pressed or not
+	// Check whether a button has been pressed or not, first left, then right, then wheel
 	if(isLeftMouseButtonDown() && !leftPressed_)
 	{
 		// We create a structure with the InputManager information where whe set the key introduced and mouse to 0 for control
@@ -253,6 +266,32 @@ void InputManager::processInput()
 	if(!isRightMouseButtonDown())
 	{
 		rightPressed_ = false;
+	}
+
+	if(isWheelMouseDown() && !wheelPressed_)
+	{
+		// We create a structure with the InputManager information where whe set the key introduced and mouse to 0 for control
+		InputStruct inputStruct = {0, WHEEL_BUTTON, mousePosition_};
+		notifyListeners(inputStruct);
+
+		wheelPressed_ = true;
+	}
+	
+	if(!isWheelMouseDown())
+	{
+		wheelPressed_ = false;
+	}
+
+	// We check if there has been a change in the wheelScroll and uptade mouseDelta_ state
+	if(mouseDelta_.z != mouseState_.lZ)
+	{
+		// If this change is different than resting, notify the change
+		if(mouseState_.lZ != 0)
+		{
+			InputStruct inputStruct = {0, WHEEL_SCROLL, Point(0.0f, 0.0f, mouseState_.lZ)};
+			notifyListeners(inputStruct);
+		}
+		mouseDelta_.z = mouseState_.lZ;
 	}
 
 	return;

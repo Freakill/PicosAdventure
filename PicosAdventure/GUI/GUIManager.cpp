@@ -12,6 +12,20 @@ GUIManager::~GUIManager()
 {
 }
 
+void GUIManager::draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix)
+{
+	std::map<std::string, GUIFrame*>::iterator it;
+	for(it = guiFrames_.begin(); it != guiFrames_.end(); ++it)
+	{
+		it->second->draw(deviceContext, worldMatrix, viewMatrix, orthoMatrix);
+	}
+}
+
+void GUIManager::addFrame(GUIFrame* frame)
+{
+	guiFrames_.insert(std::pair<std::string, GUIFrame*>(frame->getName(), frame));
+}
+
 void GUIManager::notify(InputManager* notifier, InputStruct arg)
 {
 	switch(arg.keyPressed)
@@ -27,12 +41,14 @@ void GUIManager::notify(InputManager* notifier, InputStruct arg)
 	{
 		case LEFT_BUTTON:
 			{
-				MessageBoxA(NULL, "Left pressed!", "Input", MB_OK);
-			}
-			break;
-		case RIGHT_BUTTON:
-			{
-				MessageBoxA(NULL, "Right pressed!", "Input", MB_OK);
+				std::map<std::string, GUIFrame*>::iterator it;
+				for(it = guiFrames_.begin(); it != guiFrames_.end(); ++it)
+				{
+					if(it->second->offer(arg.mouseInfo))
+					{
+						break;
+					}
+				}
 			}
 			break;
 		default:

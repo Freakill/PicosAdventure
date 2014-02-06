@@ -27,12 +27,7 @@ bool AnimatedModelClass::setup(ID3D11Device* device, std::string modelName)
 		return false;
 	}
 
-	if(!parseModelConfiguration(modelName))
-	{
-		return false;
-	}
-
-	if(!parseModelAnimations(modelName))
+	if(!parseModelConfigurationWithAnimations(modelName))
 	{
 		return false;
 	}
@@ -388,10 +383,42 @@ bool AnimatedModelClass::updateBuffers(ID3D11DeviceContext* deviceContext)
 	return true;
 }
 
-bool AnimatedModelClass::parseModelAnimations(const std::string& strFilename)
+bool AnimatedModelClass::parseModelConfigurationWithAnimations(const std::string& strFilename)
 {
+	//We create the model Loader
+	CalLoader::setLoadingMode( LOADER_ROTATE_X_AXIS );
 	//We set the basic root for getting the models
 	std::string root = "./Data/models/" + strFilename + "/";
+
+	//Loading the skeleton
+	bool is_ok = cal3dCoreModel_->loadCoreSkeleton( root + strFilename + ".csf" );
+	if(!is_ok)
+	{
+		MessageBoxA(NULL, "Could not load the skeleton!", "ModelClass - Error", MB_ICONERROR | MB_OK);
+		int errorCode = CalError::getLastErrorCode();
+		std::string errorString = CalError::getLastErrorDescription();
+		std::string errorFile = CalError::getLastErrorFile();
+		int errorLine = CalError::getLastErrorLine();
+		std::stringstream errorStream;
+		errorStream << "Error number " << errorCode << ": " << errorString << ". File: " << errorFile << " line " << errorLine;
+		MessageBoxA(NULL, errorStream.str().c_str(), "ModelClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	//Loading the mesh
+	modelMeshID = cal3dCoreModel_->loadCoreMesh( root + strFilename + ".cmf" );
+	if(modelMeshID < 0)
+	{
+		MessageBoxA(NULL, "Could not load the mesh!", "ModelClass - Error", MB_ICONERROR | MB_OK);
+		int errorCode = CalError::getLastErrorCode();
+		std::string errorString = CalError::getLastErrorDescription();
+		std::string errorFile = CalError::getLastErrorFile();
+		int errorLine = CalError::getLastErrorLine();
+		std::stringstream errorStream;
+		errorStream << "Error number " << errorCode << ": " << errorString << ". File: " << errorFile << " line " << errorLine;
+		MessageBoxA(NULL, errorStream.str().c_str(), "ModelClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
 
 	//Loading animations XML file
 	pugi::xml_document animationsDoc;
@@ -443,6 +470,21 @@ bool AnimatedModelClass::parseModelAnimations(const std::string& strFilename)
 				animationToPlay_ = animationName;
 			}
 		}
+	}
+
+	//Set up the mesh
+	cal3dModel_ = new CalModel(cal3dCoreModel_);
+	if(!cal3dModel_->attachMesh(modelMeshID))
+	{
+		MessageBox(NULL, L"Could not attach a Mesh to the model", L"ModelClass - Error", MB_ICONERROR | MB_OK);
+		int errorCode = CalError::getLastErrorCode();
+		std::string errorString = CalError::getLastErrorDescription();
+		std::string errorFile = CalError::getLastErrorFile();
+		int errorLine = CalError::getLastErrorLine();
+		std::stringstream errorStream;
+		errorStream << "Error number " << errorCode << ": " << errorString << ". File: " << errorFile << " line " << errorLine;
+		MessageBoxA(NULL, errorStream.str().c_str(), "ModelClass - Error", MB_ICONERROR | MB_OK);
+		return false;
 	}
 
 	//Set up the model to the first loaded animation

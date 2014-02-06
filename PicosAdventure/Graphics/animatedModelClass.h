@@ -36,7 +36,7 @@ class AnimatedModelClass : public ModelClass
 		virtual bool setupBuffers(ID3D11Device*);
 		bool updateBuffers(ID3D11DeviceContext*);
 
-		bool parseModelAnimations(const std::string& strFilename);
+		bool parseModelConfigurationWithAnimations(const std::string& strFilename);
 
 		// Animations
 		std::map<std::string, int> animations_;

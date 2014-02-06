@@ -20,14 +20,16 @@ enum MouseButton
 	{
 		NO_BUTTON,
 		LEFT_BUTTON,
-		RIGHT_BUTTON
+		RIGHT_BUTTON,
+		WHEEL_BUTTON,
+		WHEEL_SCROLL
 	};
 
 struct InputStruct
 	{
 		int keyPressed;
 		MouseButton mouseButton;
-		Point mousePosition;
+		Point mouseInfo;
 	};
 
 class InputManager : public Notifier<InputManager, InputStruct>
@@ -47,6 +49,7 @@ class InputManager : public Notifier<InputManager, InputStruct>
 		
 		bool isLeftMouseButtonDown();
 		bool isRightMouseButtonDown();
+		bool isWheelMouseDown();
 
 		void keyDown(unsigned int input);
 		void keyUp(unsigned int input);
@@ -67,6 +70,7 @@ class InputManager : public Notifier<InputManager, InputStruct>
 		int screenWidth_, screenHeight_;
 		bool leftPressed_;
 		bool rightPressed_;
+		bool wheelPressed_;
 };
 
 #endif

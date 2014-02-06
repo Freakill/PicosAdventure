@@ -49,6 +49,24 @@
     <Filter Include="Source Files\GUI">
       <UniqueIdentifier>{754be603-5b7e-4aa2-8fc9-d8bfdff22eee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Graphics\Model">
+      <UniqueIdentifier>{1d779504-0f26-4fc3-b188-559a3d003139}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics\Shaders">
+      <UniqueIdentifier>{9a2c362f-ecd8-4843-88ac-f35f2ee385b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\Model">
+      <UniqueIdentifier>{25549efc-4efa-4eb2-82c6-4a1ca67c14b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\Shaders">
+      <UniqueIdentifier>{44abf160-dff8-4e44-b45d-665bd2f661dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Visualizer\Objects">
+      <UniqueIdentifier>{976e901f-8018-453b-b4d4-0a74f52b6f01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Visualizer\Objects">
+      <UniqueIdentifier>{08d4151d-ecbb-458c-9eb6-1ab17cf6211f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -81,25 +99,10 @@
     <ClCompile Include="Graphics\cameraClass.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\shader3DClass.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Utils\clockClass.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\modelClass.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\textureClass.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\animatedModelClass.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\staticModelClass.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\shader2DClass.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\fontClass.cpp">
@@ -113,6 +116,42 @@
     </ClCompile>
     <ClCompile Include="Application\inputManager.cpp">
       <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\GUIFrame.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\imageClass.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\GUIButton.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\animatedModelClass.cpp">
+      <Filter>Source Files\Graphics\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\modelClass.cpp">
+      <Filter>Source Files\Graphics\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\staticModelClass.cpp">
+      <Filter>Source Files\Graphics\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\shader2DClass.cpp">
+      <Filter>Source Files\Graphics\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\shader3DClass.cpp">
+      <Filter>Source Files\Graphics\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Visualizer\Object3D.cpp">
+      <Filter>Source Files\Visualizer\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Visualizer\Object3DFactory.cpp">
+      <Filter>Source Files\Visualizer\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Visualizer\StaticObject3D.cpp">
+      <Filter>Source Files\Visualizer\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Visualizer\AnimatedObject3D.cpp">
+      <Filter>Source Files\Visualizer\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -152,22 +191,7 @@
     <ClInclude Include="Graphics\cameraClass.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\shader3DClass.h">
-      <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\modelClass.h">
-      <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\textureClass.h">
-      <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\animatedModelClass.h">
-      <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\staticModelClass.h">
-      <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\shader2DClass.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\fontClass.h">
@@ -184,6 +208,42 @@
     </ClInclude>
     <ClInclude Include="Utils\clockClass.h">
       <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\GUIFrame.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\imageClass.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\GUIButton.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\animatedModelClass.h">
+      <Filter>Header Files\Graphics\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\modelClass.h">
+      <Filter>Header Files\Graphics\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\staticModelClass.h">
+      <Filter>Header Files\Graphics\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\shader2DClass.h">
+      <Filter>Header Files\Graphics\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\shader3DClass.h">
+      <Filter>Header Files\Graphics\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Visualizer\Object3D.h">
+      <Filter>Header Files\Visualizer\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Visualizer\Object3DFactory.h">
+      <Filter>Header Files\Visualizer\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Visualizer\AnimatedObject3D.h">
+      <Filter>Header Files\Visualizer\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Visualizer\StaticObject3D.h">
+      <Filter>Header Files\Visualizer\Objects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

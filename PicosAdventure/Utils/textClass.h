@@ -28,28 +28,26 @@ public:
 	TextClass(const TextClass&);
 	~TextClass();
 
-	bool setup(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int screenWidth, int screenHeight, int posX, int posY, std::string sentenceText,
-			   XMFLOAT4X4 baseViewMatrix);
-	bool draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 orthoMatrix);
+	bool setup(ID3D11Device* device, ID3D11DeviceContext* deviceContext, Shader2DClass* shader, int screenWidth, int screenHeight, int posX, int posY, std::string sentenceText);
+	bool draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 baseViewMatrix, XMFLOAT4X4 orthoMatrix);
 	void destroy();
 
-	bool setText(std::string text, ID3D11DeviceContext*);
+	bool setText(std::string text, ID3D11DeviceContext* deviceContext);
 
 	Point getTextPosition();
 	int getTextWidth();
 	int getTextHeight();
 
 private:
-	bool setupSentence(SentenceType**, int, ID3D11Device*);
-	bool updateSentence(SentenceType*, std::string, int, int, float, float, float, ID3D11DeviceContext*);
-	bool drawSentence(ID3D11DeviceContext*, SentenceType*, XMFLOAT4X4, XMFLOAT4X4);
-	void destroySentence(SentenceType**);
+	bool setupSentence(SentenceType** sentence, int maxLength, ID3D11Device* device);
+	bool updateSentence(SentenceType* sentence, std::string text, int positionX, int positionY, float red, float green, float blue, ID3D11DeviceContext* deviceContext);
+	bool drawSentence(ID3D11DeviceContext* deviceContext, SentenceType* sentence, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 baseViewMatrix, XMFLOAT4X4 orthoMatrix);
+	void destroySentence(SentenceType** sentence);
 
 	FontClass* font_;
 	Shader2DClass* fontShader_;
 	int screenWidth_, screenHeight_;
 	int positionX_, positionY_;
-	XMFLOAT4X4 baseViewMatrix_;
 	SentenceType* sentence_;
 };
 
