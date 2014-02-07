@@ -1,12 +1,12 @@
-#ifndef _ANIMATED_MODEL_CLASS_H_
-#define _ANIMATED_MODEL_CLASS_H_
+#ifndef _ANIMATED_CAL3D_MODEL_CLASS_H_
+#define _ANIMATED_CAL3D_MODEL_CLASS_H_
 
 #include <d3d11.h>
 #include <d3dx10math.h>
 
 #include <Windows.h>
 
-#include "modelClass.h"
+#include "Cal3dModelClass.h"
 
 #include "../Utils/pugiconfig.h"
 #include "../Utils/pugixml.h"
@@ -15,12 +15,12 @@
 #include <fstream>
 #include <sstream>
 
-class AnimatedModelClass : public ModelClass
+class AnimatedCal3DModelClass : public Cal3DModelClass
 {
 	public:
-		AnimatedModelClass();
-		AnimatedModelClass(const AnimatedModelClass&);
-		virtual ~AnimatedModelClass();
+		AnimatedCal3DModelClass();
+		AnimatedCal3DModelClass(const AnimatedCal3DModelClass&);
+		virtual ~AnimatedCal3DModelClass();
 
 		virtual bool setup(ID3D11Device*, std::string);
 		void update(float elapsedTime);
@@ -32,11 +32,14 @@ class AnimatedModelClass : public ModelClass
 		void setAnimationToExecute(std::string name, float interpolationTime);
 		void setAnimationToPlay(std::string name, float interpolationTime);
 
+		void playAnimation();
+		void stopAnimation();
+
 	private:
 		virtual bool setupBuffers(ID3D11Device*);
 		bool updateBuffers(ID3D11DeviceContext*);
 
-		bool parseModelConfigurationWithAnimations(const std::string& strFilename);
+		virtual bool parseModelConfiguration(std::string strFilename);
 
 		// Animations
 		std::map<std::string, int> animations_;
@@ -44,4 +47,4 @@ class AnimatedModelClass : public ModelClass
 		std::string initialAnimationToPlay_;
 };
 
-#endif //_ANIMATED_MODEL_CLASS_H_
+#endif //_ANIMATED_CAL3D_MODEL_CLASS_H_

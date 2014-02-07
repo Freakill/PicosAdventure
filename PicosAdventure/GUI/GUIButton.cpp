@@ -55,13 +55,29 @@ bool GUIButton::setup(GraphicsManager* graphicsManager, std::string name, Point 
 		MessageBoxA(NULL, textToDisplay.c_str(), "GUIFrame - Error", MB_OK);
 		return false;
 	}
+
+	if(purpose == SELECT_OBJECT)
+	{
+		buttonActive_ = true;
+	}
+	else
+	{
+		buttonActive_ = false;
+	}
 	
 	return true;
 }
 
 void GUIButton::draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix)
 {
-	background_->draw(deviceContext, position_.x, position_.y-2, worldMatrix, viewMatrix, orthoMatrix);
+	if(buttonActive_)
+	{
+		background_->draw(deviceContext, position_.x, position_.y-2, worldMatrix, viewMatrix, orthoMatrix, XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
+	}
+	else
+	{
+		background_->draw(deviceContext, position_.x, position_.y-2, worldMatrix, viewMatrix, orthoMatrix, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	}
 
 	text_->draw(deviceContext, worldMatrix, viewMatrix, orthoMatrix);
 }
@@ -101,11 +117,27 @@ void GUIButton::setHeight(int height)
 	height_ = height;
 }
 
+bool GUIButton::getActive()
+{
+	return buttonActive_;
+}
+
+void GUIButton::setActive(bool active)
+{
+	buttonActive_ = active;
+}
+
 bool GUIButton::offer(Point mouseClick)
 {
 	if(checkInside(mouseClick))
 	{
 		ButtonStruct buttonStruct = {buttonPurpose_, buttonName_};
+
+		if(buttonPurpose_ == SELECT_OBJECT)
+		{
+			buttonActive_ = !buttonActive_;
+		}
+
 		notifyListeners(buttonStruct);
 	}
 

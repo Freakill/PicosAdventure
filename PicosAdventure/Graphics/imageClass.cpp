@@ -64,7 +64,7 @@ void ImageClass::destroy()
 	return;
 }
 
-bool ImageClass::draw(ID3D11DeviceContext* deviceContext, int positionX, int positionY, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 baseViewMatrix,  XMFLOAT4X4 orthoMatrix)
+bool ImageClass::draw(ID3D11DeviceContext* deviceContext, int positionX, int positionY, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 baseViewMatrix,  XMFLOAT4X4 orthoMatrix, XMFLOAT4 color)
 {
 	bool result;
 
@@ -80,7 +80,7 @@ bool ImageClass::draw(ID3D11DeviceContext* deviceContext, int positionX, int pos
 	drawBuffers(deviceContext);
 
 	// draw the text using the font shader.
-	result = imageShader_->draw(deviceContext, indexCount_, worldMatrix, baseViewMatrix, orthoMatrix, texture_->getTexture(), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	result = imageShader_->draw(deviceContext, indexCount_, worldMatrix, baseViewMatrix, orthoMatrix, texture_->getTexture(), color);
 	if(!result)
 	{
 		false;

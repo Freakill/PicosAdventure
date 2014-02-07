@@ -1,25 +1,23 @@
-#include "animatedModelClass.h"
+#include "animatedCal3DModelClass.h"
 
-AnimatedModelClass::AnimatedModelClass()
+AnimatedCal3DModelClass::AnimatedCal3DModelClass():Cal3DModelClass()
 {
-	vertexBuffer_ = 0;
-	indexBuffer_ = 0;
-	cal3dCoreModel_ = 0;
-	cal3dModel_ = 0;
 	animationToPlay_ = "";
 }
 
-AnimatedModelClass::AnimatedModelClass(const AnimatedModelClass& other)
+AnimatedCal3DModelClass::AnimatedCal3DModelClass(const AnimatedCal3DModelClass& other)
 {
 }
 
-AnimatedModelClass::~AnimatedModelClass()
+AnimatedCal3DModelClass::~AnimatedCal3DModelClass()
 {
 }
 
-bool AnimatedModelClass::setup(ID3D11Device* device, std::string modelName)
+bool AnimatedCal3DModelClass::setup(ID3D11Device* device, std::string modelName)
 {
 	bool result;
+
+	modelName_ = modelName;
 
 	cal3dCoreModel_ = new CalCoreModel(modelName);
 	if(!cal3dCoreModel_)
@@ -27,7 +25,7 @@ bool AnimatedModelClass::setup(ID3D11Device* device, std::string modelName)
 		return false;
 	}
 
-	if(!parseModelConfigurationWithAnimations(modelName))
+	if(!parseModelConfiguration(modelName))
 	{
 		return false;
 	}
@@ -42,13 +40,13 @@ bool AnimatedModelClass::setup(ID3D11Device* device, std::string modelName)
 	return true;
 }
 
-void AnimatedModelClass::update(float elapsedTime)
+void AnimatedCal3DModelClass::update(float elapsedTime)
 {
 	//cal3dModel_->getMixer()->world_rotation.set( CalVector( 0,1,0 ), model_yaw );
 	cal3dModel_->update(elapsedTime);
 }
 
-void AnimatedModelClass::draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
+void AnimatedCal3DModelClass::draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
 {
 	updateBuffers(deviceContext);
 
@@ -58,7 +56,7 @@ void AnimatedModelClass::draw(ID3D11Device* device, ID3D11DeviceContext* deviceC
 	return;
 }
 
-void AnimatedModelClass::decreaseAnimationToDisplay()
+void AnimatedCal3DModelClass::decreaseAnimationToDisplay()
 {
 	std::map<std::string, int>::iterator animIterator;
 	animIterator = animations_.find(animationToPlay_);
@@ -91,7 +89,7 @@ void AnimatedModelClass::decreaseAnimationToDisplay()
 	}
 }
 
-void AnimatedModelClass::increaseAnimationToDisplay()
+void AnimatedCal3DModelClass::increaseAnimationToDisplay()
 {
 	std::map<std::string, int>::iterator animIterator;
 	animIterator = animations_.find(animationToPlay_);
@@ -123,19 +121,31 @@ void AnimatedModelClass::increaseAnimationToDisplay()
 	}
 }
 
-void AnimatedModelClass::setAnimationToExecute(std::string name, float interpolationTime)
+void AnimatedCal3DModelClass::setAnimationToExecute(std::string name, float interpolationTime)
 {
 	cal3dModel_->getMixer()->executeAction(animations_.at(name), 1.0f, interpolationTime);
 }
 
-void AnimatedModelClass::setAnimationToPlay(std::string name, float interpolationTime)
+void AnimatedCal3DModelClass::setAnimationToPlay(std::string name, float interpolationTime)
 {
 	cal3dModel_->getMixer()->clearCycle(animations_.at(animationToPlay_), interpolationTime);
 	cal3dModel_->getMixer()->blendCycle(animations_.at(name), 1.0f, interpolationTime);
 	animationToPlay_ = name;
 }
 
-bool AnimatedModelClass::setupBuffers(ID3D11Device* device)
+void AnimatedCal3DModelClass::playAnimation()
+{
+	//cal3dModel_->getMixer()->clearCycle(animations_.at(animationToPlay_), 0.1f);
+	cal3dModel_->getMixer()->blendCycle(animations_.at(animationToPlay_), 1.0f, 0.1f);
+}
+
+void AnimatedCal3DModelClass::stopAnimation()
+{
+	cal3dModel_->getMixer()->clearCycle(animations_.at(animationToPlay_), 0.1f);
+	//cal3dModel_->getMixer()->blendCycle(animations_.at(animationToPlay_), 1.0f, 0.1f);
+}
+
+bool AnimatedCal3DModelClass::setupBuffers(ID3D11Device* device)
 {
 	TexturedVertexType *vertices = 0, *verticesSubmesh = 0;
 	CalIndex *indices = 0, *indicesSubmesh = 0;
@@ -294,7 +304,7 @@ bool AnimatedModelClass::setupBuffers(ID3D11Device* device)
 	return true;
 }
 
-bool AnimatedModelClass::updateBuffers(ID3D11DeviceContext* deviceContext)
+bool AnimatedCal3DModelClass::updateBuffers(ID3D11DeviceContext* deviceContext)
 {
 	TexturedVertexType *vertices = 0, *verticesSubmesh = 0, *verticesPtr = 0;
 	int vertexCountSubmesh;
@@ -383,7 +393,7 @@ bool AnimatedModelClass::updateBuffers(ID3D11DeviceContext* deviceContext)
 	return true;
 }
 
-bool AnimatedModelClass::parseModelConfigurationWithAnimations(const std::string& strFilename)
+bool AnimatedCal3DModelClass::parseModelConfiguration(std::string strFilename)
 {
 	//We create the model Loader
 	CalLoader::setLoadingMode( LOADER_ROTATE_X_AXIS );

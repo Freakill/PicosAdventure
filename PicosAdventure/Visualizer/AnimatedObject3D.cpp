@@ -27,7 +27,7 @@ bool AnimatedObject3D::setup(GraphicsManager* graphicsManager, std::string model
 {
 	objectName_ = objectName;
 
-	model_ = new AnimatedModelClass;
+	model_ = new AnimatedCal3DModelClass;
 	if(!model_)
 	{
 		return false;
@@ -64,14 +64,14 @@ bool AnimatedObject3D::setup(GraphicsManager* graphicsManager, std::string model
 
 void AnimatedObject3D::update(float dt)
 {
-	AnimatedModelClass* animatedModel = dynamic_cast<AnimatedModelClass*>(model_);
+	AnimatedCal3DModelClass* animatedModel = dynamic_cast<AnimatedCal3DModelClass*>(model_);
 	if(animatedModel)
 	{
 		animatedModel->update(dt);
 	}
 }
 
-void AnimatedObject3D::draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix)
+void AnimatedObject3D::draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light)
 {
 	XMFLOAT4X4 rotatingMatrixZ;
 	XMStoreFloat4x4(&rotatingMatrixZ, XMMatrixRotationZ(rotZ_));
@@ -94,7 +94,7 @@ void AnimatedObject3D::draw(ID3D11Device* device, ID3D11DeviceContext* deviceCon
 	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&movingMatrix)));
 
 	model_->draw(device, deviceContext);
-	modelShader_->draw(deviceContext, model_->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, diffuseTexture_->getTexture());
+	modelShader_->draw(deviceContext, model_->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, diffuseTexture_->getTexture(), light);
 }
 
 void AnimatedObject3D::destroy()
@@ -125,4 +125,22 @@ Object3D * __stdcall AnimatedObject3D::Create(GraphicsManager* graphicsManager, 
 	}
 
 	return animatedObject3DTemp;
+}
+
+void AnimatedObject3D::playAnimation()
+{
+	AnimatedCal3DModelClass* animatedModel = dynamic_cast<AnimatedCal3DModelClass*>(model_);
+	if(animatedModel)
+	{
+		animatedModel->playAnimation();
+	}
+}
+
+void AnimatedObject3D::stopAnimation()
+{
+	AnimatedCal3DModelClass* animatedModel = dynamic_cast<AnimatedCal3DModelClass*>(model_);
+	if(animatedModel)
+	{
+		animatedModel->stopAnimation();
+	}
 }

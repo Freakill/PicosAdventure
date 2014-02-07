@@ -10,6 +10,11 @@ std::string Object3D::getName()
 	return objectName_;
 }
 
+std::string Object3D::getModelName()
+{
+	return model_->getModelName();
+}
+
 void Object3D::setPosition(Point position)
 {
 	position_.x = position.x;

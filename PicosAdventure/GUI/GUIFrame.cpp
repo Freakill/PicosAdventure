@@ -106,6 +106,11 @@ void GUIFrame::setHeight(int height)
 	height_ = height;
 }
 
+bool GUIFrame::getButtonIsActive(std::string name)
+{
+	return guiButtons_.at(name)->getActive();
+}
+
 bool GUIFrame::offer(Point mouseClick)
 {
 	// First we check if mouse position is inside the frame

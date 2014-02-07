@@ -126,15 +126,6 @@
     <ClCompile Include="GUI\GUIButton.cpp">
       <Filter>Source Files\GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\animatedModelClass.cpp">
-      <Filter>Source Files\Graphics\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\modelClass.cpp">
-      <Filter>Source Files\Graphics\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\staticModelClass.cpp">
-      <Filter>Source Files\Graphics\Model</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\shader2DClass.cpp">
       <Filter>Source Files\Graphics\Shaders</Filter>
     </ClCompile>
@@ -152,6 +143,24 @@
     </ClCompile>
     <ClCompile Include="Visualizer\AnimatedObject3D.cpp">
       <Filter>Source Files\Visualizer\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\lightClass.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Cal3DmodelClass.cpp">
+      <Filter>Source Files\Graphics\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\modelClass.cpp">
+      <Filter>Source Files\Graphics\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\OBJModelClass.cpp">
+      <Filter>Source Files\Graphics\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\staticCal3DModelClass.cpp">
+      <Filter>Source Files\Graphics\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\animatedCal3DModelClass.cpp">
+      <Filter>Source Files\Graphics\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -218,15 +227,6 @@
     <ClInclude Include="GUI\GUIButton.h">
       <Filter>Header Files\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\animatedModelClass.h">
-      <Filter>Header Files\Graphics\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\modelClass.h">
-      <Filter>Header Files\Graphics\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\staticModelClass.h">
-      <Filter>Header Files\Graphics\Model</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\shader2DClass.h">
       <Filter>Header Files\Graphics\Shaders</Filter>
     </ClInclude>
@@ -244,6 +244,24 @@
     </ClInclude>
     <ClInclude Include="Visualizer\StaticObject3D.h">
       <Filter>Header Files\Visualizer\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\lightClass.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\OBJModelClass.h">
+      <Filter>Header Files\Graphics\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\staticCal3DModelClass.h">
+      <Filter>Header Files\Graphics\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\animatedCal3DModelClass.h">
+      <Filter>Header Files\Graphics\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Cal3DmodelClass.h">
+      <Filter>Header Files\Graphics\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\modelClass.h">
+      <Filter>Header Files\Graphics\Model</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

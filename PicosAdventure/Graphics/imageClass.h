@@ -25,7 +25,7 @@ public:
 
 	bool setup(ID3D11Device* device, Shader2DClass* shader, int screenWidth, int screenHeight, const std::string& textureFilename, int bitmapWidth, int bitmapHeight);
 	bool update(ID3D11DeviceContext*, int, int);
-	bool draw(ID3D11DeviceContext* deviceContext, int positionX, int positionY, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 baseViewMatrix,  XMFLOAT4X4 orthoMatrix);
+	bool draw(ID3D11DeviceContext* deviceContext, int positionX, int positionY, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 baseViewMatrix,  XMFLOAT4X4 orthoMatrix, XMFLOAT4 color);
 	void destroy();
 
 	int getIndexCount();

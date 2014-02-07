@@ -27,16 +27,29 @@ bool StaticObject3D::setup(GraphicsManager* graphicsManager, std::string modelNa
 {
 	objectName_ = objectName;
 
-	model_ = new StaticModelClass;
-	if(!model_)
+	if(checkModelIsOBJ(modelName))
 	{
-		return false;
+		model_ = new OBJModelClass;
+		if(!model_)
+		{
+			MessageBox(NULL, L"Could not instantiate the OBJ model.", L"StaticObject3D - Error", MB_ICONERROR | MB_OK);
+			return true;
+		}
+	}
+	else
+	{
+		model_ = new StaticCal3DModelClass;
+		if(!model_)
+		{
+			MessageBox(NULL, L"Could not instantiate the CAL3D model.", L"StaticObject3D - Error", MB_ICONERROR | MB_OK);
+			return false;
+		}
 	}
 
 	// Initialize the model object.
 	if(!model_->setup(graphicsManager->getDevice(), modelName))
 	{
-		MessageBox(NULL, L"Could not initialize the model object.", L"Visualizer - Error", MB_ICONERROR | MB_OK);
+		MessageBox(NULL, L"Could not initialize the model object.", L"StaticObject3D - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -65,7 +78,7 @@ void StaticObject3D::update(float dt)
 	// DO NOTHING
 }
 
-void StaticObject3D::draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix)
+void StaticObject3D::draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light)
 {
 	XMFLOAT4X4 rotatingMatrixZ;
 	XMStoreFloat4x4(&rotatingMatrixZ, XMMatrixRotationZ(rotZ_));
@@ -88,7 +101,7 @@ void StaticObject3D::draw(ID3D11Device* device, ID3D11DeviceContext* deviceConte
 	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&movingMatrix)));
 
 	model_->draw(device, deviceContext);
-	modelShader_->draw(deviceContext, model_->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, diffuseTexture_->getTexture());
+	modelShader_->draw(deviceContext, model_->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, diffuseTexture_->getTexture(), light);
 }
 
 void StaticObject3D::destroy()
@@ -106,6 +119,56 @@ void StaticObject3D::destroy()
 		delete model_;
 		model_ = 0;
 	}
+}
+
+bool StaticObject3D::checkModelIsOBJ(const std::string &modelName)
+{
+	HANDLE dir;
+    WIN32_FIND_DATAA file_data;
+
+	// We specify in which folder we want to check whether there are animations or not
+	std::string modelFolder = "./Data/models/" + modelName + "/*";
+	bool isOBJ = false;
+
+	// If we can access to the folder, we will start checking for the folder "anims"
+	if ((dir = FindFirstFileA(modelFolder.c_str(), &file_data)) != INVALID_HANDLE_VALUE)
+	{
+		do {
+    		const std::string file_name = file_data.cFileName;
+    		const bool is_directory = (file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+
+    		if(file_name[0] == '.')
+    			continue;
+
+			// If we find a file, check if it is called modelName.obj
+    		if(!is_directory)
+			{
+				std::string expectedNameMin = modelName+".obj";
+				std::string expectedNameMaj = modelName+".OBJ";
+				if(file_name == expectedNameMin || file_name == expectedNameMaj)
+				{
+					isOBJ = true;
+				}
+			}
+
+			const std::string s( file_name.begin(), file_name.end() );
+		} while (FindNextFileA(dir, &file_data));
+	}
+
+	// Return true in cas hasAnimations bool is set to true
+	if(isOBJ)
+	{
+		std::string textToDisplay = "The model " + modelName + " is OBJ.";
+		MessageBoxA(NULL, textToDisplay.c_str(), "Format Info", MB_OK);
+		return true;
+	}
+	else
+	{
+		std::string textToDisplay = "The model " + modelName + " is CAL3D.";
+		MessageBoxA(NULL, textToDisplay.c_str(), "Format Info", MB_OK);
+	}
+	
+	return false;
 }
 
 Object3D* __stdcall StaticObject3D::Create(GraphicsManager* graphicsManager, std::string modelName, std::string objectName)

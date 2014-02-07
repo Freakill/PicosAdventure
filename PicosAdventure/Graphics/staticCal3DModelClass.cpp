@@ -1,24 +1,22 @@
-#include "staticModelClass.h"
+#include "staticCal3DModelClass.h"
 
-StaticModelClass::StaticModelClass():ModelClass()
-{
-	vertexBuffer_ = 0;
-	indexBuffer_ = 0;
-	cal3dCoreModel_ = 0;
-	cal3dModel_ = 0;
-}
-
-StaticModelClass::StaticModelClass(const StaticModelClass& other)
+StaticCal3DModelClass::StaticCal3DModelClass():Cal3DModelClass()
 {
 }
 
-StaticModelClass::~StaticModelClass()
+StaticCal3DModelClass::StaticCal3DModelClass(const StaticCal3DModelClass& other)
 {
 }
 
-bool StaticModelClass::setup(ID3D11Device* device, std::string modelName)
+StaticCal3DModelClass::~StaticCal3DModelClass()
+{
+}
+
+bool StaticCal3DModelClass::setup(ID3D11Device* device, std::string modelName)
 {
 	bool result;
+
+	modelName_ = modelName;
 
 	cal3dCoreModel_ = new CalCoreModel(modelName);
 	if(!cal3dCoreModel_)
@@ -41,7 +39,7 @@ bool StaticModelClass::setup(ID3D11Device* device, std::string modelName)
 	return true;
 }
 
-void StaticModelClass::draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
+void StaticCal3DModelClass::draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
 {
 	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	drawBuffers(deviceContext);
@@ -49,7 +47,7 @@ void StaticModelClass::draw(ID3D11Device* device, ID3D11DeviceContext* deviceCon
 	return;
 }
 
-bool StaticModelClass::setupBuffers(ID3D11Device* device)
+bool StaticCal3DModelClass::setupBuffers(ID3D11Device* device)
 {
 	TexturedVertexType *vertices = 0, *verticesSubmesh = 0;
 	CalIndex *indices = 0, *indicesSubmesh = 0;
@@ -204,6 +202,64 @@ bool StaticModelClass::setupBuffers(ID3D11Device* device)
 	
 	delete [] vertices;
 	vertices = 0;
+
+	return true;
+}
+
+
+bool StaticCal3DModelClass::parseModelConfiguration(std::string strFilename)
+{
+	//We create the model Loader
+	CalLoader::setLoadingMode( LOADER_ROTATE_X_AXIS );
+	//We set the basic root for getting the models
+	std::string root = "./Data/models/" + strFilename + "/";
+
+	//Loading the skeleton
+	bool is_ok = cal3dCoreModel_->loadCoreSkeleton( root + strFilename + ".csf" );
+	if(!is_ok)
+	{
+		MessageBoxA(NULL, "Could not load the skeleton!", "ModelClass - Error", MB_ICONERROR | MB_OK);
+		int errorCode = CalError::getLastErrorCode();
+		std::string errorString = CalError::getLastErrorDescription();
+		std::string errorFile = CalError::getLastErrorFile();
+		int errorLine = CalError::getLastErrorLine();
+		std::stringstream errorStream;
+		errorStream << "Error number " << errorCode << ": " << errorString << ". File: " << errorFile << " line " << errorLine;
+		MessageBoxA(NULL, errorStream.str().c_str(), "ModelClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	//Loading the mesh
+	modelMeshID = cal3dCoreModel_->loadCoreMesh( root + strFilename + ".cmf" );
+	if(modelMeshID < 0)
+	{
+		MessageBoxA(NULL, "Could not load the mesh!", "ModelClass - Error", MB_ICONERROR | MB_OK);
+		int errorCode = CalError::getLastErrorCode();
+		std::string errorString = CalError::getLastErrorDescription();
+		std::string errorFile = CalError::getLastErrorFile();
+		int errorLine = CalError::getLastErrorLine();
+		std::stringstream errorStream;
+		errorStream << "Error number " << errorCode << ": " << errorString << ". File: " << errorFile << " line " << errorLine;
+		MessageBoxA(NULL, errorStream.str().c_str(), "ModelClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	//Set up the mesh
+	cal3dModel_ = new CalModel(cal3dCoreModel_);
+	if(!cal3dModel_->attachMesh(modelMeshID))
+	{
+		MessageBox(NULL, L"Could not attach a Mesh to the model", L"ModelClass - Error", MB_ICONERROR | MB_OK);
+		int errorCode = CalError::getLastErrorCode();
+		std::string errorString = CalError::getLastErrorDescription();
+		std::string errorFile = CalError::getLastErrorFile();
+		int errorLine = CalError::getLastErrorLine();
+		std::stringstream errorStream;
+		errorStream << "Error number " << errorCode << ": " << errorString << ". File: " << errorFile << " line " << errorLine;
+		MessageBoxA(NULL, errorStream.str().c_str(), "ModelClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	cal3dModel_->update(0.0f);
 
 	return true;
 }

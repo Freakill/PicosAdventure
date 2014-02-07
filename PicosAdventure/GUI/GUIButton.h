@@ -43,6 +43,9 @@ class GUIButton : public Notifier<GUIButton, ButtonStruct>
 		int getHeight();
 		void setHeight(int height);
 
+		bool getActive();
+		void setActive(bool active);
+
 		bool offer(Point mouseClick);
 
 	private:
@@ -58,6 +61,8 @@ class GUIButton : public Notifier<GUIButton, ButtonStruct>
 		int   height_;
 
 		ButtonPurpose buttonPurpose_;
+
+		bool  buttonActive_;
 		
 };
 

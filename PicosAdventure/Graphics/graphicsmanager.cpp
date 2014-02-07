@@ -490,9 +490,9 @@ void GraphicsManager::draw2D(int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 
 	shader2D_->draw(d3dDeviceContext_, indexCount, worldMatrix, viewMatrix, orthoMatrix, texture, color);
 }
 
-void GraphicsManager::draw3D(int indexCount, XMFLOAT4X4 worldMatrix,  XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture)
+void GraphicsManager::draw3D(int indexCount, XMFLOAT4X4 worldMatrix,  XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture, LightClass* light)
 {
-	shader3D_->draw(d3dDeviceContext_, indexCount, worldMatrix, viewMatrix, projectionMatrix, texture);
+	shader3D_->draw(d3dDeviceContext_, indexCount, worldMatrix, viewMatrix, projectionMatrix, texture, light);
 }
 
 ID3D11Device* GraphicsManager::getDevice()

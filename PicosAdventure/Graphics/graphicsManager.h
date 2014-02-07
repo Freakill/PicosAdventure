@@ -15,6 +15,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "lightClass.h"
+
 #include "shader2DClass.h"
 #include "shader3DClass.h"
 
@@ -35,7 +37,8 @@ class GraphicsManager
 	
 		void draw2D(int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix, ID3D11ShaderResourceView* texture, 
 	                XMFLOAT4 color);
-		void draw3D(int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture);
+		void draw3D(int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture,
+			        LightClass* light);
 
 		ID3D11Device* getDevice();
 		ID3D11DeviceContext* getDeviceContext();

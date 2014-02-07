@@ -3,8 +3,9 @@
 
 #include "../Application/applicationState.h"
 
-#include "../Graphics/staticModelClass.h"
+#include "../Graphics/Cal3DModelClass.h"
 #include "../Graphics/textureClass.h"
+#include "../Graphics/lightClass.h"
 
 #include "../Utils/listenerClass.h"
 #include "../Utils/textClass.h"
@@ -34,22 +35,33 @@ class VisualizerScreenState: public ApplicationState, public Listener<GUIButton,
 		static VisualizerScreenState visualizerScreenState_; //singleton
 
 		void createModel(const std::string &modelName);
+		void createXMLModel(const std::string &xmlName);
 		bool checkModelHasAnimations(const std::string &modelName);
 
 		void createLoadModelMenu();
+		void createLoadXMLMenu();
 		void createLoadedObjectButton();
+
+		void playAnimations();
+		void stopAnimations();
 
 		void moveSelectedObject(InputStruct arg);
 		void rotateSelectedObject(InputStruct arg);
 		void resizeSelectedObject(InputStruct arg);
 
+		void saveSelectedObject();
+
 		GUIManager*				visualizerGUI_;
 		GUIFrame*				loadedObjectsMenu_;
+		GUIFrame*				loadedXMLMenu_;
 
 		CameraClass*			camera_;
+		LightClass*				light_;
 
 		std::vector<Object3D*>	loadedObjects_;
-		int						selectedLoadedObject_;
+		int						lastLoadedObject_;
+
+		bool					playingAnimations_;
 };
 
 #endif //_SPLASH_SCREEN_STATE_H_

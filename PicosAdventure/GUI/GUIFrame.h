@@ -34,6 +34,8 @@ class GUIFrame
 		int getHeight();
 		void setHeight(int height);
 
+		bool getButtonIsActive(std::string);
+
 		bool offer(Point mouseClick);
 
 		GUIButton* addButton(GraphicsManager* graphicsManager, std::string name, int height, ButtonPurpose buttonPurpose);
