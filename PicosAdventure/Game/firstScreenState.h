@@ -1,5 +1,5 @@
-#ifndef _SPLASH_SCREEN_STATE_H_
-#define _SPLASH_SCREEN_STATE_H_
+#ifndef _FIRST_SCREEN_STATE_H_
+#define _FIRST_SCREEN_STATE_H_
 
 #include "../Application/applicationState.h"
 
@@ -12,16 +12,16 @@
 
 #include "../GUI/GUIManager.h"
 
-#include "Object3DFactory.h"
+#include "../Engine/Object3DFactory.h"
 
 #include <mmsystem.h>
 
-class VisualizerScreenState: public ApplicationState, public Listener<GUIButton, ButtonStruct>
+class FirstScreenState: public ApplicationState, public Listener<GUIButton, ButtonStruct>
 {
 	public:
-		VisualizerScreenState();
-		virtual ~VisualizerScreenState();
-		static VisualizerScreenState* Instance();
+		FirstScreenState();
+		virtual ~FirstScreenState();
+		static FirstScreenState* Instance();
 
 		virtual bool setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager* inputManager);
 		virtual void update(float elapsedTime);
@@ -32,7 +32,7 @@ class VisualizerScreenState: public ApplicationState, public Listener<GUIButton,
 		virtual void notify(GUIButton* notifier, ButtonStruct arg);
 
 	private:
-		static VisualizerScreenState visualizerScreenState_; //singleton
+		static FirstScreenState firstScreenState_; //singleton
 
 		void createModel(const std::string &modelName);
 		void createXMLModel(const std::string &xmlName);
@@ -68,4 +68,4 @@ class VisualizerScreenState: public ApplicationState, public Listener<GUIButton,
 		bool					playingAnimations_;
 };
 
-#endif //_SPLASH_SCREEN_STATE_H_
+#endif //_FIRST_SCREEN_STATE_H_

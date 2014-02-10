@@ -37,12 +37,6 @@
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{453a9dae-511b-4145-a641-22ec3d9e0c58}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Visualizer">
-      <UniqueIdentifier>{1f8b09b1-3178-4239-b38f-8fb9720522a8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Visualizer">
-      <UniqueIdentifier>{2d66f2dd-078d-4790-aa78-dc2d6ca45da1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\GUI">
       <UniqueIdentifier>{331c9c4e-41e5-414f-bcb2-f04a893d219e}</UniqueIdentifier>
     </Filter>
@@ -61,11 +55,23 @@
     <Filter Include="Source Files\Graphics\Shaders">
       <UniqueIdentifier>{44abf160-dff8-4e44-b45d-665bd2f661dc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Visualizer\Objects">
-      <UniqueIdentifier>{976e901f-8018-453b-b4d4-0a74f52b6f01}</UniqueIdentifier>
+    <Filter Include="Header Files\Game">
+      <UniqueIdentifier>{d6102168-6a36-497c-86e7-3af0191f9c9b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Visualizer\Objects">
-      <UniqueIdentifier>{08d4151d-ecbb-458c-9eb6-1ab17cf6211f}</UniqueIdentifier>
+    <Filter Include="Source Files\Game">
+      <UniqueIdentifier>{64c763ce-2572-442c-b43e-3ba78ecfdc36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine">
+      <UniqueIdentifier>{f091588d-1419-4bd5-90cb-5e9f5d93e0f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine">
+      <UniqueIdentifier>{6e6f05b8-0dc9-4559-9bb4-673e1bb895cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Objects">
+      <UniqueIdentifier>{d9baa183-bdf3-41fe-b177-43d7c7f4d109}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Objects">
+      <UniqueIdentifier>{8c9e81a0-3e7f-492d-a6c0-1f695d31029b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -92,9 +98,6 @@
     </ClCompile>
     <ClCompile Include="Graphics\graphicsmanager.cpp">
       <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Visualizer\visualizerScreenState.cpp">
-      <Filter>Source Files\Visualizer</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\cameraClass.cpp">
       <Filter>Source Files\Graphics</Filter>
@@ -132,18 +135,6 @@
     <ClCompile Include="Graphics\shader3DClass.cpp">
       <Filter>Source Files\Graphics\Shaders</Filter>
     </ClCompile>
-    <ClCompile Include="Visualizer\Object3D.cpp">
-      <Filter>Source Files\Visualizer\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Visualizer\Object3DFactory.cpp">
-      <Filter>Source Files\Visualizer\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Visualizer\StaticObject3D.cpp">
-      <Filter>Source Files\Visualizer\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Visualizer\AnimatedObject3D.cpp">
-      <Filter>Source Files\Visualizer\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\lightClass.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
@@ -161,6 +152,21 @@
     </ClCompile>
     <ClCompile Include="Graphics\animatedCal3DModelClass.cpp">
       <Filter>Source Files\Graphics\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\firstScreenState.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\AnimatedObject3D.cpp">
+      <Filter>Source Files\Engine\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Object3D.cpp">
+      <Filter>Source Files\Engine\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Object3DFactory.cpp">
+      <Filter>Source Files\Engine\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\StaticObject3D.cpp">
+      <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -193,9 +199,6 @@
     </ClInclude>
     <ClInclude Include="Graphics\graphicsManager.h">
       <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Visualizer\visualizerScreenState.h">
-      <Filter>Header Files\Visualizer</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\cameraClass.h">
       <Filter>Header Files\Graphics</Filter>
@@ -233,18 +236,6 @@
     <ClInclude Include="Graphics\shader3DClass.h">
       <Filter>Header Files\Graphics\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="Visualizer\Object3D.h">
-      <Filter>Header Files\Visualizer\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Visualizer\Object3DFactory.h">
-      <Filter>Header Files\Visualizer\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Visualizer\AnimatedObject3D.h">
-      <Filter>Header Files\Visualizer\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Visualizer\StaticObject3D.h">
-      <Filter>Header Files\Visualizer\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\lightClass.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
@@ -262,6 +253,21 @@
     </ClInclude>
     <ClInclude Include="Graphics\modelClass.h">
       <Filter>Header Files\Graphics\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\firstScreenState.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\StaticObject3D.h">
+      <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\AnimatedObject3D.h">
+      <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Object3D.h">
+      <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Object3DFactory.h">
+      <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

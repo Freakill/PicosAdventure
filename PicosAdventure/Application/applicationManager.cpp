@@ -2,7 +2,7 @@
 
 #include "applicationState.h"
 
-#include "../Visualizer/visualizerScreenState.h"
+#include "../Game/firstScreenState.h"
 
 ApplicationManager::ApplicationManager()
 {
@@ -41,7 +41,7 @@ bool ApplicationManager::setup(HWND windowsHandler, InputManager* inputManager, 
 	}
 	clockClass_->reset();
 
-	if(!changeState(VisualizerScreenState::Instance()))
+	if(!changeState(FirstScreenState::Instance()))
 	{
 		return false;
 	}

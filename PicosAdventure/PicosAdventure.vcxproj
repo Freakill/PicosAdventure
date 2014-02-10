@@ -100,6 +100,11 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClCompile Include="Application\applicationState.cpp" />
     <ClCompile Include="Application\inputManager.cpp" />
     <ClCompile Include="Application\systemClass.cpp" />
+    <ClCompile Include="Engine\AnimatedObject3D.cpp" />
+    <ClCompile Include="Engine\Object3D.cpp" />
+    <ClCompile Include="Engine\Object3DFactory.cpp" />
+    <ClCompile Include="Engine\StaticObject3D.cpp" />
+    <ClCompile Include="Game\firstScreenState.cpp" />
     <ClCompile Include="Graphics\animatedCal3DModelClass.cpp" />
     <ClCompile Include="Graphics\Cal3DmodelClass.cpp" />
     <ClCompile Include="Graphics\cameraClass.cpp" />
@@ -122,17 +127,17 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClCompile Include="Utils\clockClass.cpp" />
     <ClCompile Include="Utils\pugixml.cpp" />
     <ClCompile Include="Utils\textClass.cpp" />
-    <ClCompile Include="Visualizer\Object3D.cpp" />
-    <ClCompile Include="Visualizer\Object3DFactory.cpp" />
-    <ClCompile Include="Visualizer\AnimatedObject3D.cpp" />
-    <ClCompile Include="Visualizer\StaticObject3D.cpp" />
-    <ClCompile Include="Visualizer\visualizerScreenState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\applicationManager.h" />
     <ClInclude Include="Application\applicationState.h" />
     <ClInclude Include="Application\inputManager.h" />
     <ClInclude Include="Application\systemClass.h" />
+    <ClInclude Include="Engine\AnimatedObject3D.h" />
+    <ClInclude Include="Engine\Object3D.h" />
+    <ClInclude Include="Engine\Object3DFactory.h" />
+    <ClInclude Include="Engine\StaticObject3D.h" />
+    <ClInclude Include="Game\firstScreenState.h" />
     <ClInclude Include="Graphics\animatedCal3DModelClass.h" />
     <ClInclude Include="Graphics\Cal3DmodelClass.h" />
     <ClInclude Include="Graphics\cameraClass.h" />
@@ -157,11 +162,6 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClInclude Include="Utils\pugiconfig.h" />
     <ClInclude Include="Utils\pugixml.h" />
     <ClInclude Include="Utils\textClass.h" />
-    <ClInclude Include="Visualizer\AnimatedObject3D.h" />
-    <ClInclude Include="Visualizer\StaticObject3D.h" />
-    <ClInclude Include="Visualizer\Object3D.h" />
-    <ClInclude Include="Visualizer\Object3DFactory.h" />
-    <ClInclude Include="Visualizer\visualizerScreenState.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
