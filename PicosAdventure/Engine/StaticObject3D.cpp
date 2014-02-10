@@ -158,14 +158,7 @@ bool StaticObject3D::checkModelIsOBJ(const std::string &modelName)
 	// Return true in cas hasAnimations bool is set to true
 	if(isOBJ)
 	{
-		std::string textToDisplay = "The model " + modelName + " is OBJ.";
-		MessageBoxA(NULL, textToDisplay.c_str(), "Format Info", MB_OK);
 		return true;
-	}
-	else
-	{
-		std::string textToDisplay = "The model " + modelName + " is CAL3D.";
-		MessageBoxA(NULL, textToDisplay.c_str(), "Format Info", MB_OK);
 	}
 	
 	return false;

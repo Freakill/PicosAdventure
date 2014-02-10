@@ -118,7 +118,7 @@ void FirstScreenState::loadScenario(std::string scenario)
 	HANDLE dir;
     WIN32_FIND_DATAA file_data;
 
-	std::string scenarioToLoad = "./Data/scenario/"+scenario;
+	std::string scenarioToLoad = "./Data/scenario/"+scenario+"/*";
 
 	// If we can access to that sctructure, then create a loadModel button for each found model
     if ((dir = FindFirstFileA(scenarioToLoad.c_str(), &file_data)) != INVALID_HANDLE_VALUE)
