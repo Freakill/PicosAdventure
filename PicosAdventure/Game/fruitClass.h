@@ -13,10 +13,21 @@
 
 #include <math.h>
 
-#define SPAWNING 0
-#define IN_TREE 1
-#define FALLING 2
-#define IN_FLOOR 3
+enum FruitEffect
+	{
+		COLOR,
+		TEXTURE,
+		COMPLEMENT,
+		BODY
+	};
+
+enum FruitState
+	{
+		SPAWNING,
+		IN_TREE,
+		FALLING,
+		IN_FLOOR
+	};
 
 class FruitClass : public Notifier<FruitClass, Point>
 {
@@ -45,6 +56,9 @@ class FruitClass : public Notifier<FruitClass, Point>
 
 		SphereCollision* getCollisionSphere();
 
+		void setFruitEffectType(FruitEffect effect);
+		void setColorEffect(XMFLOAT4 color);
+
 		void makeItFall();
 		void resetFruit();
 
@@ -68,7 +82,11 @@ class FruitClass : public Notifier<FruitClass, Point>
 
 		float		floorHeight_;
 
-		int			fruitState_;
+		FruitState	fruitState_;
+
+		// EFFECTS
+		FruitEffect fruitEffect_;
+		XMFLOAT4	colorEffect_;
 };
 
 #endif //_FRUIT_CLASS_H_

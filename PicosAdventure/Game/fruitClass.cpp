@@ -259,3 +259,13 @@ SphereCollision* FruitClass::getCollisionSphere()
 {
 	return collisionTest_;
 }
+
+void FruitClass::setFruitEffectType(FruitEffect effect)
+{
+	fruitEffect_ = effect;
+}
+
+void FruitClass::setColorEffect(XMFLOAT4 color)
+{
+	colorEffect_ = color;
+}

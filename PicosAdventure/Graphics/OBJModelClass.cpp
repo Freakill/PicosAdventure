@@ -69,10 +69,6 @@ bool OBJModelClass::setup(ID3D11Device* device, std::string modelName)
 		fin.get(input);
 	}
 
-	std::stringstream temp;
-	temp << "OBJ Model has " << objModel_.vertexCount << " vertices " << objModel_.textureCount << " texture coords " << objModel_.normalCount << " normals and " << objModel_.faceCount << " faces.";
-	MessageBoxA(NULL, temp.str().c_str(), "OBJ Model", MB_OK);
-
 	result = parseModelConfiguration(root);
 	if(!result)
 	{

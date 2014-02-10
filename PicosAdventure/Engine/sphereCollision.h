@@ -22,7 +22,12 @@ class SphereCollision
 
 		Point getPosition();
 		void setPosition(Point pos);
+
+		Point getRelativePosition();
+		void setRelativePosition(Point pos);
+
 		float getRadius();
+		void setRadius(float radius);
 
 	private:
 		bool raySphereIntersect(XMFLOAT3, XMFLOAT3);

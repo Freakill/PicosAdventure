@@ -1,3 +1,4 @@
 <pajaro>
-	<anim name="pajaro"/>
+	<anim name="fly"/>
+	<anim name="walk"/>
 </pajaro>

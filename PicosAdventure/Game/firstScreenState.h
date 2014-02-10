@@ -40,16 +40,16 @@ class FirstScreenState: public ApplicationState
 		void loadScenario(std::string scenario);
 		void createScenarioObject(std::string scenario, std::string xmlName);
 
-		bool createFruits(int level);
+		bool createFruits(std::string scenario, std::string level);
 
-		CameraClass*			camera_;
-		LightClass*				light_;
+		CameraClass*				camera_;
+		LightClass*					light_;
 
-		std::vector<Object3D*>	scenario_;
-		float					terrainHeight_;
-		FruitClass*				fruits_[FRUITS];
+		std::vector<Object3D*>		scenario_;
+		float						terrainHeight_;
+		std::vector<FruitClass*>	fruits_;
 
-		bool					debug_;
+		bool						debug_;
 };
 
 #endif //_FIRST_SCREEN_STATE_H_

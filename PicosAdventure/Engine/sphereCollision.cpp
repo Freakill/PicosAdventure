@@ -53,9 +53,26 @@ void SphereCollision::setPosition(Point pos)
 	collisionTest_->setPosition(Point(pos.x+position_.x, pos.y+position_.y, pos.z+position_.z));
 }
 
+Point SphereCollision::getRelativePosition()
+{
+	return position_;
+}
+
+void SphereCollision::setRelativePosition(Point pos)
+{
+	position_ = pos;
+}
+
 float SphereCollision::getRadius()
 {
 	return radius_;
+}
+
+void SphereCollision::setRadius(float radius)
+{
+	collisionTest_->setScale(Vector(0.21f*radius, 0.21f*radius, 0.21f*radius));
+
+	radius_ = radius;
 }
 
 bool SphereCollision::testIntersection(CameraClass* camera, int mouseX, int mouseY)

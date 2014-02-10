@@ -68,7 +68,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 		}
 	}
 
-	createFruits(1);
+	createFruits("scenario1", "1");
 
 	inputManager->addListener(*this);
 
@@ -77,9 +77,10 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 
 void FirstScreenState::update(float elapsedTime)
 {	
-	for(int i = 0; i < FRUITS; i++)
+	std::vector<FruitClass*>::iterator fruitIt;
+	for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
 	{
-		fruits_[i]->update(elapsedTime);
+		(*fruitIt)->update(elapsedTime);
 	}
 }
 
@@ -94,24 +95,31 @@ void FirstScreenState::draw()
 	graphicsManager_->getOrthoMatrix(orthoMatrix);
 
 	// We iterate over each loaded Object to call its draw function and draw the scenario
-	std::vector<Object3D*>::iterator it;
-	for(it = scenario_.begin(); it != scenario_.end(); it++)
+	std::vector<Object3D*>::iterator objectsIt;
+	for(objectsIt = scenario_.begin(); objectsIt != scenario_.end(); objectsIt++)
 	{
-		(*it)->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_);
+		(*objectsIt)->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_);
 	}
 
-	for(int i = 0; i < FRUITS; i++)
+	std::vector<FruitClass*>::iterator fruitIt;
+	for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
 	{
-		fruits_[i]->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
+		(*fruitIt)->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
 	}
 }
 
 void FirstScreenState::destroy()
 {
-	std::vector<Object3D*>::iterator it;
-	for(it = scenario_.begin(); it != scenario_.end(); it++)
+	std::vector<Object3D*>::iterator objectsIt;
+	for(objectsIt = scenario_.begin(); objectsIt != scenario_.end(); objectsIt++)
 	{
-		(*it)->destroy();
+		(*objectsIt)->destroy();
+	}
+
+	std::vector<FruitClass*>::iterator fruitIt;
+	for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
+	{
+		(*fruitIt)->destroy();
 	}
 }
 
@@ -135,11 +143,12 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 	{
 		case LEFT_BUTTON:
 			{
-				for(int i = 0; i < FRUITS; i++)
+				std::vector<FruitClass*>::iterator fruitIt;
+				for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
 				{
-					if(fruits_[i]->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
+					if((*fruitIt)->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
 					{
-						fruits_[i]->makeItFall();
+						(*fruitIt)->makeItFall();
 					}
 				}
 			}
@@ -231,55 +240,88 @@ void FirstScreenState::createScenarioObject(std::string scenario, std::string xm
 	}
 }
 
-bool FirstScreenState::createFruits(int level)
+bool FirstScreenState::createFruits(std::string scenario, std::string level)
 {
-	// Create fruit objects.
-	fruits_[0] = new FruitClass();
-	if(!fruits_[0])
+	std::string root = "./Data/scenario/"+ scenario + "/fruits/fruits_" + level + ".xml";
+
+	//Loading animations XML file
+	pugi::xml_document fruitsDoc;
+	if (!fruitsDoc.load_file(root.c_str()))
 	{
+		MessageBoxA(NULL, "Could not load object .xml file!", "FirstScreen - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
-	if(!fruits_[0]->setup(graphicsManager_, "guindilla", Point(-3.25f, 3.2f, -2.8f), terrainHeight_, Vector(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f))
+	pugi::xml_node root_node;
+	// Le asignamos el nodo principal comprobando que sea correcto
+	if (!(root_node = fruitsDoc.child("fruits")))
 	{
-		MessageBoxA(NULL, "Could not initialize fruit 1.", "Error", MB_ICONERROR | MB_OK);
+		MessageBoxA(NULL, "Could not find the fruits root node.", "FirstScreen - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
-	fruits_[1] = new FruitClass();
-	if(!fruits_[1])
+	for(pugi::xml_node fruitNode = root_node.first_child(); fruitNode; fruitNode = fruitNode.next_sibling())
 	{
-		return false;
-	}
+		std::string node_name = fruitNode.name();
+		// Actuamos en consecuencia segun el tipo de nodo
+		if(node_name ==  "fruit")
+		{
+			pugi::xml_node modelNode;
+			modelNode = fruitNode.child("model");
 
-	if(!fruits_[1]->setup(graphicsManager_, "manzana", Point(-1.25f, 3.1f, -2.5f), terrainHeight_, Vector(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f))
-	{
-		MessageBoxA(NULL, "Could not initialize fruit 2.", "Error", MB_ICONERROR | MB_OK);
-		return false;
-	}
+			pugi::xml_text modelName = modelNode.text();
 
-	fruits_[2] = new FruitClass();
-	if(!fruits_[2])
-	{
-		return false;
-	}
+			// Parse transformation data
+			pugi::xml_node positionNode;
+			positionNode = fruitNode.child("position");
+			Point pos = Point(positionNode.attribute("x").as_float(), positionNode.attribute("y").as_float(), positionNode.attribute("z").as_float());
 
-	if(!fruits_[2]->setup(graphicsManager_, "zanahoria", Point(1.75f, 3.1f, -3.0f), terrainHeight_, Vector(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f))
-	{
-		MessageBoxA(NULL, "Could not initialize fruit 3.", "Error", MB_ICONERROR | MB_OK);
-		return false;
-	}
+			pugi::xml_node scaleNode;
+			scaleNode = fruitNode.child("scale");
+			Vector scale = Vector(scaleNode.attribute("x").as_float(), scaleNode.attribute("y").as_float(), scaleNode.attribute("z").as_float());
 
-	fruits_[3] = new FruitClass();
-	if(!fruits_[3])
-	{
-		return false;
-	}
+			pugi::xml_node rotationNode;
+			rotationNode = fruitNode.child("rotation");
+			float rotX = rotationNode.attribute("x").as_float();
+			float rotY = rotationNode.attribute("y").as_float();
+			float rotZ = rotationNode.attribute("z").as_float();
 
-	if(!fruits_[3]->setup(graphicsManager_, "arandanos", Point(3.25f, 2.8f, -2.5f), terrainHeight_, Vector(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f))
-	{
-		MessageBoxA(NULL, "Could not initialize Fruit 4.", "Error", MB_ICONERROR | MB_OK);
-		return false;
+			FruitClass* fruit = new FruitClass();
+			if(!fruit)
+			{
+				return false;
+			}
+
+			if(!fruit->setup(graphicsManager_, modelName.as_string(), pos, terrainHeight_, scale, rotX, rotY, rotZ))
+			{
+				MessageBoxA(NULL, "Could not initialize fruit 1.", "Error", MB_ICONERROR | MB_OK);
+				return false;
+			}
+
+			pugi::xml_node effectNode = fruitNode.child("effects");
+			std::string effectType = effectNode.attribute("type").as_string();
+
+			if(effectType == "color")
+			{
+				pugi::xml_node colorNode = effectNode.child("color");
+				XMFLOAT4 color = XMFLOAT4(colorNode.attribute("r").as_float(), colorNode.attribute("g").as_float(), colorNode.attribute("b").as_float(), 1.0f);
+			}
+
+			pugi::xml_node collisionNode = fruitNode.child("collision");
+
+			positionNode = collisionNode.child("position");
+			pos = Point(positionNode.attribute("x").as_float(), positionNode.attribute("y").as_float(), positionNode.attribute("z").as_float());
+
+			fruit->getCollisionSphere()->setRelativePosition(pos);
+
+			pugi::xml_node radiusNode;
+			radiusNode = collisionNode.child("radius");
+			float radius = radiusNode.text().as_float();
+
+			fruit->getCollisionSphere()->setRadius(radius);
+
+			fruits_.push_back(fruit);
+		}
 	}
 
 	return true;
