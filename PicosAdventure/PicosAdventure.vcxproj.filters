@@ -153,9 +153,6 @@
     <ClCompile Include="Graphics\animatedCal3DModelClass.cpp">
       <Filter>Source Files\Graphics\Model</Filter>
     </ClCompile>
-    <ClCompile Include="Game\firstScreenState.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\AnimatedObject3D.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
@@ -167,6 +164,9 @@
     </ClCompile>
     <ClCompile Include="Engine\StaticObject3D.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\visualizerScreenState.cpp">
+      <Filter>Source Files\Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -254,9 +254,6 @@
     <ClInclude Include="Graphics\modelClass.h">
       <Filter>Header Files\Graphics\Model</Filter>
     </ClInclude>
-    <ClInclude Include="Game\firstScreenState.h">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\StaticObject3D.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
@@ -268,6 +265,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Object3DFactory.h">
       <Filter>Header Files\Engine\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\visualizerScreenState.h">
+      <Filter>Header Files\Game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
