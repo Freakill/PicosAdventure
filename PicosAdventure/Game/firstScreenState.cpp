@@ -58,18 +58,17 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	// Load the first level scenario
 	loadScenario("scenario1");
 
-	float terrainHeight = 0;
+	terrainHeight_ = 0;
 	std::vector<Object3D*>::iterator it;
 	for(it = scenario_.begin(); it != scenario_.end(); it++)
 	{
 		if((*it)->getName().find("terreno") != std::string::npos)
 		{
-			terrainHeight = (*it)->getPosition().y-0.1f;
+			terrainHeight_ = (*it)->getPosition().y-0.1f;
 		}
 	}
 
-	fruitTest_ = new FruitClass();
-	fruitTest_->setup(graphicsManager_, "arandanos", Point(3.0f, 1.0f, -1.0f), terrainHeight, Vector(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f);
+	createFruits(1);
 
 	inputManager->addListener(*this);
 
@@ -78,7 +77,10 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 
 void FirstScreenState::update(float elapsedTime)
 {	
-	fruitTest_->update(elapsedTime);
+	for(int i = 0; i < FRUITS; i++)
+	{
+		fruits_[i]->update(elapsedTime);
+	}
 }
 
 void FirstScreenState::draw()
@@ -98,7 +100,10 @@ void FirstScreenState::draw()
 		(*it)->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_);
 	}
 
-	fruitTest_->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
+	for(int i = 0; i < FRUITS; i++)
+	{
+		fruits_[i]->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
+	}
 }
 
 void FirstScreenState::destroy()
@@ -130,9 +135,12 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 	{
 		case LEFT_BUTTON:
 			{
-				if(fruitTest_->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
+				for(int i = 0; i < FRUITS; i++)
 				{
-					fruitTest_->makeItFall();
+					if(fruits_[i]->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
+					{
+						fruits_[i]->makeItFall();
+					}
 				}
 			}
 			break;
@@ -166,23 +174,23 @@ void FirstScreenState::loadScenario(std::string scenario)
 
 			const std::string s( file_name.begin(), file_name.end() );
 
-			createScenarioObject(s);
+			createScenarioObject(scenario, s);
 
 		} while (FindNextFileA(dir, &file_data));
 	}
 }
 
-void FirstScreenState::createScenarioObject(std::string xmlName)
+void FirstScreenState::createScenarioObject(std::string scenario, std::string xmlName)
 {
 	Object3D* objectLoadedTemp = NULL;
 
-	std::string root = "./Data/scenario/" + xmlName;
+	std::string root = "./Data/scenario/"+ scenario + "/" + xmlName;
 
 	//Loading animations XML file
 	pugi::xml_document objectDoc;
 	if (!objectDoc.load_file(root.c_str()))
 	{
-		MessageBoxA(NULL, "Could not load object .xml file!", "AnimatedModel - Error", MB_ICONERROR | MB_OK);
+		MessageBoxA(NULL, "Could not load object .xml file!", "FirstScreen - Error", MB_ICONERROR | MB_OK);
 	}
 
 	//Searching for the initial node where all "anim" nodes should be
@@ -223,3 +231,56 @@ void FirstScreenState::createScenarioObject(std::string xmlName)
 	}
 }
 
+bool FirstScreenState::createFruits(int level)
+{
+	// Create fruit objects.
+	fruits_[0] = new FruitClass();
+	if(!fruits_[0])
+	{
+		return false;
+	}
+
+	if(!fruits_[0]->setup(graphicsManager_, "guindilla", Point(-3.25f, 3.2f, -2.8f), terrainHeight_, Vector(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f))
+	{
+		MessageBoxA(NULL, "Could not initialize fruit 1.", "Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	fruits_[1] = new FruitClass();
+	if(!fruits_[1])
+	{
+		return false;
+	}
+
+	if(!fruits_[1]->setup(graphicsManager_, "manzana", Point(-1.25f, 3.1f, -2.5f), terrainHeight_, Vector(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f))
+	{
+		MessageBoxA(NULL, "Could not initialize fruit 2.", "Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	fruits_[2] = new FruitClass();
+	if(!fruits_[2])
+	{
+		return false;
+	}
+
+	if(!fruits_[2]->setup(graphicsManager_, "zanahoria", Point(1.75f, 3.1f, -3.0f), terrainHeight_, Vector(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f))
+	{
+		MessageBoxA(NULL, "Could not initialize fruit 3.", "Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	fruits_[3] = new FruitClass();
+	if(!fruits_[3])
+	{
+		return false;
+	}
+
+	if(!fruits_[3]->setup(graphicsManager_, "arandanos", Point(3.25f, 2.8f, -2.5f), terrainHeight_, Vector(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f))
+	{
+		MessageBoxA(NULL, "Could not initialize Fruit 4.", "Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	return true;
+}

@@ -18,6 +18,8 @@
 
 #include <mmsystem.h>
 
+#define	FRUITS 4
+
 class FirstScreenState: public ApplicationState
 {
 	public:
@@ -36,13 +38,16 @@ class FirstScreenState: public ApplicationState
 		static FirstScreenState firstScreenState_; //singleton
 
 		void loadScenario(std::string scenario);
-		void createScenarioObject(std::string xmlName);
+		void createScenarioObject(std::string scenario, std::string xmlName);
+
+		bool createFruits(int level);
 
 		CameraClass*			camera_;
 		LightClass*				light_;
 
 		std::vector<Object3D*>	scenario_;
-		FruitClass*				fruitTest_;
+		float					terrainHeight_;
+		FruitClass*				fruits_[FRUITS];
 
 		bool					debug_;
 };
