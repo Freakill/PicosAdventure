@@ -1,0 +1,33 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 10.02.2014 12:11:39
+
+mtllib suelociudad.mtl
+
+#
+# object Plane001
+#
+
+v  -500.0000 -500.0000 0.5633
+v  500.0000 -500.0000 0.5633
+v  -500.0000 500.0000 0.5633
+v  500.0000 500.0000 0.5633
+# 4 vertices
+
+vn 0.0000 0.0000 1.0000
+vn 0.0000 0.0000 1.0000
+vn 0.0000 0.0000 1.0000
+vn 0.0000 0.0000 1.0000
+# 4 vertex normals
+
+vt 0.0000 0.0000 0.0000
+vt 1.0000 0.0000 0.0000
+vt 0.0000 1.0000 0.0000
+vt 1.0000 1.0000 0.0000
+# 4 texture coords
+
+g Plane001
+usemtl suelo
+s 1
+f 2/2/1 4/4/2 3/3/3 1/1/4 
+# 1 polygons
+

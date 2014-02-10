@@ -66,6 +66,8 @@ class Visualizer: public ApplicationState, public Listener<GUIButton, ButtonStru
 		int						lastLoadedObject_;
 
 		bool					playingAnimations_;
+
+		bool					drawMenus_;
 };
 
 #endif //_VISUALIZER_H_

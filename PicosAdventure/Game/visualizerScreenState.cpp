@@ -70,6 +70,8 @@ bool Visualizer::setup(ApplicationManager* appManager, GraphicsManager* graphics
 
 	playingAnimations_ = false;
 
+	drawMenus_ = true;
+
 	return true;
 }
 
@@ -100,11 +102,14 @@ void Visualizer::draw()
 	}
 
 	// Draw the GUI
-	graphicsManager_->turnZBufferOff();
-	graphicsManager_->turnOnAlphaBlending();
-		visualizerGUI_->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, orthoMatrix);
-	graphicsManager_->turnOffAlphaBlending();
-	graphicsManager_->turnZBufferOn();
+	if(drawMenus_)
+	{
+		graphicsManager_->turnZBufferOff();
+		graphicsManager_->turnOnAlphaBlending();
+			visualizerGUI_->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, orthoMatrix);
+		graphicsManager_->turnOffAlphaBlending();
+		graphicsManager_->turnZBufferOn();
+	}
 }
 
 void Visualizer::destroy()
@@ -149,6 +154,12 @@ void Visualizer::notify(InputManager* notifier, InputStruct arg)
 		case 68: //D
 			{
 				deleteSelectedObjects();
+			}
+			break;
+		case 103: //g
+		case 71: //G
+			{
+				drawMenus_ = !drawMenus_;
 			}
 			break;
 		case 99: //m
