@@ -24,13 +24,6 @@ class OBJModelClass : public ModelClass
 			int nIndex1, nIndex2, nIndex3;
 		}FaceType;
 
-	typedef struct
-		{
-			VertexType *vertices, *texcoords, *normals;
-			FaceType *faces;
-			int vertexCount, textureCount, normalCount, faceCount;
-		}OBJModel;
-
 	public:
 		OBJModelClass();
 		OBJModelClass(const OBJModelClass&);
@@ -46,7 +39,9 @@ class OBJModelClass : public ModelClass
 		virtual bool parseModelConfiguration(std::string strFilename);
 
 		// OBJModel
-		OBJModel objModel_;
+		VertexType *vertices, *texcoords, *normals;
+		FaceType *faces;
+		int vertexCount, textureCount, normalCount, faceCount;
 };
 
 #endif //_OBJ_MODEL_CLASS_H_

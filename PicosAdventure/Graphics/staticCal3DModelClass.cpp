@@ -176,7 +176,7 @@ bool StaticCal3DModelClass::setupBuffers(ID3D11Device* device)
 	}
 
 	// Set up the description of the static index buffer.
-	index_buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+	index_buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
 	index_buffer_desc.ByteWidth = sizeof(CalIndex) * indexCount_;
 	index_buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	index_buffer_desc.CPUAccessFlags = 0;

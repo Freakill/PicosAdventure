@@ -25,10 +25,10 @@ bool OBJModelClass::setup(ID3D11Device* device, std::string modelName)
 	std::string root = "./Data/models/" + modelName + "/" + modelName + ".obj";
 
 	// Initialize the counts.
-	objModel_.vertexCount = 0;
-	objModel_.textureCount = 0;
-	objModel_.normalCount = 0;
-	objModel_.faceCount = 0;
+	vertexCount = 0;
+	textureCount = 0;
+	normalCount = 0;
+	faceCount = 0;
 
 	// Open the file.
 	fin.open(root);
@@ -47,16 +47,16 @@ bool OBJModelClass::setup(ID3D11Device* device, std::string modelName)
 		if(input == 'v')
 		{
 			fin.get(input);
-			if(input == ' ') { objModel_.vertexCount++; }
-			if(input == 't') { objModel_.textureCount++; }
-			if(input == 'n') { objModel_.normalCount++; }
+			if(input == ' ') { vertexCount++; }
+			if(input == 't') { textureCount++; }
+			if(input == 'n') { normalCount++; }
 		}
 
 		// If the line starts with 'f' then increment the face count.
 		if(input == 'f')
 		{
 			fin.get(input);
-			if(input == ' ') { objModel_.faceCount++; }
+			if(input == ' ') { faceCount++; }
 		}
 		
 		// Otherwise read in the remainder of the line.
@@ -69,9 +69,8 @@ bool OBJModelClass::setup(ID3D11Device* device, std::string modelName)
 		fin.get(input);
 	}
 
-	std::stringstream temp;
-	temp << "OBJ Model has " << objModel_.vertexCount << " vertices " << objModel_.textureCount << " texture coords " << objModel_.normalCount << " normals and " << objModel_.faceCount << " faces.";
-	MessageBoxA(NULL, temp.str().c_str(), "OBJ Model", MB_OK);
+	// Close the file.
+	fin.close();
 
 	result = parseModelConfiguration(root);
 	if(!result)
@@ -86,9 +85,6 @@ bool OBJModelClass::setup(ID3D11Device* device, std::string modelName)
 	{
 		return false;
 	}
-
-	// Close the file.
-	fin.close();
 
 	return true;
 }
@@ -106,25 +102,25 @@ void OBJModelClass::destroy()
 
 	// Release the model
 	// Release the four data structures.
-	if(objModel_.vertices)
+	if(vertices)
 	{
-		delete [] objModel_.vertices;
-		objModel_.vertices = 0;
+		delete [] vertices;
+		vertices = 0;
 	}
-	if(objModel_.texcoords)
+	if(texcoords)
 	{
-		delete [] objModel_.texcoords;
-		objModel_.texcoords = 0;
+		delete [] texcoords;
+		texcoords = 0;
 	}
-	if(objModel_.normals)
+	if(normals)
 	{
-		delete [] objModel_.normals;
-		objModel_.normals = 0;
+		delete [] normals;
+		normals = 0;
 	}
-	if(objModel_.faces)
+	if(faces)
 	{
-		delete [] objModel_.faces;
-		objModel_.faces = 0;
+		delete [] faces;
+		faces = 0;
 	}
 
 	return;
@@ -132,50 +128,62 @@ void OBJModelClass::destroy()
 
 bool OBJModelClass::setupBuffers(ID3D11Device* device)
 {
-	TexturedVertexType *vertices = 0;
-	unsigned int *indices = 0;
+	TexturedVertexType *verticesArray = 0;
+	int *indicesArray = 0;
 	D3D11_BUFFER_DESC vertex_buffer_desc, index_buffer_desc;
 	D3D11_SUBRESOURCE_DATA vertex_data, index_data;
 	HRESULT result;
+	int vIndex, tIndex, nIndex;
 
-	//Release the old buffers to create the new ones
-	if(vertexBuffer_)
-		vertexBuffer_->Release();
+	vertexCount_ = faceCount*3;
+	indexCount_ = faceCount*3;
 
-	if(indexBuffer_)
-		indexBuffer_->Release();
+	verticesArray = new TexturedVertexType[vertexCount_];
+	indicesArray = new int[indexCount_];
 
-	vertexCount_ = objModel_.faceCount*3;
-	indexCount_ = objModel_.faceCount*3;
+	int facesNum = 0;
 
-	vertices = new TexturedVertexType[vertexCount_];
-	indices = new unsigned int[indexCount_];
-
-	for(unsigned int i = 0; i < objModel_.faceCount; i++)
+	for(int i = 0; i < faceCount; i++)
 	{
-		FaceType face = objModel_.faces[i];
+		vIndex = faces[i].vIndex1 - 1;
+		tIndex = faces[i].tIndex1 - 1;
+		nIndex = faces[i].nIndex1 - 1;
 
-		vertices[i*3].position = XMFLOAT3(objModel_.vertices[face.vIndex1-1].x, objModel_.vertices[face.vIndex1-1].y, objModel_.vertices[face.vIndex1-1].z);
-		vertices[i*3].normal = XMFLOAT3(objModel_.normals[face.nIndex1-1].x, objModel_.normals[face.nIndex1-1].y, objModel_.normals[face.nIndex1-1].z);
-		vertices[i*3].tu = objModel_.texcoords[face.tIndex1-1].x;
-		vertices[i*3].tv = objModel_.texcoords[face.tIndex1-1].y;
-		indices[i*3] = i*3;
+		verticesArray[i*3].position = XMFLOAT3(vertices[vIndex].x, vertices[vIndex].y, vertices[vIndex].z);
+		verticesArray[i*3].normal = XMFLOAT3(normals[nIndex].x, normals[nIndex].y, normals[nIndex].z);
+		verticesArray[i*3].tu = texcoords[tIndex].x;
+		verticesArray[i*3].tv = texcoords[tIndex].y;
+		indicesArray[i*3] = i*3;
 
-		vertices[i*3+1].position = XMFLOAT3(objModel_.vertices[face.vIndex2-1].x, objModel_.vertices[face.vIndex2-1].y, objModel_.vertices[face.vIndex2-1].z);
-		vertices[i*3+1].normal = XMFLOAT3(objModel_.normals[face.nIndex2-1].x, objModel_.normals[face.nIndex2-1].y, objModel_.normals[face.nIndex2-1].z);
-		vertices[i*3+1].tu = objModel_.texcoords[face.tIndex2-1].x;
-		vertices[i*3+1].tv = objModel_.texcoords[face.tIndex2-1].y;
-		indices[i*3+1] = i*3+1;
+		vIndex = faces[i].vIndex2 - 1;
+		tIndex = faces[i].tIndex2 - 1;
+		nIndex = faces[i].nIndex2 - 1;
 
-		vertices[i*3+2].position = XMFLOAT3(objModel_.vertices[face.vIndex3-1].x, objModel_.vertices[face.vIndex3-1].y, objModel_.vertices[face.vIndex3-1].z);
-		vertices[i*3+2].normal = XMFLOAT3(objModel_.normals[face.nIndex3-1].x, objModel_.normals[face.nIndex3-1].y, objModel_.normals[face.nIndex3-1].z);
-		vertices[i*3+2].tu = objModel_.texcoords[face.tIndex3-1].x;
-		vertices[i*3+2].tv = objModel_.texcoords[face.tIndex3-1].y;
-		indices[i*3+2] = i*3+2;
+		verticesArray[i*3+1].position = XMFLOAT3(vertices[vIndex].x, vertices[vIndex].y, vertices[vIndex].z);
+		verticesArray[i*3+1].normal = XMFLOAT3(normals[nIndex].x, normals[nIndex].y, normals[nIndex].z);
+		verticesArray[i*3+1].tu = texcoords[tIndex].x;
+		verticesArray[i*3+1].tv = texcoords[tIndex].y;
+		indicesArray[i*3+1] = i*3+1;
+
+		vIndex = faces[i].vIndex3 - 1;
+		tIndex = faces[i].tIndex3 - 1;
+		nIndex = faces[i].nIndex3 - 1;
+
+		verticesArray[i*3+2].position = XMFLOAT3(vertices[vIndex].x, vertices[vIndex].y, vertices[vIndex].z);
+		verticesArray[i*3+2].normal = XMFLOAT3(normals[nIndex].x, normals[nIndex].y, normals[nIndex].z);
+		verticesArray[i*3+2].tu = texcoords[tIndex].x;
+		verticesArray[i*3+2].tv = texcoords[tIndex].y;
+		indicesArray[i*3+2] = i*3+2;
+
+		facesNum++;
 	}
 
+	std::stringstream lol;
+	lol << "Vertex count = " << vertexCount_ << " index count = " << indexCount_ << " faces " << facesNum;
+	MessageBoxA(NULL, lol.str().c_str(), "Hola", MB_OK);
+
 	// Set up the description of the static vertex buffer.
-	vertex_buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+	vertex_buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
 	vertex_buffer_desc.ByteWidth = sizeof(TexturedVertexType) * vertexCount_;
 	vertex_buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertex_buffer_desc.CPUAccessFlags = 0;
@@ -183,7 +191,7 @@ bool OBJModelClass::setupBuffers(ID3D11Device* device)
 	vertex_buffer_desc.StructureByteStride = 0;
 
 	// Give the subresource structure a pointer to the vertex data.
-	vertex_data.pSysMem = vertices;
+	vertex_data.pSysMem = verticesArray;
 	vertex_data.SysMemPitch = 0;
 	vertex_data.SysMemSlicePitch = 0;
 
@@ -197,14 +205,14 @@ bool OBJModelClass::setupBuffers(ID3D11Device* device)
 
 	// Set up the description of the static index buffer.
 	index_buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
-	index_buffer_desc.ByteWidth = sizeof(unsigned int) * indexCount_;
+	index_buffer_desc.ByteWidth = sizeof(int) * indexCount_;
 	index_buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	index_buffer_desc.CPUAccessFlags = 0;
 	index_buffer_desc.MiscFlags = 0;
 	index_buffer_desc.StructureByteStride = 0;
 
 	// Give the subresource structure a pointer to the index data.
-	index_data.pSysMem = indices;
+	index_data.pSysMem = indicesArray;
 	index_data.SysMemPitch = 0;
 	index_data.SysMemSlicePitch = 0;
 
@@ -226,29 +234,29 @@ bool OBJModelClass::parseModelConfiguration(std::string modelName)
 	char input, input2;
 
 	// Initialize the four data structures.
-	objModel_.vertices = new VertexType[objModel_.vertexCount];
-	if(!objModel_.vertices)
+	vertices = new VertexType[vertexCount];
+	if(!vertices)
 	{
 		MessageBox(NULL, L"Failed creating vertices model buffer.", L"OBJModel - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
-	objModel_.texcoords = new VertexType[objModel_.textureCount];
-	if(!objModel_.texcoords)
+	texcoords = new VertexType[textureCount];
+	if(!texcoords)
 	{
 		MessageBox(NULL, L"Failed creating texcoords model buffer.", L"OBJModel - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
-	objModel_.normals = new VertexType[objModel_.normalCount];
-	if(!objModel_.normals)
+	normals = new VertexType[normalCount];
+	if(!normals)
 	{
 		MessageBox(NULL, L"Failed creating normals model buffer.", L"OBJModel - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
-	objModel_.faces = new FaceType[objModel_.faceCount];
-	if(!objModel_.faces)
+	faces = new FaceType[faceCount];
+	if(!faces)
 	{
 		MessageBox(NULL, L"Failed creating faces model buffer.", L"OBJModel - Error", MB_ICONERROR | MB_OK);
 		return false;
@@ -281,30 +289,30 @@ bool OBJModelClass::parseModelConfiguration(std::string modelName)
 			// Read in the vertices.
 			if(input == ' ') 
 			{ 
-				fin >> objModel_.vertices[vertexIndex].x >> objModel_.vertices[vertexIndex].y >> objModel_.vertices[vertexIndex].z;
+				fin >> vertices[vertexIndex].x >> vertices[vertexIndex].y >> vertices[vertexIndex].z;
 
 				// Invert the Z vertex to change to left hand system.
-				objModel_.vertices[vertexIndex].z = objModel_.vertices[vertexIndex].z * -1.0f;
+				vertices[vertexIndex].z = vertices[vertexIndex].z * -1.0f;
 				vertexIndex++;
 			}
 
 			// Read in the texture uv coordinates.
 			if(input == 't') 
 			{ 
-				fin >> objModel_.texcoords[texcoordIndex].x >> objModel_.texcoords[texcoordIndex].y;
+				fin >> texcoords[texcoordIndex].x >> texcoords[texcoordIndex].y;
 
 				// Invert the V texture coordinates to left hand system.
-				objModel_.texcoords[texcoordIndex].y = 1.0f - objModel_.texcoords[texcoordIndex].y;
+				texcoords[texcoordIndex].y = 1.0f - texcoords[texcoordIndex].y;
 				texcoordIndex++; 
 			}
 
 			// Read in the normals.
 			if(input == 'n') 
 			{ 
-				fin >> objModel_.normals[normalIndex].x >> objModel_.normals[normalIndex].y >> objModel_.normals[normalIndex].z;
+				fin >> normals[normalIndex].x >> normals[normalIndex].y >> normals[normalIndex].z;
 
 				// Invert the Z normal to change to left hand system.
-				objModel_.normals[normalIndex].z = objModel_.normals[normalIndex].z * -1.0f;
+				normals[normalIndex].z = normals[normalIndex].z * -1.0f;
 				normalIndex++; 
 			}
 		}
@@ -316,9 +324,9 @@ bool OBJModelClass::parseModelConfiguration(std::string modelName)
 			if(input == ' ')
 			{
 				// Read the face data in backwards to convert it to a left hand system from right hand system.
-				fin >> objModel_.faces[faceIndex].vIndex3 >> input2 >> objModel_.faces[faceIndex].tIndex3 >> input2 >> objModel_.faces[faceIndex].nIndex3
-				    >> objModel_.faces[faceIndex].vIndex2 >> input2 >> objModel_.faces[faceIndex].tIndex2 >> input2 >> objModel_.faces[faceIndex].nIndex2
-				    >> objModel_.faces[faceIndex].vIndex1 >> input2 >> objModel_.faces[faceIndex].tIndex1 >> input2 >> objModel_.faces[faceIndex].nIndex1;
+				fin >> faces[faceIndex].vIndex3 >> input2 >> faces[faceIndex].tIndex3 >> input2 >> faces[faceIndex].nIndex3
+				    >> faces[faceIndex].vIndex2 >> input2 >> faces[faceIndex].tIndex2 >> input2 >> faces[faceIndex].nIndex2
+				    >> faces[faceIndex].vIndex1 >> input2 >> faces[faceIndex].tIndex1 >> input2 >> faces[faceIndex].nIndex1;
 				faceIndex++;
 			}
 		}
