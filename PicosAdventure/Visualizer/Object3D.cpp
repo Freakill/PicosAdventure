@@ -68,3 +68,8 @@ float Object3D::getRotationZ()
 {
 	return rotZ_;
 }
+
+ModelClass* Object3D::getModel()
+{
+	return model_;
+}

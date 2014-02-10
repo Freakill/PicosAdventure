@@ -95,6 +95,7 @@ Point GUIButton::getPosition()
 void GUIButton::setPosition(Point pos)
 {
 	position_ = pos;
+	text_->setPosition(pos.x+10, pos.y+5);
 }
 		
 int GUIButton::getWidth()

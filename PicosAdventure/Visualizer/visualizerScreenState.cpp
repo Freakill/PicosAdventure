@@ -128,7 +128,7 @@ void VisualizerScreenState::notify(InputManager* notifier, InputStruct arg)
 		case 97: //a
 		case 113: //q
 			{
-				moveSelectedObject(arg);
+				moveSelectedObjects(arg);
 			}
 			break;
 		case 79: //O
@@ -136,13 +136,39 @@ void VisualizerScreenState::notify(InputManager* notifier, InputStruct arg)
 		case 80: //P
 		case 112: //p
 			{
-				rotateSelectedObject(arg);
+				rotateSelectedObjects(arg);
 			}
 			break;
 		case 115: //s
 		case 83: //S
 			{
-				saveSelectedObject();
+				saveSelectedObjects();
+			}
+			break;
+		case 100: //d
+		case 68: //D
+			{
+				deleteSelectedObjects();
+			}
+			break;
+		case 99: //m
+		case 77: //M
+			{
+				increaseAnimations();
+				if(!playingAnimations_)
+				{
+					stopAnimations();
+				}
+			}
+			break;
+		case 110: //n
+		case 78: //N
+			{
+				decreaseAnimations();
+				if(!playingAnimations_)
+				{
+					stopAnimations();
+				}
 			}
 			break;
 		case VK_SPACE:
@@ -168,7 +194,7 @@ void VisualizerScreenState::notify(InputManager* notifier, InputStruct arg)
 	{
 		case WHEEL_SCROLL:
 			{
-				resizeSelectedObject(arg);
+				resizeSelectedObjects(arg);
 			}
 			break;
 		default:
@@ -356,8 +382,8 @@ void VisualizerScreenState::createLoadModelMenu()
     WIN32_FIND_DATA file_data;
 
 	// Access to the root model folder (this is given by the structure of the game Data)
-	GUIFrame* loadModelsMenu = new GUIFrame();
-	loadModelsMenu->setup(graphicsManager_, "Load Models", Point(0.0f, 0.0f), 150, 200);
+	loadModelsMenu_ = new GUIFrame();
+	loadModelsMenu_->setup(graphicsManager_, "Load Models", Point(0.0f, 0.0f), 150, 200);
 
 	// If we can access to that sctructure, then create a loadModel button for each found model
     if ((dir = FindFirstFile(L"./Data/models/*", &file_data)) != INVALID_HANDLE_VALUE)
@@ -375,12 +401,12 @@ void VisualizerScreenState::createLoadModelMenu()
 			const std::string s( file_name.begin(), file_name.end() );
 
 			// Create the button by calling the GUI frame where we want to add it
-			loadModelsMenu->addButton(graphicsManager_, s, 25, LOAD_OBJECT)->addListener(*this);
+			loadModelsMenu_->addButton(graphicsManager_, s, 25, LOAD_OBJECT)->addListener(*this);
 
 		} while (FindNextFile(dir, &file_data));
 	}
 
-	visualizerGUI_->addFrame(loadModelsMenu);
+	visualizerGUI_->addFrame(loadModelsMenu_);
 }
 
 void VisualizerScreenState::createLoadXMLMenu()
@@ -389,8 +415,8 @@ void VisualizerScreenState::createLoadXMLMenu()
     WIN32_FIND_DATA file_data;
 
 	// Access to the root model folder (this is given by the structure of the game Data)
-	GUIFrame* loadModelsMenu = new GUIFrame();
-	loadModelsMenu->setup(graphicsManager_, "Load XMLs", Point(150.0f, 0.0f), 150, 200);
+	loadXMLMenu_ = new GUIFrame();
+	loadXMLMenu_->setup(graphicsManager_, "Load XMLs", Point(150.0f, 0.0f), 150, 200);
 
 	// If we can access to that sctructure, then create a loadModel button for each found model
     if ((dir = FindFirstFile(L"./Data/scenario/*", &file_data)) != INVALID_HANDLE_VALUE)
@@ -408,12 +434,12 @@ void VisualizerScreenState::createLoadXMLMenu()
 			const std::string s( file_name.begin(), file_name.end() );
 
 			// Create the button by calling the GUI frame where we want to add it
-			loadModelsMenu->addButton(graphicsManager_, s, 25, LOAD_OBJECT)->addListener(*this);
+			loadXMLMenu_->addButton(graphicsManager_, s, 25, LOAD_OBJECT)->addListener(*this);
 
 		} while (FindNextFile(dir, &file_data));
 	}
 
-	visualizerGUI_->addFrame(loadModelsMenu);
+	visualizerGUI_->addFrame(loadXMLMenu_);
 }
 
 void VisualizerScreenState::createLoadedObjectButton()
@@ -451,7 +477,39 @@ void VisualizerScreenState::stopAnimations()
 	playingAnimations_ = false;
 }
 
-void VisualizerScreenState::moveSelectedObject(InputStruct arg)
+void VisualizerScreenState::increaseAnimations()
+{
+	std::vector<Object3D*>::iterator it;
+	for(it = loadedObjects_.begin(); it != loadedObjects_.end(); it++)
+	{
+		AnimatedObject3D* animatedObject = dynamic_cast<AnimatedObject3D*>((*it));
+		if(animatedObject)
+		{
+			AnimatedCal3DModelClass* model = dynamic_cast<AnimatedCal3DModelClass*>(animatedObject->getModel());
+			model->increaseAnimationToDisplay();
+		}
+	}
+
+	playingAnimations_ = false;
+}
+
+void VisualizerScreenState::decreaseAnimations()
+{
+	std::vector<Object3D*>::iterator it;
+	for(it = loadedObjects_.begin(); it != loadedObjects_.end(); it++)
+	{
+		AnimatedObject3D* animatedObject = dynamic_cast<AnimatedObject3D*>((*it));
+		if(animatedObject)
+		{
+			AnimatedCal3DModelClass* model = dynamic_cast<AnimatedCal3DModelClass*>(animatedObject->getModel());
+			model->decreaseAnimationToDisplay();
+		}
+	}
+
+	playingAnimations_ = false;
+}
+
+void VisualizerScreenState::moveSelectedObjects(InputStruct arg)
 {
 	// Iterate over the loaded objects
 	std::vector<Object3D*>::iterator it;
@@ -503,7 +561,7 @@ void VisualizerScreenState::moveSelectedObject(InputStruct arg)
 	}
 }
 
-void VisualizerScreenState::rotateSelectedObject(InputStruct arg)
+void VisualizerScreenState::rotateSelectedObjects(InputStruct arg)
 {
 	// Iterate over the loaded objects
 	std::vector<Object3D*>::iterator it;
@@ -543,7 +601,7 @@ void VisualizerScreenState::rotateSelectedObject(InputStruct arg)
 	}
 }
 
-void VisualizerScreenState::resizeSelectedObject(InputStruct arg)
+void VisualizerScreenState::resizeSelectedObjects(InputStruct arg)
 {
 	// Iterate over the loaded objects
 	std::vector<Object3D*>::iterator it;
@@ -581,7 +639,7 @@ void VisualizerScreenState::resizeSelectedObject(InputStruct arg)
 	}
 }
 
-void VisualizerScreenState::saveSelectedObject()
+void VisualizerScreenState::saveSelectedObjects()
 {
 	// Iterate over the loaded objects
 	std::vector<Object3D*>::iterator it;
@@ -630,6 +688,27 @@ void VisualizerScreenState::saveSelectedObject()
 
 			// save document to file
 			std::cout << "Saving result: " << doc.save_file(fileName.c_str()) << std::endl;
+
+			loadXMLMenu_->addButton(graphicsManager_, (*it)->getName()+".xml", 25, LOAD_OBJECT)->addListener(*this);
 		}
+	}
+}
+
+void VisualizerScreenState::deleteSelectedObjects()
+{
+	// Iterate over the loaded objects
+	std::vector<Object3D*>::iterator it;
+	it = it = loadedObjects_.begin(); 
+	while(it != loadedObjects_.end())
+	{
+		// Check if object button is active
+		if(loadedObjectsMenu_->getButtonIsActive((*it)->getName()))
+		{
+			loadedObjectsMenu_->deleteButton((*it)->getName());
+			it = loadedObjects_.erase(it);
+			continue;
+		}
+
+		it++;
 	}
 }

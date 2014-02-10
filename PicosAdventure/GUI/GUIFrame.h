@@ -34,7 +34,11 @@ class GUIFrame
 		int getHeight();
 		void setHeight(int height);
 
-		bool getButtonIsActive(std::string);
+		bool getButtonIsActive(std::string buttonName);
+
+		void deleteButton(std::string buttonName);
+
+		void reorganizeButtons();
 
 		bool offer(Point mouseClick);
 

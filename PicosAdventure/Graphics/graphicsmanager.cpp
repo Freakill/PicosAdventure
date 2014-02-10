@@ -77,9 +77,9 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
 
 	unsigned int creationFlags = D3D11_CREATE_DEVICE_SINGLETHREADED; //Create a bitwise ORed list of flags to activate when creating the device and context
 
-#ifdef _DEBUG
+/*#ifdef _DEBUG
     creationFlags |= D3D11_CREATE_DEVICE_DEBUG; //If in debug mode we set the runtime layer to debug.
-#endif
+#endif*/
 
     unsigned int driver = 0;
 

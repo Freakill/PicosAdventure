@@ -38,6 +38,8 @@ class Object3D
 		void setRotationZ(float rotZ);
 		float getRotationZ();
 
+		ModelClass* getModel();
+
 	protected:
 		ModelClass*		model_;
 		TextureClass*	diffuseTexture_;

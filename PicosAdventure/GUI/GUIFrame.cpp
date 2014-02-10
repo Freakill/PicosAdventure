@@ -106,9 +106,34 @@ void GUIFrame::setHeight(int height)
 	height_ = height;
 }
 
-bool GUIFrame::getButtonIsActive(std::string name)
+bool GUIFrame::getButtonIsActive(std::string buttonName)
 {
-	return guiButtons_.at(name)->getActive();
+	return guiButtons_.at(buttonName)->getActive();
+}
+
+void GUIFrame::deleteButton(std::string buttonName)
+{
+	guiButtons_.erase(buttonName);
+	reorganizeButtons();
+}
+
+void GUIFrame::reorganizeButtons()
+{
+	int posY = 25;
+	std::map<std::string, GUIButton*>::iterator it;
+	for(it = guiButtons_.begin(); it != guiButtons_.end(); ++it)
+	{
+		// Calculate new position for each of the buttons
+		Point newPos;
+		newPos.x = it->second->getPosition().x;
+		newPos.y = posY;
+
+		// Set new position
+		it->second->setPosition(newPos);
+
+		// Add the height of the newly placed button
+		posY += it->second->getHeight();
+	}
 }
 
 bool GUIFrame::offer(Point mouseClick)

@@ -34,6 +34,8 @@ public:
 
 	bool setText(std::string text, ID3D11DeviceContext* deviceContext);
 
+	void setPosition(int positionX, int positionY);
+
 	Point getTextPosition();
 	int getTextWidth();
 	int getTextHeight();
@@ -44,11 +46,13 @@ private:
 	bool drawSentence(ID3D11DeviceContext* deviceContext, SentenceType* sentence, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 baseViewMatrix, XMFLOAT4X4 orthoMatrix);
 	void destroySentence(SentenceType** sentence);
 
+	ID3D11DeviceContext* deviceContext_;
 	FontClass* font_;
 	Shader2DClass* fontShader_;
 	int screenWidth_, screenHeight_;
 	int positionX_, positionY_;
 	SentenceType* sentence_;
+	std::string text_;
 };
 
 #endif

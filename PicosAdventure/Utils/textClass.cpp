@@ -23,6 +23,7 @@ bool TextClass::setup(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 {
 	bool result;
 
+	deviceContext_ = deviceContext;
 
 	// Store the screen width and height.
 	screenWidth_ = screenWidth;
@@ -63,6 +64,8 @@ bool TextClass::setup(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	{
 		return false;
 	}
+
+	text_ = sentenceText;
 
 	return true;
 }
@@ -114,6 +117,8 @@ bool TextClass::setText(std::string text, ID3D11DeviceContext* deviceContext)
 		MessageBoxA(NULL, "Could not update text.", "Text - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
+
+	text_ = text;
 
 	return true;
 }
@@ -247,6 +252,7 @@ bool TextClass::updateSentence(SentenceType* sentence, std::string text, int pos
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	VertexType* verticesPtr;
 
+	text_ = text;
 
 	// Store the color of the sentence.
 	sentence->red = red;		
@@ -300,6 +306,11 @@ bool TextClass::updateSentence(SentenceType* sentence, std::string text, int pos
 	vertices = 0;
 
 	return true;
+}
+
+void TextClass::setPosition(int positionX, int positionY)
+{
+	updateSentence(sentence_, text_, positionX, positionY, sentence_->red, sentence_->green, sentence_->blue, deviceContext_);
 }
 
 void TextClass::destroySentence(SentenceType** sentence)

@@ -44,16 +44,20 @@ class VisualizerScreenState: public ApplicationState, public Listener<GUIButton,
 
 		void playAnimations();
 		void stopAnimations();
+		void increaseAnimations();
+		void decreaseAnimations();
 
-		void moveSelectedObject(InputStruct arg);
-		void rotateSelectedObject(InputStruct arg);
-		void resizeSelectedObject(InputStruct arg);
+		void moveSelectedObjects(InputStruct arg);
+		void rotateSelectedObjects(InputStruct arg);
+		void resizeSelectedObjects(InputStruct arg);
 
-		void saveSelectedObject();
+		void saveSelectedObjects();
+		void deleteSelectedObjects();
 
 		GUIManager*				visualizerGUI_;
 		GUIFrame*				loadedObjectsMenu_;
-		GUIFrame*				loadedXMLMenu_;
+		GUIFrame*				loadModelsMenu_;
+		GUIFrame*				loadXMLMenu_;
 
 		CameraClass*			camera_;
 		LightClass*				light_;

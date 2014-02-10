@@ -60,65 +60,71 @@ void AnimatedCal3DModelClass::decreaseAnimationToDisplay()
 {
 	std::map<std::string, int>::iterator animIterator;
 	animIterator = animations_.find(animationToPlay_);
+	cal3dModel_->getMixer()->clearCycle(animations_.at(animationToPlay_), 1.0f);
+	// If the animation being played is the first, we manually set that we will now play the last one
 	if(animIterator == animations_.begin())
 	{
 		animIterator = animations_.end();
 		animIterator--;
 		animationToPlay_ = animIterator->first;
-		if(animationToPlay_ != initialAnimationToPlay_)
+		/*if(animationToPlay_ != initialAnimationToPlay_)
 		{
 			cal3dModel_->getMixer()->executeAction(animIterator->second, 0.25f, 0.25f, 1.0f );
 		}
 		else
 		{
 			cal3dModel_->getMixer()->removeAction(animations_.at(initialAnimationToPlay_));
-		}
+		}*/
 	}
 	else
 	{
 		animIterator--;
 		animationToPlay_ = animIterator->first;
-		if(animationToPlay_ != initialAnimationToPlay_)
+		/*if(animationToPlay_ != initialAnimationToPlay_)
 		{
 			cal3dModel_->getMixer()->executeAction(animIterator->second, 0.25f, 0.25f, 1.0f );
 		}
 		else
 		{
 			cal3dModel_->getMixer()->removeAction(animations_.at(initialAnimationToPlay_));
-		}
+		}*/
 	}
+	cal3dModel_->getMixer()->blendCycle(animations_.at(animationToPlay_), 1.0f, 1.0f);
 }
 
 void AnimatedCal3DModelClass::increaseAnimationToDisplay()
 {
 	std::map<std::string, int>::iterator animIterator;
 	animIterator = animations_.find(animationToPlay_);
+	cal3dModel_->getMixer()->clearCycle(animations_.at(animationToPlay_), 1.0f);
 	animIterator++;
+	// If the animation we are going to play is the end, thus we need to specify it is the fitst of the map
 	if(animIterator == animations_.end())
 	{
 		animIterator = animations_.begin();
 		animationToPlay_ = animIterator->first;
-		if(animationToPlay_ != initialAnimationToPlay_)
+		/*if(animationToPlay_ != initialAnimationToPlay_)
 		{
 			cal3dModel_->getMixer()->executeAction(animIterator->second, 0.25f, 0.25f, 1.0f );
 		}
 		else
 		{
 			cal3dModel_->getMixer()->removeAction(animations_.at(initialAnimationToPlay_));
-		}
+		}*/
 	}
 	else
 	{
 		animationToPlay_ = animIterator->first;
-		if(animationToPlay_ != initialAnimationToPlay_)
+		/*if(animationToPlay_ != initialAnimationToPlay_)
 		{
 			cal3dModel_->getMixer()->executeAction(animIterator->second, 0.25f, 0.25f, 1.0f );
 		}
 		else
 		{
 			cal3dModel_->getMixer()->removeAction(animations_.at(initialAnimationToPlay_));
-		}
+		}*/
 	}
+	cal3dModel_->getMixer()->blendCycle(animations_.at(animationToPlay_), 1.0f, 1.0f);
 }
 
 void AnimatedCal3DModelClass::setAnimationToExecute(std::string name, float interpolationTime)

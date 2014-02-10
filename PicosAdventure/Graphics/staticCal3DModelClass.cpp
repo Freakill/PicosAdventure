@@ -155,7 +155,7 @@ bool StaticCal3DModelClass::setupBuffers(ID3D11Device* device)
 	cal3dRenderer->endRendering();
 
 	// Set up the description of the static vertex buffer.
-	vertex_buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+	vertex_buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
 	vertex_buffer_desc.ByteWidth = sizeof(TexturedVertexType) * vertexCount_;
 	vertex_buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertex_buffer_desc.CPUAccessFlags = 0;
