@@ -103,8 +103,10 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClCompile Include="Engine\AnimatedObject3D.cpp" />
     <ClCompile Include="Engine\Object3D.cpp" />
     <ClCompile Include="Engine\Object3DFactory.cpp" />
+    <ClCompile Include="Engine\sphereCollision.cpp" />
     <ClCompile Include="Engine\StaticObject3D.cpp" />
     <ClCompile Include="Game\firstScreenState.cpp" />
+    <ClCompile Include="Game\fruitClass.cpp" />
     <ClCompile Include="Graphics\animatedCal3DModelClass.cpp" />
     <ClCompile Include="Graphics\Cal3DmodelClass.cpp" />
     <ClCompile Include="Graphics\cameraClass.cpp" />
@@ -136,8 +138,10 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClInclude Include="Engine\AnimatedObject3D.h" />
     <ClInclude Include="Engine\Object3D.h" />
     <ClInclude Include="Engine\Object3DFactory.h" />
+    <ClInclude Include="Engine\sphereCollision.h" />
     <ClInclude Include="Engine\StaticObject3D.h" />
     <ClInclude Include="Game\firstScreenState.h" />
+    <ClInclude Include="Game\fruitClass.h" />
     <ClInclude Include="Graphics\animatedCal3DModelClass.h" />
     <ClInclude Include="Graphics\Cal3DmodelClass.h" />
     <ClInclude Include="Graphics\cameraClass.h" />

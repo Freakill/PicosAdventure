@@ -13,6 +13,8 @@ FirstScreenState::FirstScreenState()
 {
 	camera_ = 0;
 	light_ = 0;
+
+	debug_ = false;
 }
 
 FirstScreenState::~FirstScreenState()
@@ -56,6 +58,19 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	// Load the first level scenario
 	loadScenario("scenario1");
 
+	float terrainHeight = 0;
+	std::vector<Object3D*>::iterator it;
+	for(it = scenario_.begin(); it != scenario_.end(); it++)
+	{
+		if((*it)->getName().find("terreno") != std::string::npos)
+		{
+			terrainHeight = (*it)->getPosition().y-0.1f;
+		}
+	}
+
+	fruitTest_ = new FruitClass();
+	fruitTest_->setup(graphicsManager_, "arandanos", Point(3.0f, 1.0f, -1.0f), terrainHeight, Vector(1.0f, 1.0f, 1.0f), 0.0f, 0.0f, 0.0f);
+
 	inputManager->addListener(*this);
 
 	return true;
@@ -63,7 +78,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 
 void FirstScreenState::update(float elapsedTime)
 {	
-	
+	fruitTest_->update(elapsedTime);
 }
 
 void FirstScreenState::draw()
@@ -82,6 +97,8 @@ void FirstScreenState::draw()
 	{
 		(*it)->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_);
 	}
+
+	fruitTest_->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
 }
 
 void FirstScreenState::destroy()
@@ -96,6 +113,12 @@ void FirstScreenState::destroy()
 void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 {
 	switch(arg.keyPressed){
+		case 68: //D
+		case 100: //d
+			{
+				debug_ = !debug_;
+			}
+			break;
 		default:
 			{
 				
@@ -105,6 +128,14 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 
 	switch(arg.mouseButton)
 	{
+		case LEFT_BUTTON:
+			{
+				if(fruitTest_->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
+				{
+					fruitTest_->makeItFall();
+				}
+			}
+			break;
 		default:
 			{
 				

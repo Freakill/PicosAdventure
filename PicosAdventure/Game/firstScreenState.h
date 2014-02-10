@@ -14,6 +14,8 @@
 
 #include "../Engine/Object3DFactory.h"
 
+#include "fruitClass.h"
+
 #include <mmsystem.h>
 
 class FirstScreenState: public ApplicationState
@@ -40,6 +42,9 @@ class FirstScreenState: public ApplicationState
 		LightClass*				light_;
 
 		std::vector<Object3D*>	scenario_;
+		FruitClass*				fruitTest_;
+
+		bool					debug_;
 };
 
 #endif //_FIRST_SCREEN_STATE_H_
