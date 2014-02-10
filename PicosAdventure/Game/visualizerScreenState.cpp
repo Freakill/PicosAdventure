@@ -5,11 +5,11 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-#include "firstScreenState.h"
+#include "visualizerScreenState.h"
 
-FirstScreenState FirstScreenState::firstScreenState_;
+Visualizer Visualizer::visualizerState_;
 
-FirstScreenState::FirstScreenState()
+Visualizer::Visualizer()
 {
 	camera_ = 0;
 	light_ = 0;
@@ -17,17 +17,17 @@ FirstScreenState::FirstScreenState()
 	lastLoadedObject_ = 0;
 }
 
-FirstScreenState::~FirstScreenState()
+Visualizer::~Visualizer()
 {
 
 }
 
-FirstScreenState* FirstScreenState::Instance()
+Visualizer* Visualizer::Instance()
 {
-	return (&firstScreenState_);
+	return (&visualizerState_);
 }
 
-bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager * inputManager)
+bool Visualizer::setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager * inputManager)
 {
 	// We get a pointer to the graphicsManager
 	graphicsManager_ = graphicsManager;
@@ -73,7 +73,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	return true;
 }
 
-void FirstScreenState::update(float elapsedTime)
+void Visualizer::update(float elapsedTime)
 {	
 	std::vector<Object3D*>::iterator it;
 	for(it = loadedObjects_.begin(); it != loadedObjects_.end(); it++)
@@ -82,7 +82,7 @@ void FirstScreenState::update(float elapsedTime)
 	}
 }
 
-void FirstScreenState::draw()
+void Visualizer::draw()
 {
 	XMFLOAT4X4 viewMatrix;
 	camera_->getViewMatrix(viewMatrix);
@@ -107,7 +107,7 @@ void FirstScreenState::draw()
 	graphicsManager_->turnZBufferOn();
 }
 
-void FirstScreenState::destroy()
+void Visualizer::destroy()
 {
 	std::vector<Object3D*>::iterator it;
 	for(it = loadedObjects_.begin(); it != loadedObjects_.end(); it++)
@@ -116,7 +116,7 @@ void FirstScreenState::destroy()
 	}
 }
 
-void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
+void Visualizer::notify(InputManager* notifier, InputStruct arg)
 {
 	switch(arg.keyPressed){
 		case VK_LEFT:
@@ -205,7 +205,7 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 	}
 }
 
-void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
+void Visualizer::notify(GUIButton* notifier, ButtonStruct arg)
 {
 	switch(arg.buttonPurpose)
 	{
@@ -242,7 +242,7 @@ void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
 	}
 }
 
-void FirstScreenState::createModel(const std::string &modelName)
+void Visualizer::createModel(const std::string &modelName)
 {
 	Object3D* objectLoadedTemp = NULL;
 
@@ -267,7 +267,7 @@ void FirstScreenState::createModel(const std::string &modelName)
 	}
 }
 
-void FirstScreenState::createXMLModel(const std::string &xmlName)
+void Visualizer::createXMLModel(const std::string &xmlName)
 {
 	Object3D* objectLoadedTemp = NULL;
 
@@ -328,7 +328,7 @@ void FirstScreenState::createXMLModel(const std::string &xmlName)
 	}
 }
 
-bool FirstScreenState::checkModelHasAnimations(const std::string &modelName)
+bool Visualizer::checkModelHasAnimations(const std::string &modelName)
 {
 	HANDLE dir;
     WIN32_FIND_DATAA file_data;
@@ -376,7 +376,7 @@ bool FirstScreenState::checkModelHasAnimations(const std::string &modelName)
 	return false;
 }
 
-void FirstScreenState::createLoadModelMenu()
+void Visualizer::createLoadModelMenu()
 {
 	HANDLE dir;
     WIN32_FIND_DATA file_data;
@@ -409,7 +409,7 @@ void FirstScreenState::createLoadModelMenu()
 	visualizerGUI_->addFrame(loadModelsMenu_);
 }
 
-void FirstScreenState::createLoadXMLMenu()
+void Visualizer::createLoadXMLMenu()
 {
 	HANDLE dir;
     WIN32_FIND_DATA file_data;
@@ -442,12 +442,12 @@ void FirstScreenState::createLoadXMLMenu()
 	visualizerGUI_->addFrame(loadXMLMenu_);
 }
 
-void FirstScreenState::createLoadedObjectButton()
+void Visualizer::createLoadedObjectButton()
 {
 	loadedObjectsMenu_->addButton(graphicsManager_, loadedObjects_.back()->getName(), 25, SELECT_OBJECT)->addListener(*this);
 }
 
-void FirstScreenState::playAnimations()
+void Visualizer::playAnimations()
 {
 	std::vector<Object3D*>::iterator it;
 	for(it = loadedObjects_.begin(); it != loadedObjects_.end(); it++)
@@ -462,7 +462,7 @@ void FirstScreenState::playAnimations()
 	playingAnimations_ = true;
 }
 
-void FirstScreenState::stopAnimations()
+void Visualizer::stopAnimations()
 {
 	std::vector<Object3D*>::iterator it;
 	for(it = loadedObjects_.begin(); it != loadedObjects_.end(); it++)
@@ -477,7 +477,7 @@ void FirstScreenState::stopAnimations()
 	playingAnimations_ = false;
 }
 
-void FirstScreenState::increaseAnimations()
+void Visualizer::increaseAnimations()
 {
 	std::vector<Object3D*>::iterator it;
 	for(it = loadedObjects_.begin(); it != loadedObjects_.end(); it++)
@@ -493,7 +493,7 @@ void FirstScreenState::increaseAnimations()
 	playingAnimations_ = false;
 }
 
-void FirstScreenState::decreaseAnimations()
+void Visualizer::decreaseAnimations()
 {
 	std::vector<Object3D*>::iterator it;
 	for(it = loadedObjects_.begin(); it != loadedObjects_.end(); it++)
@@ -509,7 +509,7 @@ void FirstScreenState::decreaseAnimations()
 	playingAnimations_ = false;
 }
 
-void FirstScreenState::moveSelectedObjects(InputStruct arg)
+void Visualizer::moveSelectedObjects(InputStruct arg)
 {
 	// Iterate over the loaded objects
 	std::vector<Object3D*>::iterator it;
@@ -561,7 +561,7 @@ void FirstScreenState::moveSelectedObjects(InputStruct arg)
 	}
 }
 
-void FirstScreenState::rotateSelectedObjects(InputStruct arg)
+void Visualizer::rotateSelectedObjects(InputStruct arg)
 {
 	// Iterate over the loaded objects
 	std::vector<Object3D*>::iterator it;
@@ -601,7 +601,7 @@ void FirstScreenState::rotateSelectedObjects(InputStruct arg)
 	}
 }
 
-void FirstScreenState::resizeSelectedObjects(InputStruct arg)
+void Visualizer::resizeSelectedObjects(InputStruct arg)
 {
 	// Iterate over the loaded objects
 	std::vector<Object3D*>::iterator it;
@@ -639,7 +639,7 @@ void FirstScreenState::resizeSelectedObjects(InputStruct arg)
 	}
 }
 
-void FirstScreenState::saveSelectedObjects()
+void Visualizer::saveSelectedObjects()
 {
 	// Iterate over the loaded objects
 	std::vector<Object3D*>::iterator it;
@@ -694,7 +694,7 @@ void FirstScreenState::saveSelectedObjects()
 	}
 }
 
-void FirstScreenState::deleteSelectedObjects()
+void Visualizer::deleteSelectedObjects()
 {
 	// Iterate over the loaded objects
 	std::vector<Object3D*>::iterator it;

@@ -1,5 +1,5 @@
-#ifndef _FIRST_SCREEN_STATE_H_
-#define _FIRST_SCREEN_STATE_H_
+#ifndef _VISUALIZER_H_
+#define _VISUALIZER_H_
 
 #include "../Application/applicationState.h"
 
@@ -16,12 +16,12 @@
 
 #include <mmsystem.h>
 
-class FirstScreenState: public ApplicationState, public Listener<GUIButton, ButtonStruct>
+class Visualizer: public ApplicationState, public Listener<GUIButton, ButtonStruct>
 {
 	public:
-		FirstScreenState();
-		virtual ~FirstScreenState();
-		static FirstScreenState* Instance();
+		Visualizer();
+		virtual ~Visualizer();
+		static Visualizer* Instance();
 
 		virtual bool setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager* inputManager);
 		virtual void update(float elapsedTime);
@@ -32,7 +32,7 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		virtual void notify(GUIButton* notifier, ButtonStruct arg);
 
 	private:
-		static FirstScreenState firstScreenState_; //singleton
+		static Visualizer visualizerState_; //singleton
 
 		void createModel(const std::string &modelName);
 		void createXMLModel(const std::string &xmlName);
@@ -68,4 +68,4 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		bool					playingAnimations_;
 };
 
-#endif //_FIRST_SCREEN_STATE_H_
+#endif //_VISUALIZER_H_
