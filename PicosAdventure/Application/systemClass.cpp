@@ -353,9 +353,9 @@ LRESULT SystemClass::StaticWindowProcess(HWND windowHandler, UINT messageCode, W
 	return window->WindowProcess(windowHandler, messageCode, wAdditionalData, lAdditionalData);
 }
 
-void SystemClass::notify(InputManager* notifier, int arg)
+void SystemClass::notify(InputManager* notifier, InputStruct arg)
 {
-	switch(arg){
+	switch(arg.keyPressed){
 		case 27:
 			{
 				if(MessageBoxA(windowHandler_, "Really quit?", "Pico's Adventure", MB_OKCANCEL) == IDOK)
@@ -365,6 +365,9 @@ void SystemClass::notify(InputManager* notifier, int arg)
 			}
 			break;
 		default:
+			{
+
+			}
 			break;
 	}
 }

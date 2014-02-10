@@ -2,6 +2,8 @@
 
 #include "applicationState.h"
 
+#include "../Game/firstScreenState.h"
+
 ApplicationManager::ApplicationManager()
 {
 	appState_ = 0;
@@ -39,10 +41,10 @@ bool ApplicationManager::setup(HWND windowsHandler, InputManager* inputManager, 
 	}
 	clockClass_->reset();
 
-	/*if(!changeState(FirstScreenState::Instance()))
+	if(!changeState(FirstScreenState::Instance()))
 	{
 		return false;
-	}*/
+	}
 
 	return true;
 }
@@ -50,6 +52,8 @@ bool ApplicationManager::setup(HWND windowsHandler, InputManager* inputManager, 
 void ApplicationManager::update()
 {
 	clockClass_->tick();
+
+	inputManager_->update();
 
 	// we update the State with the frame elapsed time
 	if(appState_ != 0)
@@ -97,7 +101,7 @@ bool ApplicationManager::changeState(ApplicationState* appState)
 	if (appState != appState_) {
 		inputManager_->removeListener((*appState_));
 		appState_ = appState;
-		return appState_->setup(this, graphicsManager_, inputManager_, windowHandler_);
+		return appState_->setup(this, graphicsManager_, inputManager_);
 	}
 
 	return true;
