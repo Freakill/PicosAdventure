@@ -49,7 +49,7 @@ void ClockClass::tick()
 
 float ClockClass::getDeltaTime()const
 {
-	return deltaTime_;
+	return (float)deltaTime_;
 }
 
 void ClockClass::reset()

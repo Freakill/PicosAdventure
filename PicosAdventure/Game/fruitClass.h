@@ -25,6 +25,7 @@ enum FruitState
 	{
 		SPAWNING,
 		IN_TREE,
+		SHACKEN,
 		FALLING,
 		IN_FLOOR
 	};

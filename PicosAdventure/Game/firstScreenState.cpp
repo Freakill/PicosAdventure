@@ -13,8 +13,7 @@ FirstScreenState::FirstScreenState()
 {
 	camera_ = 0;
 	light_ = 0;
-
-	debug_ = false;
+	gameClock_ = 0;
 }
 
 FirstScreenState::~FirstScreenState()
@@ -56,8 +55,9 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	light_->setDirection(0.0f, -1.0f, 1.0f);
 
 	// Load the first level scenario
-	loadScenario("scenario1");
+	loadScenario("level1");
 
+	// Get terrain height for posterior setup of different objects
 	terrainHeight_ = 0;
 	std::vector<Object3D*>::iterator it;
 	for(it = scenario_.begin(); it != scenario_.end(); it++)
@@ -68,19 +68,61 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 		}
 	}
 
-	createFruits("scenario1", "1");
+	// Set the level state to the first iteration and load fruits accordingly
+	levelState_ = INTRODUCTION;
+	subLevelState_ = PLAYING;
+
+	loadConfigurationFromXML();
+
+	debug_ = false;
 
 	inputManager->addListener(*this);
+
+	// Setup clock at the end so it starts when we run
+	gameClock_ = new ClockClass();
+	if(!gameClock_)
+	{
+		return false;
+	}
+	gameClock_->reset();
 
 	return true;
 }
 
 void FirstScreenState::update(float elapsedTime)
 {	
-	std::vector<FruitClass*>::iterator fruitIt;
-	for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
+	gameClock_->tick();
+
+	// Update fruits logic
+	if(subLevelState_ == PLAYING)
 	{
-		(*fruitIt)->update(elapsedTime);
+		std::vector<FruitClass*>::iterator fruitIt;
+		for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
+		{
+			(*fruitIt)->update(elapsedTime);
+		}
+	}
+
+	switch(levelState_)
+	{
+		case INTRODUCTION:
+			{
+				if(gameClock_->getTime() > fadeTime_)
+				{
+					changeLevel(FIRST_LEVEL);
+				}
+			}
+			break;
+		case FIRST_LEVEL:
+			{
+				updateFirsLevel();
+			}
+			break;
+		default:
+			{
+
+			}
+			break;
 	}
 }
 
@@ -101,6 +143,7 @@ void FirstScreenState::draw()
 		(*objectsIt)->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_);
 	}
 
+	// Draw the loaded fruits
 	std::vector<FruitClass*>::iterator fruitIt;
 	for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
 	{
@@ -123,6 +166,47 @@ void FirstScreenState::destroy()
 	}
 }
 
+void FirstScreenState::updateFirsLevel()
+{
+	switch(subLevelState_)
+	{
+		case PLAYING:
+			{
+				if(gameClock_->getTime() > playingTime_)
+				{
+					// check if Pico is idle
+					subLevelState_ = FADING;
+					gameClock_->reset();
+				}
+			}
+			break;
+		case FADING:
+			{
+				float diffuseTemp = 1.0f - gameClock_->getTime()/fadeTime_;
+				light_->setDiffuseColor(diffuseTemp, diffuseTemp, diffuseTemp, 1.0f);
+
+				float ambientTemp = 0.1f - (gameClock_->getTime()/fadeTime_)*0.075f;
+				light_->setAmbientColor(ambientTemp, ambientTemp, ambientTemp, 1.0f);
+
+				if(gameClock_->getTime() > fadeTime_)
+				{
+					subLevelState_ = SELECT_POLAROID;
+				}
+			}
+			break;
+		case SELECT_POLAROID:
+			{
+
+			}
+			break;
+		default:
+			{
+
+			}
+			break;
+	}
+}
+
 void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 {
 	switch(arg.keyPressed){
@@ -141,6 +225,7 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 
 	switch(arg.mouseButton)
 	{
+		// Check if the left mouse is pressed to interested objects
 		case LEFT_BUTTON:
 			{
 				std::vector<FruitClass*>::iterator fruitIt;
@@ -161,12 +246,53 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 	}
 }
 
+void FirstScreenState::loadConfigurationFromXML()
+{
+	std::string root = "./Data/configuration/level1/main_configuration.xml";
+
+	//Loading animations XML file
+	pugi::xml_document configurationDoc;
+	if (!configurationDoc.load_file(root.c_str()))
+	{
+		MessageBoxA(NULL, "Could not load configuration .xml file!", "FirstScreen - Error", MB_ICONERROR | MB_OK);
+	}
+
+	//Searching for the initial node
+	pugi::xml_node rootNode;
+	if(!(rootNode = configurationDoc.child("configuration")))
+	{
+		MessageBoxA(NULL, "Could not load configuration node!", "FirstScreen - Error", MB_ICONERROR | MB_OK);
+	}
+
+	pugi::xml_node playTimeNode;
+	if(!(playTimeNode = rootNode.child("play_time")))
+	{
+		MessageBoxA(NULL, "Could not load play time node!", "FirstScreen - Error", MB_ICONERROR | MB_OK);
+		playingTime_ = 15;
+	}
+	else
+	{
+		playingTime_ = playTimeNode.text().as_float();
+	}
+
+	pugi::xml_node fadeTimeNode;
+	if(!(fadeTimeNode = rootNode.child("fade_time")))
+	{
+		MessageBoxA(NULL, "Could not load fade time node!", "FirstScreen - Error", MB_ICONERROR | MB_OK);
+		fadeTime_ = 10;
+	}
+	else
+	{
+		fadeTime_ = fadeTimeNode.text().as_float();
+	}
+}
+
 void FirstScreenState::loadScenario(std::string scenario)
 {
 	HANDLE dir;
     WIN32_FIND_DATAA file_data;
 
-	std::string scenarioToLoad = "./Data/scenario/"+scenario+"/*";
+	std::string scenarioToLoad = "./Data/configuration/"+scenario+"/scenario/*";
 
 	// If we can access to that sctructure, then create a loadModel button for each found model
     if ((dir = FindFirstFileA(scenarioToLoad.c_str(), &file_data)) != INVALID_HANDLE_VALUE)
@@ -193,7 +319,7 @@ void FirstScreenState::createScenarioObject(std::string scenario, std::string xm
 {
 	Object3D* objectLoadedTemp = NULL;
 
-	std::string root = "./Data/scenario/"+ scenario + "/" + xmlName;
+	std::string root = "./Data/configuration/"+ scenario + "/scenario/" + xmlName;
 
 	//Loading animations XML file
 	pugi::xml_document objectDoc;
@@ -202,7 +328,7 @@ void FirstScreenState::createScenarioObject(std::string scenario, std::string xm
 		MessageBoxA(NULL, "Could not load object .xml file!", "FirstScreen - Error", MB_ICONERROR | MB_OK);
 	}
 
-	//Searching for the initial node where all "anim" nodes should be
+	//Searching for the initial node
 	pugi::xml_node rootNode;
 	if(!(rootNode = objectDoc.child(xmlName.substr(0, xmlName.size()-4).c_str())))
 	{
@@ -240,21 +366,34 @@ void FirstScreenState::createScenarioObject(std::string scenario, std::string xm
 	}
 }
 
-bool FirstScreenState::createFruits(std::string scenario, std::string level)
+void FirstScreenState::changeLevel(LevelState level)
 {
-	std::string root = "./Data/scenario/"+ scenario + "/fruits/fruits_" + level + ".xml";
+	clearFruits();
+
+	levelState_ = level;
+	subLevelState_ = PLAYING;
+
+	createFruits("level1", level);
+
+	gameClock_->reset();
+}
+
+bool FirstScreenState::createFruits(std::string scenario, LevelState level)
+{
+	std::stringstream root;
+	root << "./Data/configuration/" << scenario << "/fruits/fruits_" << level << ".xml";
 
 	//Loading animations XML file
 	pugi::xml_document fruitsDoc;
-	if (!fruitsDoc.load_file(root.c_str()))
+	if(!fruitsDoc.load_file(root.str().c_str()))
 	{
 		MessageBoxA(NULL, "Could not load object .xml file!", "FirstScreen - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
 	pugi::xml_node root_node;
-	// Le asignamos el nodo principal comprobando que sea correcto
-	if (!(root_node = fruitsDoc.child("fruits")))
+	// Get initial node
+	if(!(root_node = fruitsDoc.child("fruits")))
 	{
 		MessageBoxA(NULL, "Could not find the fruits root node.", "FirstScreen - Error", MB_ICONERROR | MB_OK);
 		return false;
@@ -325,4 +464,15 @@ bool FirstScreenState::createFruits(std::string scenario, std::string level)
 	}
 
 	return true;
+}
+
+void FirstScreenState::clearFruits()
+{
+	// First we clean the fruits vector just in case
+	std::vector<FruitClass*>::iterator fruitIt;
+	for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
+	{
+		(*fruitIt)->destroy();
+	}
+	fruits_.clear();
 }

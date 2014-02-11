@@ -19,7 +19,7 @@ TextClass::~TextClass()
 {
 }
 
-bool TextClass::setup(ID3D11Device* device, ID3D11DeviceContext* deviceContext, Shader2DClass* shader, int screenWidth, int screenHeight, int posX, int posY, std::string sentenceText)
+bool TextClass::setup(ID3D11Device* device, ID3D11DeviceContext* deviceContext, Shader2DClass* shader, int screenWidth, int screenHeight, float posX, float posY, std::string sentenceText)
 {
 	bool result;
 
@@ -242,7 +242,7 @@ bool TextClass::setupSentence(SentenceType** sentence, int maxLength, ID3D11Devi
 	return true;
 }
 
-bool TextClass::updateSentence(SentenceType* sentence, std::string text, int positionX, int positionY, float red, float green, float blue,
+bool TextClass::updateSentence(SentenceType* sentence, std::string text, float positionX, float positionY, float red, float green, float blue,
 							   ID3D11DeviceContext* deviceContext)
 {
 	int numLetters;
@@ -308,7 +308,7 @@ bool TextClass::updateSentence(SentenceType* sentence, std::string text, int pos
 	return true;
 }
 
-void TextClass::setPosition(int positionX, int positionY)
+void TextClass::setPosition(float positionX, float positionY)
 {
 	updateSentence(sentence_, text_, positionX, positionY, sentence_->red, sentence_->green, sentence_->blue, deviceContext_);
 }

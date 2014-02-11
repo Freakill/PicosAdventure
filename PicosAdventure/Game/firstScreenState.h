@@ -14,11 +14,27 @@
 
 #include "../Engine/Object3DFactory.h"
 
+#include "../Utils/clockClass.h"
+
 #include "fruitClass.h"
 
 #include <mmsystem.h>
 
-#define	FRUITS 4
+enum LevelState
+	{
+		INTRODUCTION,
+		FIRST_LEVEL = 1,
+		SECOND_LEVEL,
+		THIRD_LEVEL,
+		FOURTH_LEVEL
+	};
+
+enum SubLevelState
+	{
+		PLAYING,
+		FADING,
+		SELECT_POLAROID
+	};
 
 class FirstScreenState: public ApplicationState
 {
@@ -37,17 +53,33 @@ class FirstScreenState: public ApplicationState
 	private:
 		static FirstScreenState firstScreenState_; //singleton
 
+		void updateFirsLevel();
+
+		void loadConfigurationFromXML();
+
 		void loadScenario(std::string scenario);
 		void createScenarioObject(std::string scenario, std::string xmlName);
 
-		bool createFruits(std::string scenario, std::string level);
+		void changeLevel(LevelState level);
+
+		bool createFruits(std::string scenario, LevelState level);
+		void clearFruits();
 
 		CameraClass*				camera_;
 		LightClass*					light_;
+		ClockClass*					gameClock_;
+
+		LevelState					levelState_;
+		SubLevelState				subLevelState_;
 
 		std::vector<Object3D*>		scenario_;
 		float						terrainHeight_;
+
 		std::vector<FruitClass*>	fruits_;
+		GUIManager*					polaroidGUI_;
+
+		float						playingTime_;
+		float						fadeTime_;
 
 		bool						debug_;
 };
