@@ -55,15 +55,20 @@ class FirstScreenState: public ApplicationState
 
 		void updateFirsLevel();
 
+		void setupGUI(GraphicsManager* graphicsManager, InputManager* inputManager);
+
 		void loadConfigurationFromXML();
 
 		void loadScenario(std::string scenario);
 		void createScenarioObject(std::string scenario, std::string xmlName);
 
-		void changeLevel(LevelState level);
-
 		bool createFruits(std::string scenario, LevelState level);
 		void clearFruits();
+
+		bool createPolaroids(std::string scenario, LevelState level);
+		void clearPolaroids();
+
+		void changeLevel(LevelState level);
 
 		CameraClass*				camera_;
 		LightClass*					light_;
@@ -77,6 +82,7 @@ class FirstScreenState: public ApplicationState
 
 		std::vector<FruitClass*>	fruits_;
 		GUIManager*					polaroidGUI_;
+		GUIFrame*					polaroidFrame_;
 
 		float						playingTime_;
 		float						fadeTime_;

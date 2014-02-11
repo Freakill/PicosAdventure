@@ -182,6 +182,26 @@ GUIButton* GUIFrame::addButton(GraphicsManager* graphicsManager, std::string nam
 	return button;
 }
 
+
+GUIButton* GUIFrame::addButton(GraphicsManager* graphicsManager, std::string name, Point pos, Point size)
+{
+	GUIButton* button = new GUIButton();
+
+	// Having the final vertical position, we setup the button
+	button->setup(graphicsManager, name, pos, size.x, size.y, SELECT_OBJECT);
+
+	// We add it to the map of buttons to keep track of it
+	guiButtons_.insert(std::pair<std::string, GUIButton*>(button->getName(), button));
+
+	// Update the total height of the frame
+	if(pos.y+button->getHeight() > height_)
+	{
+		height_ = pos.y+button->getHeight();
+	}
+
+	return button;
+}
+
 bool GUIFrame::checkInside(Point pos)
 {
 	if(pos.x >= position_.x && pos.x <= position_.x+width_ &&

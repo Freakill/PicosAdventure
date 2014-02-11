@@ -63,6 +63,8 @@ class FruitClass : public Notifier<FruitClass, Point>
 		void makeItFall();
 		void resetFruit();
 
+		bool hasFallen();
+
 	private:
 		Object3D*	model_;
 		SphereCollision* collisionTest_;
@@ -82,6 +84,8 @@ class FruitClass : public Notifier<FruitClass, Point>
 		float		rotZ_;
 
 		float		floorHeight_;
+
+		bool		hasFallen_;
 
 		FruitState	fruitState_;
 

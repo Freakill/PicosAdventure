@@ -78,6 +78,8 @@ bool FruitClass::setup(GraphicsManager *graphicsManager, std::string fileName, P
 	collisionTest_ = new SphereCollision();
 	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 0.4f);
 
+	hasFallen_ = false;
+
 	return true;
 }
 
@@ -125,7 +127,7 @@ void FruitClass::update(float elapsedTime)
 			break;
 		case IN_FLOOR:
 			{
-				//position_.y = -1.4f;
+				position_.y = floorHeight_;
 			}
 			break;
 	}
@@ -183,6 +185,7 @@ void FruitClass::makeItFall()
 		velocity_.z = 0.0f;
 
 		fruitState_ = FALLING;
+		hasFallen_ = true;
 	}
 }
 
@@ -268,4 +271,9 @@ void FruitClass::setFruitEffectType(FruitEffect effect)
 void FruitClass::setColorEffect(XMFLOAT4 color)
 {
 	colorEffect_ = color;
+}
+
+bool FruitClass::hasFallen()
+{
+	return hasFallen_;
 }

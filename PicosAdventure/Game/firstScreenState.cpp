@@ -76,7 +76,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 
 	debug_ = false;
 
-	inputManager->addListener(*this);
+	setupGUI(graphicsManager, inputManager);
 
 	// Setup clock at the end so it starts when we run
 	gameClock_ = new ClockClass();
@@ -149,6 +149,15 @@ void FirstScreenState::draw()
 	{
 		(*fruitIt)->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
 	}
+
+	if(subLevelState_ == SELECT_POLAROID)
+	{
+		graphicsManager_->turnZBufferOff();
+		graphicsManager_->turnOnAlphaBlending();
+			polaroidGUI_->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, orthoMatrix);
+		graphicsManager_->turnOffAlphaBlending();
+		graphicsManager_->turnZBufferOn();
+	}
 }
 
 void FirstScreenState::destroy()
@@ -163,47 +172,6 @@ void FirstScreenState::destroy()
 	for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
 	{
 		(*fruitIt)->destroy();
-	}
-}
-
-void FirstScreenState::updateFirsLevel()
-{
-	switch(subLevelState_)
-	{
-		case PLAYING:
-			{
-				if(gameClock_->getTime() > playingTime_)
-				{
-					// check if Pico is idle
-					subLevelState_ = FADING;
-					gameClock_->reset();
-				}
-			}
-			break;
-		case FADING:
-			{
-				float diffuseTemp = 1.0f - gameClock_->getTime()/fadeTime_;
-				light_->setDiffuseColor(diffuseTemp, diffuseTemp, diffuseTemp, 1.0f);
-
-				float ambientTemp = 0.1f - (gameClock_->getTime()/fadeTime_)*0.075f;
-				light_->setAmbientColor(ambientTemp, ambientTemp, ambientTemp, 1.0f);
-
-				if(gameClock_->getTime() > fadeTime_)
-				{
-					subLevelState_ = SELECT_POLAROID;
-				}
-			}
-			break;
-		case SELECT_POLAROID:
-			{
-
-			}
-			break;
-		default:
-			{
-
-			}
-			break;
 	}
 }
 
@@ -244,6 +212,63 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 			}
 			break;
 	}
+}
+
+void FirstScreenState::updateFirsLevel()
+{
+	switch(subLevelState_)
+	{
+		case PLAYING:
+			{
+				if(gameClock_->getTime() > playingTime_)
+				{
+					// check if Pico is idle
+					subLevelState_ = FADING;
+					gameClock_->reset();
+				}
+			}
+			break;
+		case FADING:
+			{
+				float diffuseTemp = 1.0f - gameClock_->getTime()/fadeTime_;
+				light_->setDiffuseColor(diffuseTemp, diffuseTemp, diffuseTemp, 1.0f);
+
+				float ambientTemp = 0.1f - (gameClock_->getTime()/fadeTime_)*0.075f;
+				light_->setAmbientColor(ambientTemp, ambientTemp, ambientTemp, 1.0f);
+
+				if(gameClock_->getTime() > fadeTime_)
+				{
+					createPolaroids("level1", levelState_);
+					subLevelState_ = SELECT_POLAROID;
+				}
+			}
+			break;
+		case SELECT_POLAROID:
+			{
+
+			}
+			break;
+		default:
+			{
+
+			}
+			break;
+	}
+}
+
+void FirstScreenState::setupGUI(GraphicsManager* graphicsManager, InputManager* inputManager)
+{
+	polaroidGUI_ = new GUIManager;
+
+	int screenWidth, screenHeight;
+	graphicsManager->getScreenSize(screenWidth, screenHeight);
+
+	polaroidFrame_ = new GUIFrame;
+	polaroidFrame_->setup(graphicsManager, "Polaroids", Point(0, 0), screenWidth, screenHeight);
+	polaroidGUI_->addFrame(polaroidFrame_);
+
+	inputManager->addListener(*this);
+	inputManager->addListener(*polaroidGUI_);
 }
 
 void FirstScreenState::loadConfigurationFromXML()
@@ -366,18 +391,6 @@ void FirstScreenState::createScenarioObject(std::string scenario, std::string xm
 	}
 }
 
-void FirstScreenState::changeLevel(LevelState level)
-{
-	clearFruits();
-
-	levelState_ = level;
-	subLevelState_ = PLAYING;
-
-	createFruits("level1", level);
-
-	gameClock_->reset();
-}
-
 bool FirstScreenState::createFruits(std::string scenario, LevelState level)
 {
 	std::stringstream root;
@@ -475,4 +488,89 @@ void FirstScreenState::clearFruits()
 		(*fruitIt)->destroy();
 	}
 	fruits_.clear();
+}
+
+bool FirstScreenState::createPolaroids(std::string scenario, LevelState level)
+{
+	std::stringstream root;
+	root << "./Data/configuration/" << scenario << "/polaroids/polaroids_" << level << ".xml";
+
+	//Loading animations XML file
+	pugi::xml_document polaroidsDoc;
+	if(!polaroidsDoc.load_file(root.str().c_str()))
+	{
+		MessageBoxA(NULL, "Could not load polaroid .xml file!", "FirstScreen - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	pugi::xml_node root_node;
+	// Get initial node
+	if(!(root_node = polaroidsDoc.child("polaroids")))
+	{
+		MessageBoxA(NULL, "Could not find the polaroids root node.", "FirstScreen - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	int fruitIndex = 0;
+	for(pugi::xml_node polaroidNode = root_node.first_child(); polaroidNode; polaroidNode = polaroidNode.next_sibling())
+	{
+		std::string node_name = polaroidNode.name();
+		// Actuamos en consecuencia segun el tipo de nodo
+		if(node_name ==  "polaroid")
+		{
+			if(fruits_.at(fruitIndex)->hasFallen())
+			{
+				pugi::xml_node imageNode;
+				imageNode = polaroidNode.child("image");
+
+				pugi::xml_text imageName = imageNode.text();
+
+				// Parse transformation data
+				pugi::xml_node positionNode;
+				Point pos;
+				if(!(positionNode = polaroidNode.child("position")))
+				{
+					MessageBoxA(NULL, "Could not find the polaroids position.", "FirstScreen - Error", MB_ICONERROR | MB_OK);
+					pos = Point(0, 0);
+				}
+				else{
+					pos = Point(positionNode.attribute("x").as_float(), positionNode.attribute("y").as_float());
+				}
+
+				pugi::xml_node sizeNode;
+				Point size;
+				if(!(sizeNode = polaroidNode.child("size")))
+				{
+					MessageBoxA(NULL, "Could not find the polaroids size.", "FirstScreen - Error", MB_ICONERROR | MB_OK);
+					size = Point(0, 0);
+				}
+				else{
+					size = Point(sizeNode.attribute("x").as_float(), sizeNode.attribute("y").as_float());
+				}
+
+				polaroidFrame_->addButton(graphicsManager_, imageName.as_string(), pos, size);
+			}
+		}
+		fruitIndex++;
+	}
+
+	return true;
+}
+
+void FirstScreenState::clearPolaroids()
+{
+	
+}
+
+void FirstScreenState::changeLevel(LevelState level)
+{
+	clearFruits();
+	clearPolaroids();
+
+	levelState_ = level;
+	subLevelState_ = PLAYING;
+
+	createFruits("level1", level);
+
+	gameClock_->reset();
 }
