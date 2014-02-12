@@ -1,4 +1,4 @@
 <configuration>
-	<play_time> 3 </play_time>
-	<fade_time> 2 </fade_time>
+	<play_time> 300 </play_time>
+	<fade_time> 5 </fade_time>
 </configuration>

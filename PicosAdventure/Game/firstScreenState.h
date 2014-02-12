@@ -16,6 +16,7 @@
 
 #include "../Utils/clockClass.h"
 
+#include "picoClass.h"
 #include "fruitClass.h"
 
 #include <mmsystem.h>
@@ -36,7 +37,7 @@ enum SubLevelState
 		SELECT_POLAROID
 	};
 
-class FirstScreenState: public ApplicationState
+class FirstScreenState: public ApplicationState, public Listener<GUIButton, ButtonStruct>
 {
 	public:
 		FirstScreenState();
@@ -49,6 +50,7 @@ class FirstScreenState: public ApplicationState
 		virtual void destroy();
 
 		virtual void notify(InputManager* notifier, InputStruct arg);
+		void notify(GUIButton* notifier, ButtonStruct arg);
 
 	private:
 		static FirstScreenState firstScreenState_; //singleton
@@ -79,6 +81,8 @@ class FirstScreenState: public ApplicationState
 
 		std::vector<Object3D*>		scenario_;
 		float						terrainHeight_;
+
+		PicoClass*					pico_;
 
 		std::vector<FruitClass*>	fruits_;
 		GUIManager*					polaroidGUI_;

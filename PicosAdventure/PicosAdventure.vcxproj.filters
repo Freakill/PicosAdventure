@@ -174,6 +174,9 @@
     <ClCompile Include="Game\fruitClass.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
+    <ClCompile Include="Game\picoClass.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\systemClass.h">
@@ -279,6 +282,9 @@
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
     <ClInclude Include="Game\fruitClass.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\picoClass.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
   </ItemGroup>

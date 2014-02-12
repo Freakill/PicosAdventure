@@ -127,7 +127,7 @@ void FruitClass::update(float elapsedTime)
 			break;
 		case IN_FLOOR:
 			{
-				position_.y = floorHeight_;
+				//position_.y = floorHeight_;
 			}
 			break;
 	}

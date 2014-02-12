@@ -74,6 +74,20 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 
 	loadConfigurationFromXML();
 
+	// Create the Pico object.
+	pico_ = new PicoClass();
+	if(!pico_)
+	{
+		return false;
+	}
+
+	if(!pico_->setup(graphicsManager_, camera_))
+	{
+		MessageBoxA(NULL, "Could not initialize Pico :(.", "Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+	inputManager->addListener(*pico_);
+
 	debug_ = false;
 
 	setupGUI(graphicsManager, inputManager);
@@ -101,6 +115,8 @@ void FirstScreenState::update(float elapsedTime)
 		{
 			(*fruitIt)->update(elapsedTime);
 		}
+	
+		pico_->update(elapsedTime);
 	}
 
 	switch(levelState_)
@@ -149,6 +165,8 @@ void FirstScreenState::draw()
 	{
 		(*fruitIt)->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
 	}
+
+	pico_->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_);
 
 	if(subLevelState_ == SELECT_POLAROID)
 	{
@@ -212,6 +230,25 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 			}
 			break;
 	}
+}
+
+void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
+{
+    switch(arg.buttonPurpose)
+    {
+        case(SELECT_OBJECT):
+            {
+				if(levelState_ == FIRST_LEVEL)
+				{
+					changeLevel(SECOND_LEVEL);
+				}
+            }
+            break;
+        default:
+            {
+            }
+            break;
+    }
 }
 
 void FirstScreenState::updateFirsLevel()
@@ -472,6 +509,8 @@ bool FirstScreenState::createFruits(std::string scenario, LevelState level)
 
 			fruit->getCollisionSphere()->setRadius(radius);
 
+			fruit->addListener(*pico_);
+
 			fruits_.push_back(fruit);
 		}
 	}
@@ -548,7 +587,7 @@ bool FirstScreenState::createPolaroids(std::string scenario, LevelState level)
 					size = Point(sizeNode.attribute("x").as_float(), sizeNode.attribute("y").as_float());
 				}
 
-				polaroidFrame_->addButton(graphicsManager_, imageName.as_string(), pos, size);
+				polaroidFrame_->addButton(graphicsManager_, imageName.as_string(), pos, size)->addListener(*this);
 			}
 		}
 		fruitIndex++;
@@ -564,13 +603,20 @@ void FirstScreenState::clearPolaroids()
 
 void FirstScreenState::changeLevel(LevelState level)
 {
+	// Clear the fruits and polaroids vectors for next level
 	clearFruits();
 	clearPolaroids();
 
+	// Reset light
+	light_->setAmbientColor(0.1f, 0.1f, 0.1f, 1.0f);
+	light_->setDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+	// Set new level
 	levelState_ = level;
 	subLevelState_ = PLAYING;
 
 	createFruits("level1", level);
 
+	// Reset clock
 	gameClock_->reset();
 }
