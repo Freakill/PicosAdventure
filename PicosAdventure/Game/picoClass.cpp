@@ -5,6 +5,7 @@ PicoClass::PicoClass()
 	body_ = 0;
 	tips_ = 0;
 	eyes_ = 0;
+	hat_ = 0;
 
 	picoState_ = HIDDEN;
 	waitedTime_ = 0.0f;
@@ -40,13 +41,16 @@ PicoClass::~PicoClass()
 {
 }
 
-bool PicoClass::setup(GraphicsManager *graphicsManager, CameraClass* camera)
+bool PicoClass::setup(GraphicsManager* graphicsManager, CameraClass* camera)
 {
 	camera_ = camera;
 
 	body_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossCuerpo");
 	tips_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossExtremidades");
 	eyes_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossOjos");
+
+	collisionTest_ = new SphereCollision();
+	collisionTest_->setup(graphicsManager, Point(0.0f, 1.6f, 0.0f), 0.8f);
 
 	position_.x = -5.25f;
 	position_.y = 0.0f;
@@ -155,10 +159,19 @@ void PicoClass::update(float elapsedTime)
 			}
 			break;
 	}
+
+	collisionTest_->setPosition(position_);
 }
 
-void PicoClass::draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light)
+void PicoClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug)
 {
+	if(debug)
+	{
+		graphicsManager->turnOnWireframeRasterizer();
+		collisionTest_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+		graphicsManager->turnOnSolidRasterizer();
+	}
+
 	XMFLOAT4X4 rotatingMatrixZ;
 	XMStoreFloat4x4(&rotatingMatrixZ, XMMatrixRotationZ(rotZ_));
 	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&rotatingMatrixZ)));
@@ -179,9 +192,13 @@ void PicoClass::draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext, X
 	XMStoreFloat4x4(&movingMatrix, XMMatrixTranslation(position_.x, position_.y, position_.z));
 	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&movingMatrix)));
 
-	body_->draw(device, deviceContext, worldMatrix, viewMatrix, projectionMatrix, light);
-	tips_->draw(device, deviceContext, worldMatrix, viewMatrix, projectionMatrix, light);
-	eyes_->draw(device, deviceContext, worldMatrix, viewMatrix, projectionMatrix, light);
+	body_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	tips_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	eyes_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	if(hat_)
+	{
+		hat_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	}
 }
 
 void PicoClass::destroy()
@@ -208,6 +225,14 @@ void PicoClass::destroy()
 		eyes_->destroy();
 		delete eyes_;
 		eyes_ = 0;
+	}
+
+	// Release the model object
+	if(hat_)
+	{
+		hat_->destroy();
+		delete hat_;
+		hat_ = 0;
 	}
 }
 

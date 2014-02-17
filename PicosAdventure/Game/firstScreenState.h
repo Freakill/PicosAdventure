@@ -64,10 +64,11 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		void loadScenario(std::string scenario);
 		void createScenarioObject(std::string scenario, std::string xmlName);
 
-		bool createFruits(std::string scenario, LevelState level);
+		bool loadFruits();
+		void addFruitsToGame();
 		void clearFruits();
 
-		bool createPolaroids(std::string scenario, LevelState level);
+		bool createPolaroids();
 		void clearPolaroids();
 
 		void changeLevel(LevelState level);
@@ -76,20 +77,27 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		LightClass*					light_;
 		ClockClass*					gameClock_;
 
+
+		// Game state and control variables
 		LevelState					levelState_;
 		SubLevelState				subLevelState_;
 
+		float						playingTime_;
+		float						fadeTime_;
+
+		// Scenario structure
 		std::vector<Object3D*>		scenario_;
 		float						terrainHeight_;
 
 		PicoClass*					pico_;
 
+		// Fruit vector and in game fruit vector
 		std::vector<FruitClass*>	fruits_;
+		std::vector<FruitClass*>	fruitsInGame_;
+
+		// Classes for managing between game image selection
 		GUIManager*					polaroidGUI_;
 		GUIFrame*					polaroidFrame_;
-
-		float						playingTime_;
-		float						fadeTime_;
 
 		bool						debug_;
 };

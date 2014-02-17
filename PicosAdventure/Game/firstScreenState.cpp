@@ -88,6 +88,9 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	}
 	inputManager->addListener(*pico_);
 
+	// Load the fruits
+	loadFruits();
+
 	debug_ = false;
 
 	setupGUI(graphicsManager, inputManager);
@@ -111,7 +114,7 @@ void FirstScreenState::update(float elapsedTime)
 	if(subLevelState_ == PLAYING)
 	{
 		std::vector<FruitClass*>::iterator fruitIt;
-		for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
+		for(fruitIt = fruitsInGame_.begin(); fruitIt != fruitsInGame_.end(); fruitIt++)
 		{
 			(*fruitIt)->update(elapsedTime);
 		}
@@ -159,14 +162,14 @@ void FirstScreenState::draw()
 		(*objectsIt)->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_);
 	}
 
-	// Draw the loaded fruits
+	// Draw the loaded fruits in game
 	std::vector<FruitClass*>::iterator fruitIt;
-	for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
+	for(fruitIt = fruitsInGame_.begin(); fruitIt != fruitsInGame_.end(); fruitIt++)
 	{
-		(*fruitIt)->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
+		(*fruitIt)->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
 	}
 
-	pico_->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_);
+	pico_->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
 
 	if(subLevelState_ == SELECT_POLAROID)
 	{
@@ -187,7 +190,7 @@ void FirstScreenState::destroy()
 	}
 
 	std::vector<FruitClass*>::iterator fruitIt;
-	for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
+	for(fruitIt = fruitsInGame_.begin(); fruitIt != fruitsInGame_.end(); fruitIt++)
 	{
 		(*fruitIt)->destroy();
 	}
@@ -275,7 +278,7 @@ void FirstScreenState::updateFirsLevel()
 
 				if(gameClock_->getTime() > fadeTime_)
 				{
-					createPolaroids("level1", levelState_);
+					createPolaroids();
 					subLevelState_ = SELECT_POLAROID;
 				}
 			}
@@ -428,94 +431,148 @@ void FirstScreenState::createScenarioObject(std::string scenario, std::string xm
 	}
 }
 
-bool FirstScreenState::createFruits(std::string scenario, LevelState level)
+bool FirstScreenState::loadFruits()
 {
-	std::stringstream root;
-	root << "./Data/configuration/" << scenario << "/fruits/fruits_" << level << ".xml";
-
-	//Loading animations XML file
-	pugi::xml_document fruitsDoc;
-	if(!fruitsDoc.load_file(root.str().c_str()))
+	for(int i = 1; i < 5; i++)
 	{
-		MessageBoxA(NULL, "Could not load object .xml file!", "FirstScreen - Error", MB_ICONERROR | MB_OK);
-		return false;
-	}
+		std::stringstream root;
+		root << "./Data/configuration/level1/fruits/fruits_" << i << ".xml";
 
-	pugi::xml_node root_node;
-	// Get initial node
-	if(!(root_node = fruitsDoc.child("fruits")))
-	{
-		MessageBoxA(NULL, "Could not find the fruits root node.", "FirstScreen - Error", MB_ICONERROR | MB_OK);
-		return false;
-	}
-
-	for(pugi::xml_node fruitNode = root_node.first_child(); fruitNode; fruitNode = fruitNode.next_sibling())
-	{
-		std::string node_name = fruitNode.name();
-		// Actuamos en consecuencia segun el tipo de nodo
-		if(node_name ==  "fruit")
+		//Loading animations XML file
+		pugi::xml_document fruitsDoc;
+		if(!fruitsDoc.load_file(root.str().c_str()))
 		{
-			pugi::xml_node modelNode;
-			modelNode = fruitNode.child("model");
+			std::stringstream error;
+			error << "Could not load object .xml file!" << root.str();
+			MessageBoxA(NULL, error.str().c_str(), "FirstScreen - Fruit - Error", MB_ICONERROR | MB_OK);
+			continue;
+		}
 
-			pugi::xml_text modelName = modelNode.text();
+		pugi::xml_node root_node;
+		// Get initial node
+		if(!(root_node = fruitsDoc.child("fruits")))
+		{
+			MessageBoxA(NULL, "Could not find the fruits root node.", "FirstScreen - Fruit - Error", MB_ICONERROR | MB_OK);
+			continue;
+		}
 
-			// Parse transformation data
-			pugi::xml_node positionNode;
-			positionNode = fruitNode.child("position");
-			Point pos = Point(positionNode.attribute("x").as_float(), positionNode.attribute("y").as_float(), positionNode.attribute("z").as_float());
-
-			pugi::xml_node scaleNode;
-			scaleNode = fruitNode.child("scale");
-			Vector scale = Vector(scaleNode.attribute("x").as_float(), scaleNode.attribute("y").as_float(), scaleNode.attribute("z").as_float());
-
-			pugi::xml_node rotationNode;
-			rotationNode = fruitNode.child("rotation");
-			float rotX = rotationNode.attribute("x").as_float();
-			float rotY = rotationNode.attribute("y").as_float();
-			float rotZ = rotationNode.attribute("z").as_float();
-
-			FruitClass* fruit = new FruitClass();
-			if(!fruit)
+		for(pugi::xml_node fruitNode = root_node.first_child(); fruitNode; fruitNode = fruitNode.next_sibling())
+		{
+			std::string node_name = fruitNode.name();
+			// Actuamos en consecuencia segun el tipo de nodo
+			if(node_name ==  "fruit")
 			{
-				return false;
+				pugi::xml_node modelNode;
+				modelNode = fruitNode.child("model");
+
+				pugi::xml_text modelName = modelNode.text();
+
+				// Parse transformation data
+				pugi::xml_node positionNode;
+				positionNode = fruitNode.child("position");
+				Point pos = Point(positionNode.attribute("x").as_float(), positionNode.attribute("y").as_float(), positionNode.attribute("z").as_float());
+
+				pugi::xml_node scaleNode;
+				scaleNode = fruitNode.child("scale");
+				Vector scale = Vector(scaleNode.attribute("x").as_float(), scaleNode.attribute("y").as_float(), scaleNode.attribute("z").as_float());
+
+				pugi::xml_node rotationNode;
+				rotationNode = fruitNode.child("rotation");
+				float rotX = rotationNode.attribute("x").as_float();
+				float rotY = rotationNode.attribute("y").as_float();
+				float rotZ = rotationNode.attribute("z").as_float();
+
+				FruitClass* fruit = new FruitClass();
+				if(!fruit)
+				{
+					return false;
+				}
+
+				if(!fruit->setup(graphicsManager_, modelName.as_string(), pos, terrainHeight_, scale, rotX, rotY, rotZ))
+				{
+					MessageBoxA(NULL, "Could not initialize fruit.", "Visualizer - Fruit - Error", MB_ICONERROR | MB_OK);
+					return false;
+				}
+
+				pugi::xml_node effectNode = fruitNode.child("effects");
+				std::string effectType = effectNode.attribute("type").as_string();
+
+				if(effectType == "color")
+				{
+					pugi::xml_node colorNode = effectNode.child("color");
+					XMFLOAT4 color = XMFLOAT4(colorNode.attribute("r").as_float(), colorNode.attribute("g").as_float(), colorNode.attribute("b").as_float(), 1.0f);
+				}
+
+				if(effectType == "texture")
+				{
+					pugi::xml_node textureNode = effectNode.child("texture");
+
+					TextureClass* temp = new TextureClass;
+					if(!temp)
+					{
+						MessageBoxA(NULL, "Could not create texture!", "Visualizer - Fruit - Error", MB_ICONERROR | MB_OK);
+						continue;
+					}
+					std::string textureName = textureNode.text().as_string();
+					std::string filePath = "./Data/models/miniBossCuerpo/" + textureName + ".dds";
+					bool result = temp->setup(graphicsManager_->getDevice(), filePath);
+					if(!result)
+					{
+						MessageBoxA(NULL, "Could not load texture!", "Visualizer - Fruit - Error", MB_ICONERROR | MB_OK);
+						continue;
+					}
+
+					fruit->setFruitEffectType(TEXTURE);
+					fruit->setTextureEffect(temp);
+				}
+
+				if(effectType == "hat")
+				{
+					pugi::xml_node modelNode = effectNode.child("model");
+
+					std::string modelName = modelNode.text().as_string();
+
+					Object3D* temp = 0;
+					temp = Object3DFactory::Instance()->CreateObject3D("StaticObject3D", graphicsManager_, modelName);
+					if(!temp)
+					{
+						MessageBoxA(NULL, "Could not load model!", "Visualizer - Fruit - Error", MB_ICONERROR | MB_OK);
+						continue;
+					}
+
+					fruit->setFruitEffectType(HAT);
+					fruit->setHatEffect(temp);
+				}
+
+				pugi::xml_node collisionNode = fruitNode.child("collision");
+
+				positionNode = collisionNode.child("position");
+				pos = Point(positionNode.attribute("x").as_float(), positionNode.attribute("y").as_float(), positionNode.attribute("z").as_float());
+
+				fruit->getCollisionSphere()->setRelativePosition(pos);
+
+				pugi::xml_node radiusNode;
+				radiusNode = collisionNode.child("radius");
+				float radius = radiusNode.text().as_float();
+
+				fruit->getCollisionSphere()->setRadius(radius);
+
+				fruit->addListener(*pico_);
+
+				fruits_.push_back(fruit);
 			}
-
-			if(!fruit->setup(graphicsManager_, modelName.as_string(), pos, terrainHeight_, scale, rotX, rotY, rotZ))
-			{
-				MessageBoxA(NULL, "Could not initialize fruit 1.", "Error", MB_ICONERROR | MB_OK);
-				return false;
-			}
-
-			pugi::xml_node effectNode = fruitNode.child("effects");
-			std::string effectType = effectNode.attribute("type").as_string();
-
-			if(effectType == "color")
-			{
-				pugi::xml_node colorNode = effectNode.child("color");
-				XMFLOAT4 color = XMFLOAT4(colorNode.attribute("r").as_float(), colorNode.attribute("g").as_float(), colorNode.attribute("b").as_float(), 1.0f);
-			}
-
-			pugi::xml_node collisionNode = fruitNode.child("collision");
-
-			positionNode = collisionNode.child("position");
-			pos = Point(positionNode.attribute("x").as_float(), positionNode.attribute("y").as_float(), positionNode.attribute("z").as_float());
-
-			fruit->getCollisionSphere()->setRelativePosition(pos);
-
-			pugi::xml_node radiusNode;
-			radiusNode = collisionNode.child("radius");
-			float radius = radiusNode.text().as_float();
-
-			fruit->getCollisionSphere()->setRadius(radius);
-
-			fruit->addListener(*pico_);
-
-			fruits_.push_back(fruit);
 		}
 	}
 
 	return true;
+}
+
+void FirstScreenState::addFruitsToGame()
+{
+	for(int i = (levelState_-1)*4; i < (levelState_-1)*4+4; i++)
+	{
+		fruitsInGame_.push_back(fruits_.at(i));
+	}
 }
 
 void FirstScreenState::clearFruits()
@@ -529,10 +586,10 @@ void FirstScreenState::clearFruits()
 	fruits_.clear();
 }
 
-bool FirstScreenState::createPolaroids(std::string scenario, LevelState level)
+bool FirstScreenState::createPolaroids()
 {
 	std::stringstream root;
-	root << "./Data/configuration/" << scenario << "/polaroids/polaroids_" << level << ".xml";
+	root << "./Data/configuration/scenario1/polaroids/polaroids_" << levelState_ << ".xml";
 
 	//Loading animations XML file
 	pugi::xml_document polaroidsDoc;
@@ -604,7 +661,7 @@ void FirstScreenState::clearPolaroids()
 void FirstScreenState::changeLevel(LevelState level)
 {
 	// Clear the fruits and polaroids vectors for next level
-	clearFruits();
+	fruitsInGame_.clear();
 	clearPolaroids();
 
 	// Reset light
@@ -615,7 +672,7 @@ void FirstScreenState::changeLevel(LevelState level)
 	levelState_ = level;
 	subLevelState_ = PLAYING;
 
-	createFruits("level1", level);
+	addFruitsToGame();
 
 	// Reset clock
 	gameClock_->reset();

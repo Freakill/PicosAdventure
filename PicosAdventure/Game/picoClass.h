@@ -39,9 +39,9 @@ class PicoClass : public Listener<InputManager, InputStruct>, public Listener<Fr
 		PicoClass(const PicoClass&);
 		~PicoClass();
 
-		bool setup(GraphicsManager *graphicsManager, CameraClass* camera);
+		bool setup(GraphicsManager* graphicsManager, CameraClass* camera);
 		void update(float elapsedTime);
-		void draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light);
+		void draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug);
 		void destroy();
 
 		void goToPosition(Point position);
@@ -62,6 +62,9 @@ class PicoClass : public Listener<InputManager, InputStruct>, public Listener<Fr
 		Object3D*	body_;
 		Object3D*	tips_;
 		Object3D*	eyes_;
+		Object3D*	hat_;
+
+		SphereCollision* collisionTest_;
 
 		XMFLOAT4	bodyColor_;
 		XMFLOAT4	tipsColor_;

@@ -31,6 +31,9 @@ FruitClass::FruitClass()
 	rotX_ = 0.0f;
 	rotY_ = 0.0f; 
 	rotZ_ = 0.0f;
+
+	textureEffect_ = 0;
+	hatEffect_ = 0;
 }
 
 FruitClass::FruitClass(const FruitClass& other)
@@ -135,11 +138,13 @@ void FruitClass::update(float elapsedTime)
 	collisionTest_->setPosition(position_);
 }
 
-void FruitClass::draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug)
+void FruitClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug)
 {
 	if(debug)
 	{
-		collisionTest_->draw(device, deviceContext, worldMatrix, viewMatrix, projectionMatrix, light);
+		graphicsManager->turnOnWireframeRasterizer();
+		collisionTest_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+		graphicsManager->turnOnSolidRasterizer();
 	}
 
 	XMFLOAT4X4 rotatingMatrixZ;
@@ -162,7 +167,7 @@ void FruitClass::draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	XMStoreFloat4x4(&movingMatrix, XMMatrixTranslation(position_.x, position_.y, position_.z));
 	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&movingMatrix)));
 
-	model_->draw(device, deviceContext, worldMatrix, viewMatrix, projectionMatrix, light);
+	model_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
 }
 
 void FruitClass::destroy()
@@ -173,6 +178,21 @@ void FruitClass::destroy()
 		model_->destroy();
 		delete model_;
 		model_ = 0;
+	}
+
+	// Release the collision object
+	if(collisionTest_)
+	{
+		collisionTest_->destroy();
+		delete collisionTest_;
+		collisionTest_ = 0;
+	}
+
+	if(textureEffect_)
+	{
+		textureEffect_->destroy();
+		delete textureEffect_;
+		textureEffect_ = 0;
 	}
 }
 
@@ -268,12 +288,43 @@ void FruitClass::setFruitEffectType(FruitEffect effect)
 	fruitEffect_ = effect;
 }
 
+FruitEffect FruitClass::getFruitEffect()
+{
+	return fruitEffect_;
+}
+
 void FruitClass::setColorEffect(XMFLOAT4 color)
 {
 	colorEffect_ = color;
+}
+
+XMFLOAT4 FruitClass::getColorEffect()
+{
+	return colorEffect_;
+}
+
+void FruitClass::setTextureEffect(TextureClass* texture)
+{
+	textureEffect_ = texture;
+}
+
+TextureClass* FruitClass::getTextureEffect()
+{
+	return textureEffect_;
+}
+
+void FruitClass::setHatEffect(Object3D* hat)
+{
+	hatEffect_ = hat;
+}
+
+Object3D* FruitClass::getHatEffect()
+{
+	return hatEffect_;
 }
 
 bool FruitClass::hasFallen()
 {
 	return hasFallen_;
 }
+

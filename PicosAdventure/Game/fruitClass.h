@@ -2,6 +2,7 @@
 #define _FRUIT_CLASS_H_
 
 #include "../Engine/Object3DFactory.h"
+
 #include "../Graphics/graphicsManager.h"
 
 #include "../Math/pointClass.h"
@@ -17,7 +18,7 @@ enum FruitEffect
 	{
 		COLOR,
 		TEXTURE,
-		COMPLEMENT,
+		HAT,
 		BODY
 	};
 
@@ -37,9 +38,9 @@ class FruitClass : public Notifier<FruitClass, Point>
 		FruitClass(const FruitClass&);
 		~FruitClass();
 
-		bool setup(GraphicsManager *graphicsManager, std::string fileName, Point position, float floorHeight, Vector scaling, float rotX, float rotY, float rotZ);
+		bool setup(GraphicsManager* graphicsManager, std::string fileName, Point position, float floorHeight, Vector scaling, float rotX, float rotY, float rotZ);
 		void update(float elapsedTime);
-		void draw(ID3D11Device* device, ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug);
+		void draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug);
 		void destroy();
 
 		void setPosition(Point newPosition);
@@ -58,7 +59,16 @@ class FruitClass : public Notifier<FruitClass, Point>
 		SphereCollision* getCollisionSphere();
 
 		void setFruitEffectType(FruitEffect effect);
+		FruitEffect getFruitEffect();
+
 		void setColorEffect(XMFLOAT4 color);
+		XMFLOAT4 getColorEffect();
+
+		void setTextureEffect(TextureClass* texture);
+		TextureClass* getTextureEffect();
+
+		void setHatEffect(Object3D* hat);
+		Object3D* getHatEffect();
 
 		void makeItFall();
 		void resetFruit();
@@ -92,6 +102,9 @@ class FruitClass : public Notifier<FruitClass, Point>
 		// EFFECTS
 		FruitEffect fruitEffect_;
 		XMFLOAT4	colorEffect_;
+		TextureClass* textureEffect_;
+		Object3D* hatEffect_;
+
 };
 
 #endif //_FRUIT_CLASS_H_
