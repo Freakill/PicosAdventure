@@ -48,6 +48,8 @@ bool FruitClass::setup(GraphicsManager *graphicsManager, std::string fileName, P
 {
 	model_ = Object3DFactory::Instance()->CreateObject3D("StaticObject3D", graphicsManager, fileName);
 
+	name_ = fileName;
+
 	initialPosition_.x = position.x;
 	initialPosition_.y = position.y;
 	initialPosition_.z = position.z;
@@ -194,6 +196,11 @@ void FruitClass::destroy()
 		delete textureEffect_;
 		textureEffect_ = 0;
 	}
+}
+
+std::string FruitClass::getName()
+{
+	return name_;
 }
 
 void FruitClass::makeItFall()

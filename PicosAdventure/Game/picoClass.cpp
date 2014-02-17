@@ -269,10 +269,11 @@ void PicoClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, X
 		hat_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
 	}
 
-	/*tipsLight_->setAmbientColor(light->getAmbientColor().x, light->getAmbientColor().y, light->getAmbientColor().z, 1.0f);
+	tipsLight_->setAmbientColor(light->getAmbientColor().x, light->getAmbientColor().y, light->getAmbientColor().z, 1.0f);
 	tipsLight_->setDiffuseColor(tipsColor_.x*light->getDiffuseColor().x, tipsColor_.y*light->getDiffuseColor().y, tipsColor_.z*light->getDiffuseColor().z, 1.0f);
-	tipsLight_->setDirection(light->getDirection().x, light->getDirection().y, light->getDirection().z);*/
-	tips_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	tipsLight_->setDirection(light->getDirection().x, light->getDirection().y, light->getDirection().z);
+
+	tips_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, tipsLight_);
 }
 
 void PicoClass::destroy()

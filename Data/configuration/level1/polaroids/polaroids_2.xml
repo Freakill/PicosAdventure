@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<polaroids>
+	<polaroid>
+		<image>polaroid_armor</image>
+		<position x="0" y="0"/>
+		<size x="100" y="100"/>
+	</polaroid>
+	<polaroid>
+		<image>polaroid_stars</image>
+		<position x="200" y="0"/>
+		<size x="100" y="100"/>
+	</polaroid>
+	<polaroid>
+		<image>polaroid_fire</image>
+		<position x="400" y="0"/>
+		<size x="100" y="100"/>
+	</polaroid>
+	<polaroid>
+		<image>polaroid_ice</image>
+		<position x="600" y="0"/>
+		<size x="100" y="100"/>
+	</polaroid>
+</polaroids>

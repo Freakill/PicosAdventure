@@ -27,7 +27,8 @@ enum LevelState
 		FIRST_LEVEL = 1,
 		SECOND_LEVEL,
 		THIRD_LEVEL,
-		FOURTH_LEVEL
+		FOURTH_LEVEL,
+		ENDING
 	};
 
 enum SubLevelState
@@ -55,7 +56,7 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 	private:
 		static FirstScreenState firstScreenState_; //singleton
 
-		void updateFirsLevel();
+		void updateLevel();
 
 		void setupGUI(GraphicsManager* graphicsManager, InputManager* inputManager);
 

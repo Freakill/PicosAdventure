@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fruits>
 	<fruit>
-		<model>carne</model>
+		<model>donuts</model>
 		<position x="-3.25" y="3.2" z="-2.8" />
 		<scale x="1" y="1" z="1" />
 		<rotation x="0" y="0" z="0" />
@@ -14,7 +14,7 @@
 		</collision>
 	</fruit>
 	<fruit>
-		<model>tarta</model>
+		<model>galleta</model>
 		<position x="-1.25" y="3.1" z="-2.5" />
 		<scale x="1" y="1" z="1" />
 		<rotation x="0" y="0" z="0" />
@@ -27,7 +27,7 @@
 		</collision>
 	</fruit>
 	<fruit>
-		<model>guindilla</model>
+		<model>polo</model>
 		<position x="1.75" y="3.2" z="-3.0" />
 		<scale x="1" y="1" z="1" />
 		<rotation x="0" y="0" z="0" />

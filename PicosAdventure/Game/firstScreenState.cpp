@@ -149,8 +149,16 @@ void FirstScreenState::update(float elapsedTime)
 			}
 			break;
 		case FIRST_LEVEL:
+		case SECOND_LEVEL:
 			{
-				updateFirsLevel();
+				updateLevel();
+			}
+			break;
+		case THIRD_LEVEL:
+		case FOURTH_LEVEL:
+			{
+				updateLevel();
+				// Add update bird
 			}
 			break;
 		default:
@@ -270,9 +278,40 @@ void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
     {
         case(SELECT_OBJECT):
             {
-				if(levelState_ == FIRST_LEVEL)
+				switch(levelState_)
 				{
-					changeLevel(SECOND_LEVEL);
+					case FIRST_LEVEL:
+						{
+							std::string name = arg.buttonInfo;
+
+							std::vector<FruitClass*>::iterator it;
+							for(it = fruitsInGame_.begin(); it != fruitsInGame_.end(); it++)
+							{
+								if((*it)->getName() == name)
+								{
+									pico_->setTipsColor((*it)->getColorEffect());
+								}
+							}
+
+							changeLevel(SECOND_LEVEL);
+						}
+						break;
+					case SECOND_LEVEL:
+						{
+							std::string name = arg.buttonInfo;
+
+							std::vector<FruitClass*>::iterator it;
+							for(it = fruitsInGame_.begin(); it != fruitsInGame_.end(); it++)
+							{
+								if((*it)->getName() == name)
+								{
+									pico_->setBodyTexture((*it)->getTextureEffect());
+								}
+							}
+
+							changeLevel(THIRD_LEVEL);
+						}
+						break;
 				}
             }
             break;
@@ -283,7 +322,7 @@ void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
     }
 }
 
-void FirstScreenState::updateFirsLevel()
+void FirstScreenState::updateLevel()
 {
 	switch(subLevelState_)
 	{
@@ -523,19 +562,21 @@ bool FirstScreenState::loadFruits()
 					return false;
 				}
 
-				pugi::xml_node effectNode = fruitNode.child("effects");
+				pugi::xml_node effectNode = fruitNode.child("effect");
 				std::string effectType = effectNode.attribute("type").as_string();
 
 				if(effectType == "color")
 				{
 					pugi::xml_node colorNode = effectNode.child("color");
 					XMFLOAT4 color = XMFLOAT4(colorNode.attribute("r").as_float(), colorNode.attribute("g").as_float(), colorNode.attribute("b").as_float(), 1.0f);
+
+					fruit->setFruitEffectType(COLOR);
+					fruit->setColorEffect(color);
 				}
 
 				if(effectType == "texture")
 				{
 					pugi::xml_node textureNode = effectNode.child("texture");
-
 					TextureClass* temp = new TextureClass;
 					if(!temp)
 					{
@@ -618,7 +659,7 @@ void FirstScreenState::clearFruits()
 bool FirstScreenState::createPolaroids()
 {
 	std::stringstream root;
-	root << "./Data/configuration/scenario1/polaroids/polaroids_" << levelState_ << ".xml";
+	root << "./Data/configuration/level1/polaroids/polaroids_" << levelState_ << ".xml";
 
 	//Loading animations XML file
 	pugi::xml_document polaroidsDoc;
@@ -635,6 +676,9 @@ bool FirstScreenState::createPolaroids()
 		MessageBoxA(NULL, "Could not find the polaroids root node.", "FirstScreen - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
+
+	int screenWidth, screenHeight;
+	graphicsManager_->getScreenSize(screenWidth, screenHeight);
 
 	int fruitIndex = 0;
 	for(pugi::xml_node polaroidNode = root_node.first_child(); polaroidNode; polaroidNode = polaroidNode.next_sibling())
@@ -659,7 +703,7 @@ bool FirstScreenState::createPolaroids()
 					pos = Point(0, 0);
 				}
 				else{
-					pos = Point(positionNode.attribute("x").as_float(), positionNode.attribute("y").as_float());
+					pos = Point(positionNode.attribute("x").as_float()*screenWidth, positionNode.attribute("y").as_float()*screenHeight);
 				}
 
 				pugi::xml_node sizeNode;
@@ -670,10 +714,10 @@ bool FirstScreenState::createPolaroids()
 					size = Point(0, 0);
 				}
 				else{
-					size = Point(sizeNode.attribute("x").as_float(), sizeNode.attribute("y").as_float());
+					size = Point(sizeNode.attribute("x").as_float()*screenWidth, sizeNode.attribute("y").as_float()*screenHeight);
 				}
 
-				polaroidFrame_->addButton(graphicsManager_, imageName.as_string(), pos, size)->addListener(*this);
+				polaroidFrame_->addButton(graphicsManager_, fruitsInGame_.at(fruitIndex)->getName(), pos, size)->addListener(*this);
 			}
 		}
 		fruitIndex++;

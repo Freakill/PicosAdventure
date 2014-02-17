@@ -43,6 +43,8 @@ class FruitClass : public Notifier<FruitClass, Point>
 		void draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug);
 		void destroy();
 
+		std::string getName();
+
 		void setPosition(Point newPosition);
 		Point getPosition();
 
@@ -78,6 +80,8 @@ class FruitClass : public Notifier<FruitClass, Point>
 	private:
 		Object3D*	model_;
 		SphereCollision* collisionTest_;
+
+		std::string name_;
 
 		Point		initialPosition_;
 		Point		position_;
