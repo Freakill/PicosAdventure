@@ -18,7 +18,7 @@
 #include "lightClass.h"
 
 #include "shader2DClass.h"
-#include "shader3DClass.h"
+#include "shader3DFactory.h"
 
 class GraphicsManager
 {
@@ -37,7 +37,7 @@ class GraphicsManager
 	
 		void draw2D(int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix, ID3D11ShaderResourceView* texture, 
 	                XMFLOAT4 color);
-		void draw3D(int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture,
+		void draw3D(int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView** textureArray,
 			        LightClass* light);
 
 		ID3D11Device* getDevice();
@@ -45,7 +45,7 @@ class GraphicsManager
 		IDXGISwapChain* getSwapChain();
 
 		Shader2DClass* getShader2D();
-		Shader3DClass* getShader3D();
+		Shader3DClass* getShader3D(std::string type);
 
 		void getProjectionMatrix(XMFLOAT4X4& projectionMatrix);
 		void getWorldMatrix(XMFLOAT4X4& worldMatrix);

@@ -99,7 +99,9 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		GUIManager*					polaroidGUI_;
 		GUIFrame*					polaroidFrame_;
 
+		// Debug
 		bool						debug_;
+		TextClass*					FPS_;
 };
 
 #endif //_FIRST_SCREEN_STATE_H_

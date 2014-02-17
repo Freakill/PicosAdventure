@@ -6,9 +6,12 @@
 #include <d3dx11async.h>
 #include <xnamath.h>
 
+#include "textureArrayClass.h"
 #include "lightClass.h"
 
 #include <fstream>
+
+class GraphicsManager;
 
 struct TexturedVertexType
 		{
@@ -19,7 +22,7 @@ struct TexturedVertexType
 
 class Shader3DClass
 {
-	private:
+	protected:
 		struct MatrixBufferType
 		{
 			XMFLOAT4X4 world;
@@ -40,21 +43,20 @@ class Shader3DClass
 		Shader3DClass(const Shader3DClass&);
 		~Shader3DClass();
 
-		bool setup(ID3D11Device* device);
+		virtual bool setup(ID3D11Device* device) = 0;
 		void destroy();
 		bool draw(ID3D11DeviceContext* deviceContext, int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, 
-			      XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture, LightClass* light);
+						  XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView** textureArray, LightClass* light);
 
-	private:
-		bool setupShader(ID3D11Device* device, WCHAR* vsFilename, WCHAR* psFilename);
+	protected:
+		virtual bool setupShader(ID3D11Device* device, WCHAR* vsFilename, WCHAR* psFilename) = 0;
 		void drawShader(ID3D11DeviceContext* deviceContext, int indexCount);
 		void destroyShader();
 		void outputShaderErrorMessage(ID3D10Blob* errorMessage, WCHAR* shaderFilename);
 
-		bool setShaderParameters(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, 
-								 XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture, LightClass* light);
+		virtual bool setShaderParameters(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, 
+										 XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView** textureArray, LightClass* light) = 0;
 
-	private:
 		ID3D11VertexShader* vertexShader_;
 		ID3D11PixelShader* pixelShader_;
 		ID3D11InputLayout* layout_;
@@ -62,5 +64,8 @@ class Shader3DClass
 		ID3D11Buffer* matrixBuffer_;
 		ID3D11Buffer* lightBuffer_;
 };
+
+// Create function pointer
+typedef Shader3DClass* (__stdcall *CreateShader3DFn)(GraphicsManager*);
 
 #endif

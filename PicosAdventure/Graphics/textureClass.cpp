@@ -28,7 +28,7 @@ bool TextureClass::setup(ID3D11Device* device, const std::string& strFilename)
 	result = D3DX11CreateShaderResourceViewFromFileA(device, strFilename.c_str(), NULL, NULL, &texture_, NULL);
 	if(FAILED(result))
 	{
-		MessageBoxA(NULL, "Could not create the texture shader resource from path.", "Texture - Error", MB_ICONERROR | MB_OK);
+		//MessageBoxA(NULL, "Could not create the texture shader resource from path.", "Texture - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 

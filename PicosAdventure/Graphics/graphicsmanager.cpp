@@ -496,18 +496,7 @@ bool GraphicsManager::setupShaders()
 	}
 
 	// Create the 3D shader object.
-	shader3D_ = new Shader3DClass;
-	if(!shader3D_)
-	{
-		return false;
-	}
-
-	// Initialize the color shader object.
-	if(!shader3D_->setup(d3dDevice_))
-	{
-		MessageBoxA(NULL, "Could not initialize the 3D shader object.", "Error", MB_ICONERROR | MB_OK);
-		return false;
-	}
+	shader3D_ = Shader3DFactory::Instance()->CreateShader3D("DiffuseShader3D", this);
 
 	return true;
 }
@@ -518,9 +507,9 @@ void GraphicsManager::draw2D(int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 
 	shader2D_->draw(d3dDeviceContext_, indexCount, worldMatrix, viewMatrix, orthoMatrix, texture, color);
 }
 
-void GraphicsManager::draw3D(int indexCount, XMFLOAT4X4 worldMatrix,  XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView* texture, LightClass* light)
+void GraphicsManager::draw3D(int indexCount, XMFLOAT4X4 worldMatrix,  XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView** textureArray, LightClass* light)
 {
-	shader3D_->draw(d3dDeviceContext_, indexCount, worldMatrix, viewMatrix, projectionMatrix, texture, light);
+	shader3D_->draw(d3dDeviceContext_, indexCount, worldMatrix, viewMatrix, projectionMatrix, textureArray, light);
 }
 
 ID3D11Device* GraphicsManager::getDevice()
@@ -543,9 +532,9 @@ Shader2DClass* GraphicsManager::getShader2D()
 	return shader2D_;
 }
 
-Shader3DClass* GraphicsManager::getShader3D()
+Shader3DClass* GraphicsManager::getShader3D(std::string type)
 {
-	return shader3D_;
+	return Shader3DFactory::Instance()->CreateShader3D(type, this);;
 }
 
 void GraphicsManager::getProjectionMatrix(XMFLOAT4X4& projectionMatrix)

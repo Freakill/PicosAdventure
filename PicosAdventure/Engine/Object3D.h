@@ -6,6 +6,7 @@
 #include "../Graphics/animatedCal3DModelClass.h"
 #include "../Graphics/staticCal3DModelClass.h"
 #include "../Graphics/OBJModelClass.h"
+#include "../Graphics/textureArrayClass.h"
 #include "../Graphics/textureClass.h"
 #include "../Graphics/lightClass.h"
 
@@ -40,9 +41,15 @@ class Object3D
 
 		ModelClass* getModel();
 
+		TextureArrayClass* getTextureArrayClass();
+		void setTextureArrayClass(TextureArrayClass* textureArray);
+
+		Shader3DClass* getShader3D();
+		void setShader3D(Shader3DClass* shader);
+
 	protected:
 		ModelClass*		model_;
-		TextureClass*	diffuseTexture_;
+		TextureArrayClass*	textures_;
 
 		Shader3DClass*	modelShader_;
 

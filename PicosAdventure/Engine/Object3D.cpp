@@ -73,3 +73,23 @@ ModelClass* Object3D::getModel()
 {
 	return model_;
 }
+
+TextureArrayClass* Object3D::getTextureArrayClass()
+{
+	return textures_;
+}
+
+void Object3D::setTextureArrayClass(TextureArrayClass* textureArray)
+{
+	textures_ = textureArray;
+}
+
+Shader3DClass* Object3D::getShader3D()
+{
+	return modelShader_;
+}
+
+void Object3D::setShader3D(Shader3DClass* shader)
+{
+	modelShader_ = shader;
+}

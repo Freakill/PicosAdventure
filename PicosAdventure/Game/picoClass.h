@@ -17,8 +17,9 @@
 
 #include "../Utils/listenerClass.h"
 
-#include <deque>
+#include "../Utils/clockClass.h"
 
+#include <deque>
 
 enum PicoStates
 	{
@@ -30,6 +31,13 @@ enum PicoStates
 		EATING,
 		CELEBRATING,
 		SCARED
+	};
+
+enum FaceStates
+	{
+		NORMAL,
+		CHANGING,
+		CHANGED
 	};
 
 class PicoClass : public Listener<InputManager, InputStruct>, public Listener<FruitClass, Point>, public Notifier<PicoClass, bool>
@@ -46,16 +54,24 @@ class PicoClass : public Listener<InputManager, InputStruct>, public Listener<Fr
 
 		void goToPosition(Point position);
 
+		void changeAnimation(std::string name, float time);
+		void changeExpression(std::string newExpression);
+
+		void setTipsColor(XMFLOAT4 color);
+		void setBodyTexture(TextureClass* texture);
+
 		virtual void notify(InputManager* notifier, InputStruct arg);
 		virtual void notify(FruitClass* notifier, Point arg);
 		//virtual void notify(BirdClass* notifier, bool arg);
 
+		SphereCollision* getCollisionSphere();
+
 	private:
+		void loadExpressions(GraphicsManager* graphicsManager);
+		
 		float approach(float goal, float current, float dt);
 		void walk(float elapsedTime);
 		void checkPicoArrivedObjective();
-
-		void changeAnimation(std::string name, float time);
 
 		CameraClass* camera_;
 
@@ -64,12 +80,22 @@ class PicoClass : public Listener<InputManager, InputStruct>, public Listener<Fr
 		Object3D*	eyes_;
 		Object3D*	hat_;
 
+		// Expressions
+		std::map<std::string, TextureClass*> expressions_;
+
 		SphereCollision* collisionTest_;
 
-		XMFLOAT4	bodyColor_;
 		XMFLOAT4	tipsColor_;
+		LightClass* tipsLight_;
 
 		PicoStates  picoState_;
+
+		FaceStates	faceState_;
+		float		expressionChangeTime_;
+		float		expressionPercentage_;
+		std::string actualExpression_;
+		std::string newExpression_;
+		ClockClass* expressionClock_;
 
 		float		waitedTime_;
 		float		eatingWaitTime_;

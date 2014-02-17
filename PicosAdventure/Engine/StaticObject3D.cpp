@@ -13,6 +13,8 @@ StaticObject3D::StaticObject3D()
 	rotX_ = 0.0f;
 	rotY_ = 0.0f; 
 	rotZ_ = 0.0f;
+
+	textures_ = 0;
 }
 
 StaticObject3D::StaticObject3D(const StaticObject3D &)
@@ -53,22 +55,46 @@ bool StaticObject3D::setup(GraphicsManager* graphicsManager, std::string modelNa
 		return false;
 	}
 
-	diffuseTexture_ = new TextureClass;
-	if(!diffuseTexture_)
+	textures_ = new TextureArrayClass;
+	if(!textures_)
 	{
 		return false;
 	}
 
 	// Initialize the texture object.
-	std::string filePath = "./Data/models/" + modelName + "/d-" + modelName + ".dds";
-	bool result = diffuseTexture_->setup(graphicsManager->getDevice(), filePath);
+	std::string diffuseFilePath = "./Data/models/" + modelName + "/d-" + modelName + ".dds";
+
+	TextureClass* diffTemp = new TextureClass;
+	bool result = diffTemp->setup(graphicsManager->getDevice(), diffuseFilePath);
 	if(!result)
 	{
-		MessageBoxA(NULL, "Could not load texture!", "Visualizer - Error", MB_ICONERROR | MB_OK);
+		MessageBoxA(NULL, "Could not load diffuse texture!", "StaticObject3D - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
-	modelShader_ = graphicsManager->getShader3D();
+	std::string normalFilePath = "./Data/models/" + modelName + "/n-" + modelName + ".dds";
+	TextureClass* normTemp = new TextureClass;
+	result = normTemp->setup(graphicsManager->getDevice(), normalFilePath);
+	if(!result)
+	{
+		result = textures_->setup(graphicsManager->getDevice(), diffuseFilePath, "", "", 1);
+		if(!result)
+		{
+			MessageBoxA(NULL, "Could not load the textures (diffuse)!", "StaticObject3D - Error", MB_ICONERROR | MB_OK);
+			return false;
+		}
+	}
+	else
+	{
+		result = textures_->setup(graphicsManager->getDevice(), diffuseFilePath, normalFilePath, "", 2);
+		if(!result)
+		{
+			MessageBoxA(NULL, "Could not load the textures (diffuse and normal)!", "StaticObject3D - Error", MB_ICONERROR | MB_OK);
+			return false;
+		}
+	}
+
+	modelShader_ = graphicsManager->getShader3D("DiffuseShader3D");
 
 	return true;
 }
@@ -101,16 +127,16 @@ void StaticObject3D::draw(ID3D11Device* device, ID3D11DeviceContext* deviceConte
 	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&movingMatrix)));
 
 	model_->draw(device, deviceContext);
-	modelShader_->draw(deviceContext, model_->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, diffuseTexture_->getTexture(), light);
+	modelShader_->draw(deviceContext, model_->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, textures_->getTexturesArray(), light);
 }
 
 void StaticObject3D::destroy()
 {
-	if(diffuseTexture_)
+	if(textures_)
 	{
-		diffuseTexture_->destroy();
-		delete diffuseTexture_;
-		diffuseTexture_ = 0;
+		textures_->destroy();
+		delete textures_;
+		textures_ = 0;
 	}
 
 	if(model_)
@@ -118,6 +144,13 @@ void StaticObject3D::destroy()
 		model_->destroy();
 		delete model_;
 		model_ = 0;
+	}
+
+	if(modelShader_)
+	{
+		modelShader_->destroy();
+		delete modelShader_;
+		modelShader_ = 0;
 	}
 }
 

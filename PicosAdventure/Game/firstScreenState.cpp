@@ -31,6 +31,9 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	// We get a pointer to the graphicsManager
 	graphicsManager_ = graphicsManager;
 
+	int screenWidth, screenHeight;
+	graphicsManager_->getScreenSize(screenWidth, screenHeight);
+
 	// Create the camera object.
 	camera_ = new CameraClass();
 	if(!camera_)
@@ -93,6 +96,19 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 
 	debug_ = false;
 
+	FPS_ = new TextClass();
+	if(!FPS_)
+	{
+		return false;
+	}
+
+	// Initialize the text object.
+	if(!FPS_->setup(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), graphicsManager->getShader2D(), screenWidth, screenHeight, 20, 20, "FPS: "))
+	{
+		MessageBoxA(NULL, "Could not initialize the FPS text object.", "GUIFrame - Error", MB_OK);
+		return false;
+	}
+
 	setupGUI(graphicsManager, inputManager);
 
 	// Setup clock at the end so it starts when we run
@@ -143,6 +159,10 @@ void FirstScreenState::update(float elapsedTime)
 			}
 			break;
 	}
+
+	std::stringstream FPSText;
+	FPSText << "FPS: " << 1/elapsedTime;
+	FPS_->setText(FPSText.str(), graphicsManager_->getDeviceContext());
 }
 
 void FirstScreenState::draw()
@@ -176,6 +196,15 @@ void FirstScreenState::draw()
 		graphicsManager_->turnZBufferOff();
 		graphicsManager_->turnOnAlphaBlending();
 			polaroidGUI_->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, orthoMatrix);
+		graphicsManager_->turnOffAlphaBlending();
+		graphicsManager_->turnZBufferOn();
+	}
+
+	if(debug_)
+	{
+		graphicsManager_->turnZBufferOff();
+		graphicsManager_->turnOnAlphaBlending();
+			FPS_->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, orthoMatrix);
 		graphicsManager_->turnOffAlphaBlending();
 		graphicsManager_->turnZBufferOn();
 	}
