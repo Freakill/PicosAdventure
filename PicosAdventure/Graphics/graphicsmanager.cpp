@@ -12,6 +12,12 @@ GraphicsManager::GraphicsManager()
 	depthStencilState_ = 0;
 	depthStencilView_ = 0;
 
+	solidRasterizerState_ = 0;
+	wireframeRasterizerState_ = 0;
+
+	alphaEnableBlendingState_ = 0;
+	alphaDisableBlendingState_ = 0;
+
 	shader2D_ = 0;
 	shader3D_ = 0;
 }
@@ -305,14 +311,36 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
 	rasterDescription.SlopeScaledDepthBias = 0.0f;
 
 	// Create the rasterizer state from the description we just filled out.
-	result = d3dDevice_->CreateRasterizerState(&rasterDescription, &rasterState_);
+	result = d3dDevice_->CreateRasterizerState(&rasterDescription, &solidRasterizerState_);
 	if(FAILED(result))
 	{
 		return false;
 	}
 
 	// Now set the rasterizer state.
-	d3dDeviceContext_->RSSetState(rasterState_);
+	d3dDeviceContext_->RSSetState(solidRasterizerState_);
+
+	// Clear the raster description.
+	ZeroMemory(&rasterDescription, sizeof(D3D11_RASTERIZER_DESC));
+
+	// Setup the raster description which will determine how and what polygons will be drawn.
+	rasterDescription.AntialiasedLineEnable = false;
+	rasterDescription.CullMode = D3D11_CULL_BACK;
+	rasterDescription.DepthBias = 0;
+	rasterDescription.DepthBiasClamp = 0.0f;
+	rasterDescription.DepthClipEnable = true;
+	rasterDescription.FillMode = D3D11_FILL_WIREFRAME;
+	rasterDescription.FrontCounterClockwise = false;
+	rasterDescription.MultisampleEnable = false;
+	rasterDescription.ScissorEnable = false;
+	rasterDescription.SlopeScaledDepthBias = 0.0f;
+
+	// Create the rasterizer state from the description we just filled out.
+	result = d3dDevice_->CreateRasterizerState(&rasterDescription, &wireframeRasterizerState_);
+	if(FAILED(result))
+	{
+		return false;
+	}
 
 	// Bind the render target view and depth stencil buffer to the output render pipeline.
 	d3dDeviceContext_->OMSetRenderTargets(1, &renderTargetView_, depthStencilView_);
@@ -543,6 +571,16 @@ void GraphicsManager::getScreenSize(int& width, int& height)
 	width = screenWidth_;
 	height = screenHeight_;
 	return;
+}
+
+void GraphicsManager::turnOnSolidRasterizer()
+{
+	d3dDeviceContext_->RSSetState(solidRasterizerState_);
+}
+
+void GraphicsManager::turnOnWireframeRasterizer()
+{
+	d3dDeviceContext_->RSSetState(wireframeRasterizerState_);
 }
 
 void GraphicsManager::turnZBufferOn()

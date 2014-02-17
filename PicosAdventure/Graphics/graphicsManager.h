@@ -53,6 +53,9 @@ class GraphicsManager
 
 		void getScreenSize(int&, int&);
 
+		void turnOnSolidRasterizer();
+		void turnOnWireframeRasterizer();
+
 		void turnZBufferOn();
 		void turnZBufferOff();
 
@@ -82,7 +85,8 @@ class GraphicsManager
 		ID3D11DepthStencilView* depthStencilView_;
 		ID3D11DepthStencilState* depthDisabledStencilState_;
 
-		ID3D11RasterizerState* rasterState_;
+		ID3D11RasterizerState* solidRasterizerState_;
+		ID3D11RasterizerState* wireframeRasterizerState_;
 		
 		ID3D11BlendState* alphaEnableBlendingState_;
 		ID3D11BlendState* alphaDisableBlendingState_;
