@@ -23,6 +23,10 @@ PicoClass::PicoClass()
 	objective_.x = 0.0f;
 	objective_.y = 0.0f;
 	objective_.z = 0.0f;
+	
+	lookAt_.x = 0.0f;
+	lookAt_.y = 0.0f;
+	lookAt_.z = 0.0f;
 
 	scaling_.x = 1.0f;
 	scaling_.y = 1.0f;
@@ -69,10 +73,18 @@ bool PicoClass::setup(GraphicsManager* graphicsManager, CameraClass* camera)
 	scaling_.x = 0.041f;
 	scaling_.y = 0.041f;
 	scaling_.z = 0.041f;
-	
-	rotX_ = 0.0f;
-	rotY_ = 3.141592f-1.570796f/4; 
-	rotZ_ = 0.0f;
+
+	lookAtCamera();
+
+	positionUnhidding_[0].x = -3.0f;
+	positionUnhidding_[0].y = 0.0f;
+	positionUnhidding_[0].z = -0.25f;
+
+	positionUnhidding_[1].x = -3.0f;
+	positionUnhidding_[1].y = 0.0f;
+	positionUnhidding_[1].z = -2.75f;
+
+	unhiddingStep_ = 0;
 
 	tipsColor_ = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -128,9 +140,42 @@ void PicoClass::update(float elapsedTime)
 			{
 				if(fallenFruits_.size() > 0)
 				{
-					Point fallenFruitPos = fallenFruits_.front()->getPosition();
 					changeExpression("sorpresa");
-					goToPosition(fallenFruitPos);
+					goToPosition(positionUnhidding_[unhiddingStep_]);
+					picoState_ = UNHIDDING;
+				}
+			}
+			break;
+		case UNHIDDING:
+			{
+				walk(elapsedTime);
+
+				if(checkPicoArrivedObjective())
+				{
+					switch(unhiddingStep_)
+					{
+						case 0:
+							{
+								unhiddingStep_++;
+								goToPosition(positionUnhidding_[unhiddingStep_]);
+								picoState_ = UNHIDDING;
+							}
+							break;
+						case 1:
+							{
+								Point fallenFruitPos = fallenFruits_.front()->getPosition();
+								goToPosition(fallenFruitPos);
+								picoState_ = WAITING;
+							}
+							break;
+						default:
+							{
+								Point fallenFruitPos = fallenFruits_.front()->getPosition();
+								goToPosition(fallenFruitPos);
+								picoState_ = WAITING;
+							}
+							break;
+					}
 				}
 			}
 			break;
@@ -148,7 +193,10 @@ void PicoClass::update(float elapsedTime)
 			{
 				walk(elapsedTime);
 
-				checkPicoArrivedObjective();
+				if(checkPicoArrivedObjective())
+				{
+					eatFruit();
+				}
 			}
 			break;
 		case TURNING:
@@ -347,7 +395,7 @@ void PicoClass::setToRest()
 {
 	changeAnimation("idle", 0.2f);
 
-	rotY_ = 3.141592f;
+	lookAtCamera();
 	picoState_ = WAITING;
 
 	fallenFruits_.clear();
@@ -405,34 +453,64 @@ void PicoClass::walk(float elapsedTime)
 	position_.z += velocity_.z*elapsedTime;
 }
 
-void PicoClass::checkPicoArrivedObjective()
+void PicoClass::lookAtCamera()
+{
+	Point cameraPos = Point(camera_->getPosition().x, camera_->getPosition().y, camera_->getPosition().z);
+
+	lookAt_.x = cameraPos.x-position_.x;
+	lookAt_.y = cameraPos.y-position_.y;
+	lookAt_.z = cameraPos.z-position_.z;
+
+	Vector normalizedLookAt = lookAt_.normalize();
+
+	rotX_ = 0.0f;
+	rotY_ = acos(normalizedLookAt.x);//3.141592f-1.570796f/4; 
+	rotZ_ = 0.0f;
+	if(normalizedLookAt.x > 0)
+	{
+		rotY_ += XM_PIDIV2;
+	}
+	else
+	{
+		rotY_ += XM_PIDIV2;
+	}
+}
+
+bool PicoClass::checkPicoArrivedObjective()
 {
 	if(position_.x < objective_.x+0.05 && position_.x > objective_.x-0.05 && position_.z < objective_.z+0.05 && position_.z > objective_.z-0.05)
 	{
-		if(fallenFruits_.size() > 0)
-		{
-			changeAnimation("eat", 0.2f);
+		return true;
+	}
 
-			Point fruitPos = fallenFruits_.front()->getPosition();
-			fruitPos.y = fruitPos.y + 1.6f;
-			fruitPos.z = fruitPos.z - 0.85f;
-			fallenFruits_.front()->setPosition(fruitPos);
+	return false;
+}
 
-			rotY_ = 3.141592f;
+void PicoClass::eatFruit()
+{
+	if(fallenFruits_.size() > 0)
+	{
+		changeAnimation("eat", 0.2f);
 
-			waitedTime_ = 0.0f;
+		Point fruitPos = fallenFruits_.front()->getPosition();
+		fruitPos.y = fruitPos.y + 1.6f;
+		fruitPos.z = fruitPos.z - 0.85f;
+		fallenFruits_.front()->setPosition(fruitPos);
 
-			picoState_ = EATING;
-			notifyListeners(false);
-		}
-		else
-		{
-			changeAnimation("idle", 0.2f);
+		lookAtCamera();
 
-			rotY_ = 3.141592f;
+		waitedTime_ = 0.0f;
 
-			picoState_ = WAITING;
-		}
+		picoState_ = EATING;
+		notifyListeners(false);
+	}
+	else
+	{
+		changeAnimation("idle", 0.2f);
+
+		lookAtCamera();
+
+		picoState_ = WAITING;
 	}
 }
 
@@ -459,7 +537,7 @@ void PicoClass::notify(FruitClass* notifier, Point arg)
 		bodyModel_->setAnimationToPlay("negation", 0.2f);
 		tipsModel_->setAnimationToPlay("negation", 0.2f);
 
-		rotY_ = 3.141592f;
+		lookAtCamera();
 
 		picoState_ = SCARED;
 	}

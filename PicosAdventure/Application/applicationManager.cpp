@@ -42,7 +42,7 @@ bool ApplicationManager::setup(HWND windowsHandler, InputManager* inputManager, 
 	}
 	clockClass_->reset();
 
-	if(!changeState(SecondScreenState::Instance()))
+	if(!changeState(FirstScreenState::Instance()))
 	{
 		return false;
 	}

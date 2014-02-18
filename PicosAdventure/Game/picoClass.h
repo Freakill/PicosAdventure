@@ -73,19 +73,23 @@ class PicoClass : public Listener<InputManager, InputStruct>, public Listener<Fr
 		
 		float approach(float goal, float current, float dt);
 		void walk(float elapsedTime);
-		void checkPicoArrivedObjective();
+		void lookAtCamera();
+
+		bool checkPicoArrivedObjective();
+		void eatFruit();
 
 		CameraClass* camera_;
 
+		// 3D Models
 		Object3D*	body_;
 		Object3D*	tips_;
 		Object3D*	eyes_;
 		Object3D*	hat_;
 
+		SphereCollision* collisionTest_;
+
 		// Expressions
 		std::map<std::string, TextureClass*> expressions_;
-
-		SphereCollision* collisionTest_;
 
 		XMFLOAT4	tipsColor_;
 		LightClass* tipsLight_;
@@ -103,16 +107,23 @@ class PicoClass : public Listener<InputManager, InputStruct>, public Listener<Fr
 		float		eatingWaitTime_;
 		float		celebratingWaitTime_;
 
+		// Fruits
 		std::deque<FruitClass*> fallenFruits_;
 
+		// Position and movement
 		Point		position_;
 		Vector		velocity_;
 		Point		objective_;
+		Vector		lookAt_;
 
 		Vector		scaling_; 
 		float		rotX_;
 		float		rotY_; 
 		float		rotZ_;
+
+		// Unhidding
+		Point		positionUnhidding_[2];
+		int			unhiddingStep_;
 };
 
 #endif //_PICO_CLASS_H_
