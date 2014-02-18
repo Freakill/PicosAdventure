@@ -19,7 +19,8 @@ GraphicsManager::GraphicsManager()
 	alphaDisableBlendingState_ = 0;
 
 	shader2D_ = 0;
-	shader3D_ = 0;
+	diffuseShader3D_ = 0;
+	multitextureShader3D_ = 0;
 }
 
 GraphicsManager::GraphicsManager(const GraphicsManager& other)
@@ -390,11 +391,18 @@ void GraphicsManager::destroy()
 	}
 
 	// Release the 3D shader object.
-	if(shader3D_)
+	if(diffuseShader3D_)
 	{
-		shader3D_->destroy();
-		delete shader3D_;
-		shader3D_ = 0;
+		diffuseShader3D_->destroy();
+		delete diffuseShader3D_;
+		diffuseShader3D_ = 0;
+	}
+
+	if(multitextureShader3D_)
+	{
+		multitextureShader3D_->destroy();
+		delete multitextureShader3D_;
+		multitextureShader3D_ = 0;
 	}
 
 	// Before shutting down set to windowed mode or when you release the swap chain it will throw an exception.
@@ -496,20 +504,10 @@ bool GraphicsManager::setupShaders()
 	}
 
 	// Create the 3D shader object.
-	shader3D_ = Shader3DFactory::Instance()->CreateShader3D("DiffuseShader3D", this);
+	diffuseShader3D_ = Shader3DFactory::Instance()->CreateShader3D("DiffuseShader3D", this);
+	multitextureShader3D_ = Shader3DFactory::Instance()->CreateShader3D("MultiTextureShader3D", this);
 
 	return true;
-}
-
-void GraphicsManager::draw2D(int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix, ID3D11ShaderResourceView* texture, 
-	                         XMFLOAT4 color)
-{
-	shader2D_->draw(d3dDeviceContext_, indexCount, worldMatrix, viewMatrix, orthoMatrix, texture, color);
-}
-
-void GraphicsManager::draw3D(int indexCount, XMFLOAT4X4 worldMatrix,  XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView** textureArray, LightClass* light)
-{
-	shader3D_->draw(d3dDeviceContext_, indexCount, worldMatrix, viewMatrix, projectionMatrix, textureArray, light);
 }
 
 ID3D11Device* GraphicsManager::getDevice()
@@ -535,6 +533,16 @@ Shader2DClass* GraphicsManager::getShader2D()
 Shader3DClass* GraphicsManager::getShader3D(std::string type)
 {
 	return Shader3DFactory::Instance()->CreateShader3D(type, this);;
+}
+
+Shader3DClass* GraphicsManager::getDiffuseShader3D()
+{
+	return diffuseShader3D_;
+}
+
+Shader3DClass* GraphicsManager::getMultitextureShader3D()
+{
+	return multitextureShader3D_;
 }
 
 void GraphicsManager::getProjectionMatrix(XMFLOAT4X4& projectionMatrix)

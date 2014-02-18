@@ -21,25 +21,25 @@
 
 #include <mmsystem.h>
 
-enum LevelState
-	{
-		INTRODUCTION,
-		FIRST_LEVEL = 1,
-		SECOND_LEVEL,
-		THIRD_LEVEL,
-		FOURTH_LEVEL,
-		ENDING
-	};
-
-enum SubLevelState
-	{
-		PLAYING,
-		FADING,
-		SELECT_POLAROID
-	};
-
 class FirstScreenState: public ApplicationState, public Listener<GUIButton, ButtonStruct>
 {
+	enum LevelState
+		{
+			INTRODUCTION,
+			FIRST_LEVEL = 1,
+			SECOND_LEVEL,
+			THIRD_LEVEL,
+			FOURTH_LEVEL,
+			ENDING
+		};
+
+	enum SubLevelState
+		{
+			PLAYING,
+			FADING,
+			SELECT_POLAROID
+		};
+
 	public:
 		FirstScreenState();
 		virtual ~FirstScreenState();
@@ -79,6 +79,8 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		LightClass*					light_;
 		ClockClass*					gameClock_;
 
+		int							screenWidth_;
+		int							screenHeight_;
 
 		// Game state and control variables
 		LevelState					levelState_;
@@ -88,6 +90,9 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		float						fadeTime_;
 
 		// Scenario structure
+		ImageClass*					background_;
+		Point						backgrounPosition_;
+
 		std::vector<Object3D*>		scenario_;
 		float						terrainHeight_;
 

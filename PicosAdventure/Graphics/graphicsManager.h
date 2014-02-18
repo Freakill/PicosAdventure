@@ -34,11 +34,6 @@ class GraphicsManager
 		void endDraw();
 
 		bool setupShaders();
-	
-		void draw2D(int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix, ID3D11ShaderResourceView* texture, 
-	                XMFLOAT4 color);
-		void draw3D(int indexCount, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView** textureArray,
-			        LightClass* light);
 
 		ID3D11Device* getDevice();
 		ID3D11DeviceContext* getDeviceContext();
@@ -46,6 +41,8 @@ class GraphicsManager
 
 		Shader2DClass* getShader2D();
 		Shader3DClass* getShader3D(std::string type);
+		Shader3DClass* getDiffuseShader3D();
+		Shader3DClass* getMultitextureShader3D();
 
 		void getProjectionMatrix(XMFLOAT4X4& projectionMatrix);
 		void getWorldMatrix(XMFLOAT4X4& worldMatrix);
@@ -97,7 +94,8 @@ class GraphicsManager
 
 		// Pointers to shaders
 		Shader2DClass* shader2D_;
-		Shader3DClass* shader3D_;
+		Shader3DClass* diffuseShader3D_;
+		Shader3DClass* multitextureShader3D_;
 };
 
 #endif

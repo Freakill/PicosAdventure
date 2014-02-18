@@ -94,7 +94,7 @@ bool StaticObject3D::setup(GraphicsManager* graphicsManager, std::string modelNa
 		}
 	}
 
-	modelShader_ = graphicsManager->getShader3D("DiffuseShader3D");
+	modelShader_ = graphicsManager->getDiffuseShader3D();
 
 	return true;
 }
@@ -146,12 +146,12 @@ void StaticObject3D::destroy()
 		model_ = 0;
 	}
 
-	if(modelShader_)
+	/*if(modelShader_)
 	{
 		modelShader_->destroy();
 		delete modelShader_;
 		modelShader_ = 0;
-	}
+	}*/
 }
 
 bool StaticObject3D::checkModelIsOBJ(const std::string &modelName)

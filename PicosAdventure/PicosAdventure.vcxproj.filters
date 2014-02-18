@@ -189,6 +189,9 @@
     <ClCompile Include="Graphics\multitextureShader3D.cpp">
       <Filter>Source Files\Graphics\Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="Game\secondScreenState.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\systemClass.h">
@@ -310,6 +313,9 @@
     </ClInclude>
     <ClInclude Include="Graphics\multitextureShader3D.h">
       <Filter>Header Files\Graphics\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\secondScreenState.h">
+      <Filter>Header Files\Game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

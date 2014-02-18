@@ -3,6 +3,7 @@
 #include "applicationState.h"
 
 #include "../Game/firstScreenState.h"
+#include "../Game/secondScreenState.h"
 
 ApplicationManager::ApplicationManager()
 {
@@ -41,7 +42,7 @@ bool ApplicationManager::setup(HWND windowsHandler, InputManager* inputManager, 
 	}
 	clockClass_->reset();
 
-	if(!changeState(FirstScreenState::Instance()))
+	if(!changeState(SecondScreenState::Instance()))
 	{
 		return false;
 	}

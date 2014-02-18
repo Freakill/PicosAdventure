@@ -31,8 +31,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	// We get a pointer to the graphicsManager
 	graphicsManager_ = graphicsManager;
 
-	int screenWidth, screenHeight;
-	graphicsManager_->getScreenSize(screenWidth, screenHeight);
+	graphicsManager_->getScreenSize(screenWidth_, screenHeight_);
 
 	// Create the camera object.
 	camera_ = new CameraClass();
@@ -56,6 +55,23 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	light_->setAmbientColor(0.1f, 0.1f, 0.1f, 1.0f);
 	light_->setDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
 	light_->setDirection(0.0f, -1.0f, 1.0f);
+
+	// load background and calculate its position
+	background_ = new ImageClass;
+	if(!background_)
+	{
+		MessageBoxA(NULL, "Could not initialize the background image instance.", "SecondScreen - Error", MB_OK);
+		return false;
+	}
+
+	if(!background_->setup(graphicsManager_->getDevice(), graphicsManager_->getShader2D(), screenWidth_, screenHeight_, "sky_background", screenWidth_, screenHeight_))
+	{
+		MessageBoxA(NULL, "Could not setup the background image.", "SecondScreen - Error", MB_OK);
+		return false;
+	}
+
+	backgrounPosition_.x = (screenWidth_/2)*-1;
+	backgrounPosition_.y = (screenHeight_/2)+2;
 
 	// Load the first level scenario
 	loadScenario("level1");
@@ -103,7 +119,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	}
 
 	// Initialize the text object.
-	if(!FPS_->setup(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), graphicsManager->getShader2D(), screenWidth, screenHeight, 20, 20, "FPS: "))
+	if(!FPS_->setup(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), graphicsManager->getShader2D(), screenWidth_, screenHeight_, 20, 20, "FPS: "))
 	{
 		MessageBoxA(NULL, "Could not initialize the FPS text object.", "GUIFrame - Error", MB_OK);
 		return false;
@@ -182,6 +198,10 @@ void FirstScreenState::draw()
 	graphicsManager_->getWorldMatrix(worldMatrix);
 	graphicsManager_->getProjectionMatrix(projectionMatrix);
 	graphicsManager_->getOrthoMatrix(orthoMatrix);
+
+	graphicsManager_->turnZBufferOff();
+		background_->draw(graphicsManager_->getDeviceContext(), backgrounPosition_.x, backgrounPosition_.y, worldMatrix, viewMatrix, orthoMatrix, light_->getDiffuseColor());
+	graphicsManager_->turnZBufferOn();
 
 	// We iterate over each loaded Object to call its draw function and draw the scenario
 	std::vector<Object3D*>::iterator objectsIt;

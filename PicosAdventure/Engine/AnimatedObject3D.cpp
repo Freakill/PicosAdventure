@@ -81,7 +81,7 @@ bool AnimatedObject3D::setup(GraphicsManager* graphicsManager, std::string model
 		}
 	}
 
-	modelShader_ = graphicsManager->getShader3D("DiffuseShader3D");
+	modelShader_ = graphicsManager->getDiffuseShader3D();
 
 	return true;
 
@@ -139,12 +139,12 @@ void AnimatedObject3D::destroy()
 		model_ = 0;
 	}
 
-	if(modelShader_)
+	/*if(modelShader_)
 	{
 		modelShader_->destroy();
 		delete modelShader_;
 		modelShader_ = 0;
-	}
+	}*/
 }
 
 Object3D * __stdcall AnimatedObject3D::Create(GraphicsManager* graphicsManager, std::string modelName, std::string objectName)
