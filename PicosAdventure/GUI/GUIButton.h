@@ -31,7 +31,9 @@ class GUIButton : public Notifier<GUIButton, ButtonStruct>
 		~GUIButton();
 
 		bool setup(GraphicsManager* graphicsManager, std::string name, Point position, int width, int height, ButtonPurpose purpose);
+		bool setup(GraphicsManager* graphicsManager, std::string name, Point position, int width, int height, std::string image, ButtonPurpose purpose);
 		void draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix);
+		void destroy();
 
 		std::string getName();
 
@@ -59,6 +61,11 @@ class GUIButton : public Notifier<GUIButton, ButtonStruct>
 		Point position_;
 		int	  width_;
 		int   height_;
+
+		Point viewportPosition_;
+
+		int screenWidth_;
+		int screenHeight_;
 
 		ButtonPurpose buttonPurpose_;
 

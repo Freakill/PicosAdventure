@@ -37,6 +37,7 @@ class GUIFrame
 		bool getButtonIsActive(std::string buttonName);
 
 		void deleteButton(std::string buttonName);
+		void deleteButtons();
 
 		void reorganizeButtons();
 
@@ -44,6 +45,7 @@ class GUIFrame
 
 		GUIButton* addButton(GraphicsManager* graphicsManager, std::string name, int height, ButtonPurpose buttonPurpose);
 		GUIButton* addButton(GraphicsManager* graphicsManager, std::string name, Point pos, Point size);
+		GUIButton* addButton(GraphicsManager* graphicsManager, std::string name, Point pos, Point size, std::string image);
 
 	private:
 		bool checkInside(Point pos);

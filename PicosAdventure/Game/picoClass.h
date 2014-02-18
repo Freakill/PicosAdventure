@@ -53,12 +53,14 @@ class PicoClass : public Listener<InputManager, InputStruct>, public Listener<Fr
 		void destroy();
 
 		void goToPosition(Point position);
+		void setToRest();
 
 		void changeAnimation(std::string name, float time);
 		void changeExpression(std::string newExpression);
 
 		void setTipsColor(XMFLOAT4 color);
 		void setBodyTexture(TextureClass* texture);
+		void setHat(Object3D* hat);
 
 		virtual void notify(InputManager* notifier, InputStruct arg);
 		virtual void notify(FruitClass* notifier, Point arg);

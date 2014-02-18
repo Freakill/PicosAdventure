@@ -110,6 +110,10 @@ void PicoClass::update(float elapsedTime)
 	body_->update(elapsedTime);
 	tips_->update(elapsedTime);
 	eyes_->update(elapsedTime);
+	if(hat_)
+	{
+		hat_->update(elapsedTime);
+	}
 
 	// Update textures for the tips
 	tips_->getTextureArrayClass()->getTexturesArray()[0] = expressions_.at(actualExpression_)->getTexture();
@@ -183,6 +187,11 @@ void PicoClass::update(float elapsedTime)
 						case TEXTURE:
 							{
 								body_->getTextureArrayClass()->getTexturesArray()[0] = fallenFruits_.front()->getTextureEffect()->getTexture();
+							}
+							break;
+						case HAT:
+							{
+								hat_ = fallenFruits_.front()->getHatEffect();
 							}
 							break;
 					}
@@ -274,6 +283,11 @@ void PicoClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, X
 	tipsLight_->setDirection(light->getDirection().x, light->getDirection().y, light->getDirection().z);
 
 	tips_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, tipsLight_);
+
+	if(hat_)
+	{
+		hat_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	}
 }
 
 void PicoClass::destroy()
@@ -329,6 +343,16 @@ void PicoClass::goToPosition(Point position)
 	picoState_ = WALKING;
 }
 
+void PicoClass::setToRest()
+{
+	changeAnimation("idle", 0.2f);
+
+	rotY_ = 3.141592f;
+	picoState_ = WAITING;
+
+	fallenFruits_.clear();
+}
+
 void PicoClass::setTipsColor(XMFLOAT4 color)
 {
 	tipsColor_ = color;
@@ -337,6 +361,11 @@ void PicoClass::setTipsColor(XMFLOAT4 color)
 void PicoClass::setBodyTexture(TextureClass* texture)
 {
 	body_->getTextureArrayClass()->getTexturesArray()[0] = texture->getTexture();
+}
+
+void PicoClass::setHat(Object3D* hat)
+{
+	hat_ = hat;
 }
 
 SphereCollision* PicoClass::getCollisionSphere()
@@ -454,6 +483,12 @@ void PicoClass::changeAnimation(std::string name, float time)
 	animatedTemp = dynamic_cast<AnimatedObject3D*>(eyes_);
 	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
 	cal3dTemp->setAnimationToPlay(name, time);
+	if(hat_)
+	{
+		animatedTemp = dynamic_cast<AnimatedObject3D*>(hat_);
+		cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+		cal3dTemp->setAnimationToPlay(name, time);
+	}
 }
 
 void PicoClass::changeExpression(std::string newExpression)

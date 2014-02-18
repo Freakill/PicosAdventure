@@ -2,22 +2,22 @@
 <polaroids>
 	<polaroid>
 		<image>polaroid_red</image>
-		<position x="-0.475" y="0.35"/>
+		<position x="-0.475" y="0.15"/>
 		<size x="0.2" y="0.4"/>
 	</polaroid>
 	<polaroid>
 		<image>polaroid_green</image>
-		<position x="-0.25" y="0.35"/>
+		<position x="-0.225" y="0.15"/>
 		<size x="0.2" y="0.4"/>
 	</polaroid>
 	<polaroid>
 		<image>polaroid_orange</image>
-		<position x="0.025" y="0.35"/>
+		<position x="0.025" y="0.15"/>
 		<size x="0.2" y="0.4"/>
 	</polaroid>
 	<polaroid>
 		<image>polaroid_blue</image>
-		<position x="0.25" y="0.35"/>
+		<position x="0.275" y="0.15"/>
 		<size x="0.2" y="0.4"/>
 	</polaroid>
 </polaroids>

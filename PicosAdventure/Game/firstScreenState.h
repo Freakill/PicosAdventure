@@ -68,6 +68,7 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		bool loadFruits();
 		void addFruitsToGame();
 		void clearFruits();
+		void clearFruitsInGame();
 
 		bool createPolaroids();
 		void clearPolaroids();

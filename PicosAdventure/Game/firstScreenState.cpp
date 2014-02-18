@@ -255,7 +255,7 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 		case LEFT_BUTTON:
 			{
 				std::vector<FruitClass*>::iterator fruitIt;
-				for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
+				for(fruitIt = fruitsInGame_.begin(); fruitIt != fruitsInGame_.end(); fruitIt++)
 				{
 					if((*fruitIt)->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
 					{
@@ -274,52 +274,75 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 
 void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
 {
-    switch(arg.buttonPurpose)
-    {
-        case(SELECT_OBJECT):
-            {
-				switch(levelState_)
+	if(subLevelState_ == SELECT_POLAROID)
+	{
+		switch(arg.buttonPurpose)
+		{
+			case(SELECT_OBJECT):
 				{
-					case FIRST_LEVEL:
-						{
-							std::string name = arg.buttonInfo;
-
-							std::vector<FruitClass*>::iterator it;
-							for(it = fruitsInGame_.begin(); it != fruitsInGame_.end(); it++)
+					switch(levelState_)
+					{
+						case FIRST_LEVEL:
 							{
-								if((*it)->getName() == name)
+								std::string name = arg.buttonInfo;
+
+								std::vector<FruitClass*>::iterator it;
+								for(it = fruitsInGame_.begin(); it != fruitsInGame_.end(); it++)
 								{
-									pico_->setTipsColor((*it)->getColorEffect());
+									if((*it)->getName() == name)
+									{
+										pico_->setTipsColor((*it)->getColorEffect());
+									}
 								}
+
+								changeLevel(SECOND_LEVEL);
 							}
-
-							changeLevel(SECOND_LEVEL);
-						}
-						break;
-					case SECOND_LEVEL:
-						{
-							std::string name = arg.buttonInfo;
-
-							std::vector<FruitClass*>::iterator it;
-							for(it = fruitsInGame_.begin(); it != fruitsInGame_.end(); it++)
+							break;
+						case SECOND_LEVEL:
 							{
-								if((*it)->getName() == name)
-								{
-									pico_->setBodyTexture((*it)->getTextureEffect());
-								}
-							}
+								std::string name = arg.buttonInfo;
 
-							changeLevel(THIRD_LEVEL);
-						}
-						break;
+								std::vector<FruitClass*>::iterator it;
+								for(it = fruitsInGame_.begin(); it != fruitsInGame_.end(); it++)
+								{
+									if((*it)->getName() == name)
+									{
+										pico_->setBodyTexture((*it)->getTextureEffect());
+										break;
+									}
+								}
+
+								changeLevel(THIRD_LEVEL);
+							}
+							break;
+						case THIRD_LEVEL:
+							{
+								std::string name = arg.buttonInfo;
+
+								std::vector<FruitClass*>::iterator it;
+								for(it = fruitsInGame_.begin(); it != fruitsInGame_.end(); it++)
+								{
+									if((*it)->getName() == name)
+									{
+										pico_->setHat((*it)->getHatEffect());
+										break;
+									}
+								}
+
+								changeLevel(FOURTH_LEVEL);
+							}
+							break;
+					}
+
+					pico_->setToRest();
 				}
-            }
-            break;
-        default:
-            {
-            }
-            break;
-    }
+				break;
+			default:
+				{
+				}
+				break;
+		}
+	}
 }
 
 void FirstScreenState::updateLevel()
@@ -346,8 +369,10 @@ void FirstScreenState::updateLevel()
 
 				if(gameClock_->getTime() > fadeTime_)
 				{
+					clearPolaroids();
 					createPolaroids();
 					subLevelState_ = SELECT_POLAROID;
+					gameClock_->stop();
 				}
 			}
 			break;
@@ -603,7 +628,7 @@ bool FirstScreenState::loadFruits()
 					std::string modelName = modelNode.text().as_string();
 
 					Object3D* temp = 0;
-					temp = Object3DFactory::Instance()->CreateObject3D("StaticObject3D", graphicsManager_, modelName);
+					temp = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager_, modelName);
 					if(!temp)
 					{
 						MessageBoxA(NULL, "Could not load model!", "Visualizer - Fruit - Error", MB_ICONERROR | MB_OK);
@@ -627,8 +652,6 @@ bool FirstScreenState::loadFruits()
 
 				fruit->getCollisionSphere()->setRadius(radius);
 
-				fruit->addListener(*pico_);
-
 				fruits_.push_back(fruit);
 			}
 		}
@@ -642,6 +665,7 @@ void FirstScreenState::addFruitsToGame()
 	for(int i = (levelState_-1)*4; i < (levelState_-1)*4+4; i++)
 	{
 		fruitsInGame_.push_back(fruits_.at(i));
+		fruits_.at(i)->addListener(*pico_);
 	}
 }
 
@@ -654,6 +678,16 @@ void FirstScreenState::clearFruits()
 		(*fruitIt)->destroy();
 	}
 	fruits_.clear();
+}
+
+void FirstScreenState::clearFruitsInGame()
+{
+	std::vector<FruitClass*>::iterator fruitIt;
+	for(fruitIt = fruitsInGame_.begin(); fruitIt != fruitsInGame_.end(); fruitIt++)
+	{
+		(*fruitIt)->removeListener(*pico_);
+	}
+	fruitsInGame_.clear();
 }
 
 bool FirstScreenState::createPolaroids()
@@ -677,6 +711,17 @@ bool FirstScreenState::createPolaroids()
 		return false;
 	}
 
+	// We first check if any has fallen, if none has been thrown, then we display all
+	bool noneHasFallen = true;
+	std::vector<FruitClass*>::iterator it;
+	for(it = fruitsInGame_.begin(); it != fruitsInGame_.end(); it++)
+	{
+		if((*it)->hasFallen())
+		{
+			noneHasFallen = false;
+		}
+	}
+
 	int screenWidth, screenHeight;
 	graphicsManager_->getScreenSize(screenWidth, screenHeight);
 
@@ -687,7 +732,7 @@ bool FirstScreenState::createPolaroids()
 		// Actuamos en consecuencia segun el tipo de nodo
 		if(node_name ==  "polaroid")
 		{
-			if(fruits_.at(fruitIndex)->hasFallen())
+			if(fruitsInGame_.at(fruitIndex)->hasFallen() || noneHasFallen)
 			{
 				pugi::xml_node imageNode;
 				imageNode = polaroidNode.child("image");
@@ -717,7 +762,7 @@ bool FirstScreenState::createPolaroids()
 					size = Point(sizeNode.attribute("x").as_float()*screenWidth, sizeNode.attribute("y").as_float()*screenHeight);
 				}
 
-				polaroidFrame_->addButton(graphicsManager_, fruitsInGame_.at(fruitIndex)->getName(), pos, size)->addListener(*this);
+				polaroidFrame_->addButton(graphicsManager_, fruitsInGame_.at(fruitIndex)->getName(), pos, size, "seafloor")->addListener(*this);
 			}
 		}
 		fruitIndex++;
@@ -728,14 +773,13 @@ bool FirstScreenState::createPolaroids()
 
 void FirstScreenState::clearPolaroids()
 {
-	
+	polaroidFrame_->deleteButtons();
 }
 
 void FirstScreenState::changeLevel(LevelState level)
 {
 	// Clear the fruits and polaroids vectors for next level
-	fruitsInGame_.clear();
-	clearPolaroids();
+	clearFruitsInGame();
 
 	// Reset light
 	light_->setAmbientColor(0.1f, 0.1f, 0.1f, 1.0f);

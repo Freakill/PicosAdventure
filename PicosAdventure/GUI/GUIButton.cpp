@@ -24,8 +24,7 @@ bool GUIButton::setup(GraphicsManager* graphicsManager, std::string name, Point 
 	height_ = height;
 	buttonPurpose_ = purpose;
 
-	int screenWidth, screenHeight;
-	graphicsManager->getScreenSize(screenWidth, screenHeight);
+	graphicsManager->getScreenSize(screenWidth_, screenHeight_);
 
 	// Create the bitmap object.
 	background_ = new ImageClass();
@@ -35,7 +34,7 @@ bool GUIButton::setup(GraphicsManager* graphicsManager, std::string name, Point 
 	}
 
 	// Initialize the bitmap object.
-	if(!background_->setup(graphicsManager->getDevice(), graphicsManager->getShader2D(), screenWidth, screenHeight, "button", width_, height_))
+	if(!background_->setup(graphicsManager->getDevice(), graphicsManager->getShader2D(), screenWidth_, screenHeight_, "button", width_, height_))
 	{
 		std::string textToDisplay = "Could not initialize the frame background object for " + buttonName_;
 		MessageBoxA(NULL, textToDisplay.c_str(), "GUIFrame - Error", MB_ICONERROR | MB_OK);
@@ -49,12 +48,69 @@ bool GUIButton::setup(GraphicsManager* graphicsManager, std::string name, Point 
 	}
 
 	// Initialize the text object.
-	if(!text_->setup(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), graphicsManager->getShader2D(), screenWidth, screenHeight, position_.x+10, position_.y+5, buttonName_))
+	if(!text_->setup(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), graphicsManager->getShader2D(), screenWidth_, screenHeight_, (screenWidth_/2)+position_.x, (screenHeight_/2)-position_.y, buttonName_))
 	{
 		std::string textToDisplay = "Could not initialize the frame text object for " + buttonName_;
 		MessageBoxA(NULL, textToDisplay.c_str(), "GUIFrame - Error", MB_OK);
 		return false;
 	}
+
+	viewportPosition_.x = (screenWidth_/2)+position_.x;
+	viewportPosition_.y = (screenHeight_/2)-position_.y;
+
+	if(purpose == SELECT_OBJECT)
+	{
+		buttonActive_ = true;
+	}
+	else
+	{
+		buttonActive_ = false;
+	}
+	
+	return true;
+}
+
+bool GUIButton::setup(GraphicsManager* graphicsManager, std::string name, Point position, int width, int height, std::string image, ButtonPurpose purpose)
+{
+	buttonName_ = name;
+	position_ = position;
+	width_ = width;
+	height_ = height;
+	buttonPurpose_ = purpose;
+
+	graphicsManager->getScreenSize(screenWidth_, screenHeight_);
+
+	// Create the bitmap object.
+	background_ = new ImageClass();
+	if(!background_)
+	{
+		return false;
+	}
+
+	// Initialize the bitmap object.
+	if(!background_->setup(graphicsManager->getDevice(), graphicsManager->getShader2D(), screenWidth_, screenHeight_, image, width_, height_))
+	{
+		std::string textToDisplay = "Could not initialize the frame background object for " + buttonName_;
+		MessageBoxA(NULL, textToDisplay.c_str(), "GUIFrame - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	text_ = new TextClass();
+	if(!text_)
+	{
+		return false;
+	}
+
+	// Initialize the text object.
+	if(!text_->setup(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), graphicsManager->getShader2D(), screenWidth_, screenHeight_, (screenWidth_/2)+position_.x+5, (screenHeight_/2)-position_.y+5, buttonName_))
+	{
+		std::string textToDisplay = "Could not initialize the frame text object for " + buttonName_;
+		MessageBoxA(NULL, textToDisplay.c_str(), "GUIFrame - Error", MB_OK);
+		return false;
+	}
+
+	viewportPosition_.x = (screenWidth_/2)+position_.x;
+	viewportPosition_.y = (screenHeight_/2)-position_.y;
 
 	if(purpose == SELECT_OBJECT)
 	{
@@ -80,6 +136,23 @@ void GUIButton::draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix,
 	}
 
 	text_->draw(deviceContext, worldMatrix, viewMatrix, orthoMatrix);
+}
+
+void GUIButton::destroy()
+{
+	if(text_)
+	{
+		text_->destroy();
+		delete text_;
+		text_ = 0;
+	}
+	
+	if(background_)
+	{
+		background_->destroy();
+		delete background_;
+		background_ = 0;
+	}
 }
 
 std::string GUIButton::getName()
@@ -147,8 +220,8 @@ bool GUIButton::offer(Point mouseClick)
 
 bool GUIButton::checkInside(Point pos)
 {
-	if(pos.x >= position_.x && pos.x <= position_.x+width_ &&
-	   pos.y >= position_.y && pos.y <= position_.y+height_)
+	if(pos.x >= viewportPosition_.x && pos.x <= viewportPosition_.x+width_ &&
+	   pos.y >= viewportPosition_.y && pos.y <= viewportPosition_.y+height_)
 	{
 		return true;
 	}

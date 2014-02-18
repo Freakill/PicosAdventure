@@ -117,6 +117,18 @@ void GUIFrame::deleteButton(std::string buttonName)
 	reorganizeButtons();
 }
 
+void GUIFrame::deleteButtons()
+{
+	/*std::map<std::string, GUIButton*>::iterator it;
+	for(it = guiButtons_.begin(); it != guiButtons_.end(); ++it)
+	{
+		it->second->destroy();
+		it = guiButtons_.erase(it);
+		continue;
+	}*/
+	guiButtons_.clear();
+}
+
 void GUIFrame::reorganizeButtons()
 {
 	int posY = 25;
@@ -182,13 +194,31 @@ GUIButton* GUIFrame::addButton(GraphicsManager* graphicsManager, std::string nam
 	return button;
 }
 
-
 GUIButton* GUIFrame::addButton(GraphicsManager* graphicsManager, std::string name, Point pos, Point size)
 {
 	GUIButton* button = new GUIButton();
 
 	// Having the final vertical position, we setup the button
 	button->setup(graphicsManager, name, pos, size.x, size.y, SELECT_OBJECT);
+
+	// We add it to the map of buttons to keep track of it
+	guiButtons_.insert(std::pair<std::string, GUIButton*>(button->getName(), button));
+
+	// Update the total height of the frame
+	if(pos.y+button->getHeight() > height_)
+	{
+		height_ = pos.y+button->getHeight();
+	}
+
+	return button;
+}
+
+GUIButton* GUIFrame::addButton(GraphicsManager* graphicsManager, std::string name, Point pos, Point size, std::string image)
+{
+	GUIButton* button = new GUIButton();
+
+	// Having the final vertical position, we setup the button
+	button->setup(graphicsManager, name, pos, size.x, size.y, image, SELECT_OBJECT);
 
 	// We add it to the map of buttons to keep track of it
 	guiButtons_.insert(std::pair<std::string, GUIButton*>(button->getName(), button));
