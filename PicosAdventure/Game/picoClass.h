@@ -16,7 +16,7 @@
 #include "../Math/vectorClass.h"
 
 #include "../Utils/listenerClass.h"
-
+#include "../Utils/textClass.h"
 #include "../Utils/clockClass.h"
 
 #include <deque>
@@ -39,6 +39,8 @@ enum FaceStates
 		CHANGING,
 		CHANGED
 	};
+
+#define UNHIDDING_STEPS 2
 
 class PicoClass : public Listener<InputManager, InputStruct>, public Listener<FruitClass, Point>, public Notifier<PicoClass, bool>
 {
@@ -119,11 +121,14 @@ class PicoClass : public Listener<InputManager, InputStruct>, public Listener<Fr
 		Vector		scaling_; 
 		float		rotX_;
 		float		rotY_; 
+		float		newRotY_;
 		float		rotZ_;
 
 		// Unhidding
-		Point		positionUnhidding_[2];
+		Point		positionUnhidding_[UNHIDDING_STEPS];
 		int			unhiddingStep_;
+
+		TextClass*	info_;
 };
 
 #endif //_PICO_CLASS_H_

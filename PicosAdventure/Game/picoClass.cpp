@@ -34,6 +34,7 @@ PicoClass::PicoClass()
 	
 	rotX_ = 0.0f;
 	rotY_ = 0.0f; 
+	newRotY_ = 0.0f;
 	rotZ_ = 0.0f;
 }
 
@@ -112,6 +113,22 @@ bool PicoClass::setup(GraphicsManager* graphicsManager, CameraClass* camera)
 	eatingWaitTime_ = 2.0f;
 	celebratingWaitTime_ = 1.2f;
 
+	int screenWidth, screenHeight;
+	graphicsManager->getScreenSize(screenWidth, screenHeight);
+
+	info_ = new TextClass();
+	if(!info_)
+	{
+		return false;
+	}
+
+	// Initialize the text object.
+	if(!info_->setup(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), graphicsManager->getShader2D(), screenWidth, screenHeight, 20, 40, "Rot: "))
+	{
+		MessageBoxA(NULL, "Could not initialize the FPS text object.", "GUIFrame - Error", MB_OK);
+		return false;
+	}
+
 	return true;
 }
 
@@ -142,6 +159,7 @@ void PicoClass::update(float elapsedTime)
 				{
 					changeExpression("sorpresa");
 					goToPosition(positionUnhidding_[unhiddingStep_]);
+					unhiddingStep_++;
 					picoState_ = UNHIDDING;
 				}
 			}
@@ -152,29 +170,17 @@ void PicoClass::update(float elapsedTime)
 
 				if(checkPicoArrivedObjective())
 				{
-					switch(unhiddingStep_)
+					if(unhiddingStep_ < UNHIDDING_STEPS)
 					{
-						case 0:
-							{
-								unhiddingStep_++;
-								goToPosition(positionUnhidding_[unhiddingStep_]);
-								picoState_ = UNHIDDING;
-							}
-							break;
-						case 1:
-							{
-								Point fallenFruitPos = fallenFruits_.front()->getPosition();
-								goToPosition(fallenFruitPos);
-								picoState_ = WAITING;
-							}
-							break;
-						default:
-							{
-								Point fallenFruitPos = fallenFruits_.front()->getPosition();
-								goToPosition(fallenFruitPos);
-								picoState_ = WAITING;
-							}
-							break;
+						goToPosition(positionUnhidding_[unhiddingStep_]);
+						unhiddingStep_++;
+						picoState_ = UNHIDDING;
+					}
+					else
+					{
+						Point fallenFruitPos = fallenFruits_.front()->getPosition();
+						goToPosition(fallenFruitPos);
+						picoState_ = WAITING;
 					}
 				}
 			}
@@ -297,6 +303,19 @@ void PicoClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, X
 		graphicsManager->turnOnWireframeRasterizer();
 		collisionTest_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
 		graphicsManager->turnOnSolidRasterizer();
+
+		std::stringstream RotText;
+		RotText << "RotY: " << rotY_ << " NewRotY: " << newRotY_;
+		info_->setText(RotText.str(), graphicsManager->getDeviceContext());
+
+		XMFLOAT4X4 orthoMatrix;
+		graphicsManager->getOrthoMatrix(orthoMatrix);
+
+		graphicsManager->turnZBufferOff();
+		graphicsManager->turnOnAlphaBlending();
+			info_->draw(graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, orthoMatrix);
+		graphicsManager->turnOffAlphaBlending();
+		graphicsManager->turnZBufferOn();
 	}
 
 	XMFLOAT4X4 rotatingMatrixZ;
@@ -442,15 +461,31 @@ void PicoClass::walk(float elapsedTime)
 	Vector normalizedVelocity = velocity_.normalize();
 	velocity_ = normalizedVelocity * 1.8f;
 
-	rotY_ = acos(normalizedVelocity.z);
+	float newRotY_ = acos(normalizedVelocity.z);
 	if(normalizedVelocity.x < 0)
 	{
-		rotY_ += 3.141592f;
+		newRotY_ += 3.141592f;
 	}
 
-	position_.x += velocity_.x*elapsedTime;
-	position_.y += velocity_.y*elapsedTime;
-	position_.z += velocity_.z*elapsedTime;
+	if(rotY_ > newRotY_-0.1f && rotY_ < newRotY_+0.1f)
+	{
+		rotY_ = newRotY_;
+
+		position_.x += velocity_.x*elapsedTime;
+		position_.y += velocity_.y*elapsedTime;
+		position_.z += velocity_.z*elapsedTime;
+	}
+	else
+	{
+		if(rotY_ < newRotY_)
+		{
+			rotY_ += 0.04f;
+		}
+		if(rotY_ > newRotY_)
+		{
+			rotY_ -= 0.04f;
+		}
+	}
 }
 
 void PicoClass::lookAtCamera()
