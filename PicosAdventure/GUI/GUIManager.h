@@ -16,6 +16,7 @@ class GUIManager : public Listener<InputManager, InputStruct>
 		GUIManager(const GUIManager& camera);
 		~GUIManager();
 
+		void update(float elapsedTime);
 		void draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix);
 
 		void addFrame(GUIFrame* frame);

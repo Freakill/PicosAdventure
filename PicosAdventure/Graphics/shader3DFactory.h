@@ -3,6 +3,7 @@
 
 #include "shader3DClass.h"
 
+#include "colorShader3D.h"
 #include "diffuseShader3D.h"
 #include "multitextureShader3D.h"
 

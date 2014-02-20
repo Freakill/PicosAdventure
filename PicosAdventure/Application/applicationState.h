@@ -20,7 +20,7 @@ class ApplicationState : public Listener<InputManager, InputStruct>
 		ApplicationState();
 		virtual ~ApplicationState();
 
-		virtual bool setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager * inputManager) = 0;
+		virtual bool setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager * inputManager, KinectClass* kinectManager) = 0;
 		virtual void update(float elapsedTime) = 0;
 		virtual void draw() = 0;
 		virtual void destroy() = 0;

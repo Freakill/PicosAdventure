@@ -20,6 +20,13 @@ struct TexturedVertexType
 			float tu, tv;
 		};
 
+struct ColorVertexType
+		{
+			XMFLOAT3 position;
+			XMFLOAT2 texture;
+			XMFLOAT4 color;
+		};
+
 class Shader3DClass
 {
 	protected:

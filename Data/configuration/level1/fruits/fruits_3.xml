@@ -45,7 +45,7 @@
 		<scale x="1" y="1" z="1" />
 		<rotation x="0" y="0" z="0" />
 		<effect type="hat">
-			<model>gorroFrutas</model>
+			<model>gorroCumple</model>
 		</effect>
 		<collision>
 			<position x="0.0" y="0.4" z="0.0" />

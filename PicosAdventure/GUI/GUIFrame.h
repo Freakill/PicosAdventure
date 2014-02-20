@@ -22,6 +22,7 @@ class GUIFrame
 		~GUIFrame();
 
 		bool setup(GraphicsManager* graphicsManager, std::string name, Point position, int width, int height);
+		void update(float elapsedTime);
 		void draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix);
 
 		std::string getName();

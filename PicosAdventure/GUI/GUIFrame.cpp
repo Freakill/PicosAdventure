@@ -58,6 +58,15 @@ bool GUIFrame::setup(GraphicsManager* graphicsManager, std::string name, Point p
 	return true;
 }
 
+void GUIFrame::update(float elapsedTime)
+{
+	std::map<std::string, GUIButton*>::iterator it;
+	for(it = guiButtons_.begin(); it != guiButtons_.end(); ++it)
+	{
+		it->second->update(elapsedTime);
+	}
+}
+
 void GUIFrame::draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix)
 {
 	std::map<std::string, GUIButton*>::iterator it;

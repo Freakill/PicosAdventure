@@ -28,7 +28,7 @@ SecondScreenState* SecondScreenState::Instance()
 	return (&secondScreenState_);
 }
 
-bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager * inputManager)
+bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager * inputManager, KinectClass* kinectManager)
 {
 	// We get a pointer to the graphicsManager
 	graphicsManager_ = graphicsManager;
@@ -118,6 +118,8 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 		return false;
 	}
 	gameClock_->reset();
+
+	kinectManager->addListener(*this);
 
 	return true;
 }
@@ -210,6 +212,11 @@ void SecondScreenState::notify(InputManager* notifier, InputStruct arg)
 			}
 			break;
 	}
+}
+
+void SecondScreenState::notify(KinectClass* notifier, KinectStruct arg)
+{
+	
 }
 
 void SecondScreenState::loadConfigurationFromXML()

@@ -4,6 +4,7 @@ Shader3DFactory Shader3DFactory::shader3DFactory_;
 
 Shader3DFactory::Shader3DFactory()
 {
+	Register("ColorShader3D", &ColorShader3DClass::Create);
 	Register("DiffuseShader3D", &DiffuseShader3DClass::Create);
 	Register("MultiTextureShader3D", &MultiTextureShader3DClass::Create);
 

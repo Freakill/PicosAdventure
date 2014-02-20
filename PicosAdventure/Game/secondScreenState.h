@@ -21,7 +21,7 @@
 
 #include <mmsystem.h>
 
-class SecondScreenState: public ApplicationState
+class SecondScreenState: public ApplicationState, public Listener<KinectClass, KinectStruct>
 {
 	enum LevelState
 		{
@@ -45,12 +45,13 @@ class SecondScreenState: public ApplicationState
 		virtual ~SecondScreenState();
 		static SecondScreenState* Instance();
 
-		virtual bool setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager* inputManager);
+		virtual bool setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager* inputManager, KinectClass* kinectManager);
 		virtual void update(float elapsedTime);
 		virtual void draw();
 		virtual void destroy();
 
 		virtual void notify(InputManager* notifier, InputStruct arg);
+		void notify(KinectClass* notifier, KinectStruct arg);
 
 	private:
 		static SecondScreenState secondScreenState_; //singleton

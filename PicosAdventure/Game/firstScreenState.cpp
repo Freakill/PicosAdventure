@@ -26,7 +26,7 @@ FirstScreenState* FirstScreenState::Instance()
 	return (&firstScreenState_);
 }
 
-bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager * inputManager)
+bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager * inputManager, KinectClass* kinectManager)
 {
 	// We get a pointer to the graphicsManager
 	graphicsManager_ = graphicsManager;
@@ -135,6 +135,8 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	}
 	gameClock_->reset();
 
+	kinectManager->addListener(*this);
+
 	return true;
 }
 
@@ -182,6 +184,11 @@ void FirstScreenState::update(float elapsedTime)
 
 			}
 			break;
+	}
+
+	if(subLevelState_ == SELECT_POLAROID)
+	{
+		polaroidGUI_->update(elapsedTime);
 	}
 
 	std::stringstream FPSText;
@@ -260,6 +267,15 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 		case 100: //d
 			{
 				debug_ = !debug_;
+			}
+			break;
+		case 80: //P
+		case 112: //p
+			{
+				clearPolaroids();
+				createPolaroids();
+				subLevelState_ = SELECT_POLAROID;
+				gameClock_->stop();
 			}
 			break;
 		default:
@@ -362,6 +378,32 @@ void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
 				}
 				break;
 		}
+	}
+}
+
+void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
+{
+	int screenWidth, screenHeight;
+	graphicsManager_->getScreenSize(screenWidth, screenHeight);
+
+	kinectHandPos_ = Point(arg.handPos.x*screenWidth/320, arg.handPos.y*screenHeight/240);
+
+	std::stringstream kinectext;
+	kinectext << "Kinect: " << kinectHandPos_.x << "x" << kinectHandPos_.y;
+	kinectHandText_->setText(kinectext.str(), graphicsManager_->getDeviceContext());
+
+	std::vector<FruitClass*>::iterator fruitIt;
+	for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
+	{
+		if((*fruitIt)->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+		{
+			(*fruitIt)->makeItFall();
+		}
+	}
+
+	if(pico_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+	{
+		pico_->changeExpression("feliz");
 	}
 }
 

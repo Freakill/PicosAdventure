@@ -72,6 +72,7 @@ class FruitClass : public Notifier<FruitClass, Point>
 		void setHatEffect(Object3D* hat);
 		Object3D* getHatEffect();
 
+		void shakeIt();
 		void makeItFall();
 		void resetFruit();
 
@@ -92,6 +93,10 @@ class FruitClass : public Notifier<FruitClass, Point>
 
 		float		waitedTime_;
 		float		spawningTime_;
+
+		float		shakenTime_;
+		float		fallTime_;
+		bool		shaken_;
 
 		float		rotX_;
 		float		rotY_; 

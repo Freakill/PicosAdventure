@@ -6,6 +6,7 @@
 #include "../Graphics/graphicsManager.h"
 
 #include "inputManager.h"
+#include "kinectClass.h"
 
 #include "../Utils/clockClass.h"
 
@@ -30,6 +31,7 @@ class ApplicationManager
 		InputManager* inputManager_;
 		GraphicsManager* graphicsManager_;
 		ClockClass* clockClass_;
+		KinectClass* kinectManager_;
 
 		HWND windowHandler_;
 };

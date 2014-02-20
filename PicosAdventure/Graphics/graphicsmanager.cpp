@@ -19,6 +19,7 @@ GraphicsManager::GraphicsManager()
 	alphaDisableBlendingState_ = 0;
 
 	shader2D_ = 0;
+	colorShader3D_ = 0;
 	diffuseShader3D_ = 0;
 	multitextureShader3D_ = 0;
 }
@@ -391,6 +392,13 @@ void GraphicsManager::destroy()
 	}
 
 	// Release the 3D shader object.
+	if(colorShader3D_)
+	{
+		colorShader3D_->destroy();
+		delete colorShader3D_;
+		colorShader3D_ = 0;
+	}
+
 	if(diffuseShader3D_)
 	{
 		diffuseShader3D_->destroy();
@@ -504,6 +512,7 @@ bool GraphicsManager::setupShaders()
 	}
 
 	// Create the 3D shader object.
+	colorShader3D_ = Shader3DFactory::Instance()->CreateShader3D("ColorShader3D", this);
 	diffuseShader3D_ = Shader3DFactory::Instance()->CreateShader3D("DiffuseShader3D", this);
 	multitextureShader3D_ = Shader3DFactory::Instance()->CreateShader3D("MultiTextureShader3D", this);
 
@@ -533,6 +542,11 @@ Shader2DClass* GraphicsManager::getShader2D()
 Shader3DClass* GraphicsManager::getShader3D(std::string type)
 {
 	return Shader3DFactory::Instance()->CreateShader3D(type, this);;
+}
+
+Shader3DClass* GraphicsManager::getColorShader3D()
+{
+	return colorShader3D_;
 }
 
 Shader3DClass* GraphicsManager::getDiffuseShader3D()

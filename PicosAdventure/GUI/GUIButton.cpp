@@ -6,6 +6,9 @@ GUIButton::GUIButton()
 	position_ = Point(0.0f, 0.0f);
 	width_ = 0;
 	height_ = 0;
+
+	selectTime_ = 0.0f;
+	selectionTime_ = 0.0f;
 }
 
 GUIButton::GUIButton(const GUIButton& camera)
@@ -57,6 +60,9 @@ bool GUIButton::setup(GraphicsManager* graphicsManager, std::string name, Point 
 
 	viewportPosition_.x = (screenWidth_/2)+position_.x;
 	viewportPosition_.y = (screenHeight_/2)-position_.y;
+
+	selectionTime_ = 2.0f;
+	selected_ = false;
 
 	if(purpose == SELECT_OBJECT)
 	{
@@ -122,6 +128,21 @@ bool GUIButton::setup(GraphicsManager* graphicsManager, std::string name, Point 
 	}
 	
 	return true;
+}
+
+void GUIButton::update(float elapsedTime)
+{
+	if(selected_)
+	{
+		selectTime_ += elapsedTime;
+		selected_ = false;
+	}
+
+	selectTime_ -= 0.001;
+	if(selectTime_ < 0.0)
+	{
+		selectTime_ = 0.0f;
+	}
 }
 
 void GUIButton::draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix)
@@ -212,7 +233,14 @@ bool GUIButton::offer(Point mouseClick)
 			buttonActive_ = !buttonActive_;
 		}
 
-		notifyListeners(buttonStruct);
+		selected_ = true;
+
+		if(selectTime_ > selectionTime_)
+		{
+			notifyListeners(buttonStruct);
+
+			selectTime_ = 0.0f;
+		}
 	}
 
 	return false;

@@ -25,8 +25,10 @@ FruitClass::FruitClass()
 	initialScaling_.z = 1.0f;
 
 	spawningTime_ = 0.0f;
-
 	waitedTime_ = 0.0f;
+
+	shakenTime_ = 0.0f;
+	fallTime_ = 0.0f;
 	
 	rotX_ = 0.0f;
 	rotY_ = 0.0f; 
@@ -71,6 +73,9 @@ bool FruitClass::setup(GraphicsManager *graphicsManager, std::string fileName, P
 	scaling_.z = initialScaling_.z;
 
 	spawningTime_ = 2.0f;
+
+	fallTime_ = 2.0f;
+	shaken_ = false;
 	
 	rotX_ = rotX;
 	rotY_ = rotY; 
@@ -102,6 +107,8 @@ void FruitClass::update(float elapsedTime)
 					scaling_.y = endScaling_.y;
 					scaling_.z = endScaling_.z;
 
+					shakenTime_ = 0;
+
 					fruitState_ = IN_TREE;
 				}
 				else
@@ -114,6 +121,17 @@ void FruitClass::update(float elapsedTime)
 			break;
 		case IN_TREE:
 			{
+				if(shaken_)
+				{
+					shakenTime_ += elapsedTime;
+					shaken_ = false;
+				}
+
+				shakenTime_ -= 0.001;
+				if(shakenTime_ < 0.0)
+				{
+					shakenTime_ = 0.0f;
+				}
 			}
 			break;
 		case FALLING:
@@ -201,6 +219,19 @@ void FruitClass::destroy()
 std::string FruitClass::getName()
 {
 	return name_;
+}
+
+void FruitClass::shakeIt()
+{
+	if(fruitState_ == IN_TREE)
+	{
+		shaken_ = true;
+
+		if(shakenTime_ > fallTime_)
+		{
+			makeItFall();
+		}
+	}
 }
 
 void FruitClass::makeItFall()

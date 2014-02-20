@@ -10,6 +10,7 @@ ApplicationManager::ApplicationManager()
 	appState_ = 0;
 	graphicsManager_ = 0;
 	clockClass_ = 0;
+	kinectManager_ = 0;
 }
 
 ApplicationManager::~ApplicationManager()
@@ -42,7 +43,20 @@ bool ApplicationManager::setup(HWND windowsHandler, InputManager* inputManager, 
 	}
 	clockClass_->reset();
 
-	if(!changeState(SecondScreenState::Instance()))
+	kinectManager_ = new KinectClass;
+	if(!kinectManager_)
+	{
+		MessageBoxA(NULL, "Could not create a Kinect Manager instance.", "Application Manager - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	if(!kinectManager_->setup(windowHandler_, graphicsManager_->getSwapChain()))
+	{
+		MessageBoxA(NULL, "Could not setup the Kinect instance.", "Application Manager - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	if(!changeState(FirstScreenState::Instance()))
 	{
 		return false;
 	}
@@ -55,6 +69,8 @@ void ApplicationManager::update()
 	clockClass_->tick();
 
 	inputManager_->update();
+
+	kinectManager_->update();
 
 	// we update the State with the frame elapsed time
 	if(appState_ != 0)
@@ -72,6 +88,12 @@ void ApplicationManager::draw()
 	{
 		appState_->draw();
 	}
+
+	graphicsManager_->turnZBufferOff();
+	graphicsManager_->turnOnAlphaBlending();
+		kinectManager_->draw();
+	graphicsManager_->turnOffAlphaBlending();
+	graphicsManager_->turnZBufferOn();
 
 	graphicsManager_->endDraw();
 }
@@ -102,7 +124,7 @@ bool ApplicationManager::changeState(ApplicationState* appState)
 	if (appState != appState_) {
 		inputManager_->removeListener((*appState_));
 		appState_ = appState;
-		return appState_->setup(this, graphicsManager_, inputManager_);
+		return appState_->setup(this, graphicsManager_, inputManager_, kinectManager_);
 	}
 
 	return true;

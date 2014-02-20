@@ -12,6 +12,15 @@ GUIManager::~GUIManager()
 {
 }
 
+void GUIManager::update(float elapsedTime)
+{
+	std::map<std::string, GUIFrame*>::iterator it;
+	for(it = guiFrames_.begin(); it != guiFrames_.end(); ++it)
+	{
+		it->second->update(elapsedTime);
+	}
+}
+
 void GUIManager::draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 orthoMatrix)
 {
 	std::map<std::string, GUIFrame*>::iterator it;

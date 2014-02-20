@@ -99,10 +99,12 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClCompile Include="Application\applicationManager.cpp" />
     <ClCompile Include="Application\applicationState.cpp" />
     <ClCompile Include="Application\inputManager.cpp" />
+    <ClCompile Include="Application\kinectClass.cpp" />
     <ClCompile Include="Application\systemClass.cpp" />
     <ClCompile Include="Engine\AnimatedObject3D.cpp" />
     <ClCompile Include="Engine\Object3D.cpp" />
     <ClCompile Include="Engine\Object3DFactory.cpp" />
+    <ClCompile Include="Engine\particleSystem.cpp" />
     <ClCompile Include="Engine\sphereCollision.cpp" />
     <ClCompile Include="Engine\StaticObject3D.cpp" />
     <ClCompile Include="Game\firstScreenState.cpp" />
@@ -112,6 +114,7 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClCompile Include="Graphics\animatedCal3DModelClass.cpp" />
     <ClCompile Include="Graphics\Cal3DmodelClass.cpp" />
     <ClCompile Include="Graphics\cameraClass.cpp" />
+    <ClCompile Include="Graphics\colorShader3D.cpp" />
     <ClCompile Include="Graphics\diffuseShader3D.cpp" />
     <ClCompile Include="Graphics\fontClass.cpp" />
     <ClCompile Include="Graphics\graphicsmanager.cpp" />
@@ -140,10 +143,12 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClInclude Include="Application\applicationManager.h" />
     <ClInclude Include="Application\applicationState.h" />
     <ClInclude Include="Application\inputManager.h" />
+    <ClInclude Include="Application\kinectClass.h" />
     <ClInclude Include="Application\systemClass.h" />
     <ClInclude Include="Engine\AnimatedObject3D.h" />
     <ClInclude Include="Engine\Object3D.h" />
     <ClInclude Include="Engine\Object3DFactory.h" />
+    <ClInclude Include="Engine\particleSystem.h" />
     <ClInclude Include="Engine\sphereCollision.h" />
     <ClInclude Include="Engine\StaticObject3D.h" />
     <ClInclude Include="Game\firstScreenState.h" />
@@ -153,6 +158,7 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClInclude Include="Graphics\animatedCal3DModelClass.h" />
     <ClInclude Include="Graphics\Cal3DmodelClass.h" />
     <ClInclude Include="Graphics\cameraClass.h" />
+    <ClInclude Include="Graphics\colorShader3D.h" />
     <ClInclude Include="Graphics\diffuseShader3D.h" />
     <ClInclude Include="Graphics\fontClass.h" />
     <ClInclude Include="Graphics\graphicsManager.h" />

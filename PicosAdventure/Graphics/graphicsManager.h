@@ -41,6 +41,7 @@ class GraphicsManager
 
 		Shader2DClass* getShader2D();
 		Shader3DClass* getShader3D(std::string type);
+		Shader3DClass* getColorShader3D();
 		Shader3DClass* getDiffuseShader3D();
 		Shader3DClass* getMultitextureShader3D();
 
@@ -94,6 +95,7 @@ class GraphicsManager
 
 		// Pointers to shaders
 		Shader2DClass* shader2D_;
+		Shader3DClass* colorShader3D_;
 		Shader3DClass* diffuseShader3D_;
 		Shader3DClass* multitextureShader3D_;
 };

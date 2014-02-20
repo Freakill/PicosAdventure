@@ -21,7 +21,7 @@
 
 #include <mmsystem.h>
 
-class FirstScreenState: public ApplicationState, public Listener<GUIButton, ButtonStruct>
+class FirstScreenState: public ApplicationState, public Listener<GUIButton, ButtonStruct>, public Listener<KinectClass, KinectStruct>
 {
 	enum LevelState
 		{
@@ -45,13 +45,14 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		virtual ~FirstScreenState();
 		static FirstScreenState* Instance();
 
-		virtual bool setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager* inputManager);
+		virtual bool setup(ApplicationManager* appManager, GraphicsManager* graphicsManager, InputManager* inputManager, KinectClass* kinectManager);
 		virtual void update(float elapsedTime);
 		virtual void draw();
 		virtual void destroy();
 
 		virtual void notify(InputManager* notifier, InputStruct arg);
 		void notify(GUIButton* notifier, ButtonStruct arg);
+		void notify(KinectClass* notifier, KinectStruct arg);
 
 	private:
 		static FirstScreenState firstScreenState_; //singleton
@@ -88,6 +89,10 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 
 		float						playingTime_;
 		float						fadeTime_;
+
+		Point						kinectHandPos_;
+		ImageClass*					kinectHand_;
+		TextClass*					kinectHandText_;
 
 		// Scenario structure
 		ImageClass*					background_;
