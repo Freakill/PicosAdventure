@@ -1,4 +1,4 @@
 <configuration>
 	<play_time> 360 </play_time>
-	<fade_time> 5 </fade_time>
+	<fade_time> 20 </fade_time>
 </configuration>

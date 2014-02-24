@@ -22,9 +22,6 @@
     <Filter Include="Header Files\Math">
       <UniqueIdentifier>{7c3dfb52-f3af-46f0-ada0-37dc5c8db8c1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Utils">
-      <UniqueIdentifier>{8d0f5294-0a4c-4d86-9fa2-01b8e8504640}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Math">
       <UniqueIdentifier>{e9c778b2-5188-4eef-8ed3-c01df76e85b8}</UniqueIdentifier>
     </Filter>
@@ -72,6 +69,15 @@
     </Filter>
     <Filter Include="Source Files\Engine\Objects">
       <UniqueIdentifier>{8c9e81a0-3e7f-492d-a6c0-1f695d31029b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utils">
+      <UniqueIdentifier>{8d0f5294-0a4c-4d86-9fa2-01b8e8504640}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\FirstLevel">
+      <UniqueIdentifier>{24bbe77e-1dfc-4e17-a3c4-27c40abf2b8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\FirstLevel">
+      <UniqueIdentifier>{75dc3d33-ce0e-4cc9-b482-a74fec23ac6e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -153,9 +159,6 @@
     <ClCompile Include="Graphics\animatedCal3DModelClass.cpp">
       <Filter>Source Files\Graphics\Model</Filter>
     </ClCompile>
-    <ClCompile Include="Game\firstScreenState.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\AnimatedObject3D.cpp">
       <Filter>Source Files\Engine\Objects</Filter>
     </ClCompile>
@@ -171,12 +174,6 @@
     <ClCompile Include="Engine\sphereCollision.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Game\fruitClass.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\picoClass.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\textureArrayClass.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
@@ -189,9 +186,6 @@
     <ClCompile Include="Graphics\multitextureShader3D.cpp">
       <Filter>Source Files\Graphics\Shaders</Filter>
     </ClCompile>
-    <ClCompile Include="Game\secondScreenState.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\colorShader3D.cpp">
       <Filter>Source Files\Graphics\Shaders</Filter>
     </ClCompile>
@@ -201,17 +195,32 @@
     <ClCompile Include="Application\kinectClass.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
-    <ClCompile Include="Game\birdClass.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\spaceShipClass.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\soundClass.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\pointlightDiffuseShader3D.cpp">
       <Filter>Source Files\Graphics\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\secondScreenState.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\pieceClass.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\birdClass.cpp">
+      <Filter>Source Files\Game\FirstLevel</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\firstScreenState.cpp">
+      <Filter>Source Files\Game\FirstLevel</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\fruitClass.cpp">
+      <Filter>Source Files\Game\FirstLevel</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\picoFirstClass.cpp">
+      <Filter>Source Files\Game\FirstLevel</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\spaceShipClass.cpp">
+      <Filter>Source Files\Game\FirstLevel</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -299,9 +308,6 @@
     <ClInclude Include="Graphics\modelClass.h">
       <Filter>Header Files\Graphics\Model</Filter>
     </ClInclude>
-    <ClInclude Include="Game\firstScreenState.h">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\StaticObject3D.h">
       <Filter>Header Files\Engine\Objects</Filter>
     </ClInclude>
@@ -316,12 +322,6 @@
     </ClInclude>
     <ClInclude Include="Engine\sphereCollision.h">
       <Filter>Header Files\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\fruitClass.h">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\picoClass.h">
-      <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\textureArrayClass.h">
       <Filter>Header Files\Graphics</Filter>
@@ -347,17 +347,29 @@
     <ClInclude Include="Application\kinectClass.h">
       <Filter>Header Files\Application</Filter>
     </ClInclude>
-    <ClInclude Include="Game\birdClass.h">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\spaceShipClass.h">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\soundClass.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\pointlightDiffuseShader3D.h">
       <Filter>Header Files\Graphics\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\pieceClass.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\birdClass.h">
+      <Filter>Header Files\Game\FirstLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\firstScreenState.h">
+      <Filter>Header Files\Game\FirstLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\fruitClass.h">
+      <Filter>Header Files\Game\FirstLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\picoFirstClass.h">
+      <Filter>Header Files\Game\FirstLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\spaceShipClass.h">
+      <Filter>Header Files\Game\FirstLevel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

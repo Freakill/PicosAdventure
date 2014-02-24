@@ -17,9 +17,9 @@
 
 #include <deque>
 
-class PicoClass;
+class PicoFirstClass;
 
-class BirdClass : public Listener<FruitClass, Point>, public Listener<PicoClass, bool>, public Notifier<BirdClass, bool>
+class BirdClass : public Listener<FruitClass, Point>, public Listener<PicoFirstClass, bool>, public Notifier<BirdClass, bool>
 {
 	private:
 		enum BirdState
@@ -51,7 +51,7 @@ class BirdClass : public Listener<FruitClass, Point>, public Listener<PicoClass,
 		SphereCollision* getCollisionSphere();
 
 		virtual void notify(FruitClass* notifier, Point arg);
-		virtual void notify(PicoClass* notifier, bool arg);
+		virtual void notify(PicoFirstClass* notifier, bool arg);
 
 	private:
 		float approach(float goal, float current, float dt);

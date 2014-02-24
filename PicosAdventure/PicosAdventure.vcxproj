@@ -112,7 +112,8 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClCompile Include="Game\birdClass.cpp" />
     <ClCompile Include="Game\firstScreenState.cpp" />
     <ClCompile Include="Game\fruitClass.cpp" />
-    <ClCompile Include="Game\picoClass.cpp" />
+    <ClCompile Include="Game\picoFirstClass.cpp" />
+    <ClCompile Include="Game\pieceClass.cpp" />
     <ClCompile Include="Game\secondScreenState.cpp" />
     <ClCompile Include="Game\spaceShipClass.cpp" />
     <ClCompile Include="Graphics\animatedCal3DModelClass.cpp" />
@@ -160,7 +161,8 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClInclude Include="Game\birdClass.h" />
     <ClInclude Include="Game\firstScreenState.h" />
     <ClInclude Include="Game\fruitClass.h" />
-    <ClInclude Include="Game\picoClass.h" />
+    <ClInclude Include="Game\picoFirstClass.h" />
+    <ClInclude Include="Game\pieceClass.h" />
     <ClInclude Include="Game\secondScreenState.h" />
     <ClInclude Include="Game\spaceShipClass.h" />
     <ClInclude Include="Graphics\animatedCal3DModelClass.h" />

@@ -113,7 +113,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	}
 
 	// Create the Pico object.
-	pico_ = new PicoClass();
+	pico_ = new PicoFirstClass();
 	if(!pico_)
 	{
 		return false;

@@ -56,7 +56,7 @@ bool ApplicationManager::setup(HWND windowsHandler, InputManager* inputManager, 
 		return false;
 	}
 
-	if(!changeState(SecondScreenState::Instance()))
+	if(!changeState(FirstScreenState::Instance()))
 	{
 		return false;
 	}
@@ -75,7 +75,14 @@ void ApplicationManager::update()
 	// we update the State with the frame elapsed time
 	if(appState_ != 0)
 	{
-		appState_->update(clockClass_->getDeltaTime());
+		// Control maximum frame time :)
+		float elapsedTime = clockClass_->getDeltaTime();
+		if(elapsedTime > 0.03)
+		{
+			elapsedTime = 0.03;
+		}
+
+		appState_->update(elapsedTime);
 	}
 }
 

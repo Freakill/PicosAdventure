@@ -15,6 +15,8 @@ SecondScreenState::SecondScreenState()
 	light_ = 0;
 	gameClock_ = 0;
 
+	spaceShipWireframe_ = 0;
+
 	background_ = 0;
 }
 
@@ -75,6 +77,10 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	backgrounPosition_.x = (screenWidth_/2)*-1;
 	backgrounPosition_.y = (screenHeight_/2)+2;
 
+	// Lights
+	lightPos_[0] = XMFLOAT4(-3.5f, 2.0f, -4.0f, 0.0f);
+	lightPos_[1] = XMFLOAT4(3.5f, 2.0f, -4.0f, 0.0f);
+
 	// Load the first level scenario
 	loadScenario("level1");
 
@@ -89,15 +95,27 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 		}
 	}
 
+	// Load spaceship
+	spaceShipWireframe_ = Object3DFactory::Instance()->CreateObject3D("StaticObject3D", graphicsManager_, "nave");
+	spaceShipWireframe_->setPosition(Point(-2.0f, 0.0f, -3.25f));
+	spaceShipWireframe_->setScale(Vector(0.0110476f, 0.0110476f, 0.0110476f));
+	spaceShipWireframe_->setRotationX(0);
+	spaceShipWireframe_->setRotationY(0);
+	spaceShipWireframe_->setRotationZ(0);
+	Shader3DClass* shaderTemp = Shader3DFactory::Instance()->CreateShader3D("PointlightDiffuseShader3D", graphicsManager_);
+	spaceShipWireframe_->setShader3D(shaderTemp);
+
+	PointlightDiffuseShader3DClass* pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>(spaceShipWireframe_->getShader3D());
+	pointlightShader->setPositions(lightPos_[0], lightPos_[1]);
+
+	loadPieces();
+
 	// Set the level state to the first iteration and load fruits accordingly
 	levelState_ = INTRODUCTION;
-	subLevelState_ = PLAYING;
+
+	introLevelState_ = TO_PIECE;
 
 	loadConfigurationFromXML();
-
-	// Lights
-	lightPos_[0] = XMFLOAT4(-4.5f, 2.0f, -3.5f, 0.0f);
-	lightPos_[1] = XMFLOAT4(4.5f, 2.0f, -3.5f, 0.0f);
 
 	debug_ = false;
 
@@ -111,6 +129,21 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	if(!FPS_->setup(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), graphicsManager->getShader2D(), screenWidth_, screenHeight_, 20, 20, "FPS: "))
 	{
 		MessageBoxA(NULL, "Could not initialize the FPS text object.", "SecondScreen - Error", MB_OK);
+		return false;
+	}
+
+	// kinect debug text object
+	kinectHandText_ = new TextClass();
+	if(!kinectHandText_)
+	{
+		return false;
+	}
+
+	// Initialize the text object.
+	if(!kinectHandText_->setup(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), graphicsManager->getShader2D(), screenWidth_, screenHeight_, 20, 20, "Kinect: "))
+	{
+		std::string textToDisplay = "Could not initialize the frame text object for Kinect text.";
+		MessageBoxA(NULL, textToDisplay.c_str(), "GUIFrame - Error", MB_OK);
 		return false;
 	}
 
@@ -139,12 +172,18 @@ void SecondScreenState::update(float elapsedTime)
 		PointlightDiffuseShader3DClass* pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>((*objectsIt)->getShader3D());
 		pointlightShader->setPositions(lightPos_[0], lightPos_[1]);
 	}
+	PointlightDiffuseShader3DClass* pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>(spaceShipWireframe_->getShader3D());
+	pointlightShader->setPositions(lightPos_[0], lightPos_[1]);
 
 	switch(levelState_)
 	{
 		default:
 			{
-
+				std::vector<PieceClass*>::iterator pieceIt;
+				for(pieceIt = pieces_.begin(); pieceIt != pieces_.end(); pieceIt++)
+				{
+					(*pieceIt)->update(elapsedTime);
+				}
 			}
 			break;
 	}
@@ -175,6 +214,17 @@ void SecondScreenState::draw()
 		(*objectsIt)->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_);
 	}
 
+	graphicsManager_->turnOnWireframeRasterizer();
+		spaceShipWireframe_->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_);
+	graphicsManager_->turnOnSolidRasterizer();
+
+	// Draw the loaded pieces
+	std::vector<PieceClass*>::iterator pieceIt;
+	for(pieceIt = pieces_.begin(); pieceIt != pieces_.end(); pieceIt++)
+	{
+		(*pieceIt)->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
+	}
+
 	if(debug_)
 	{
 		graphicsManager_->turnZBufferOff();
@@ -187,10 +237,31 @@ void SecondScreenState::draw()
 
 void SecondScreenState::destroy()
 {
+	if(spaceShipWireframe_)
+	{
+		spaceShipWireframe_->destroy();
+		delete spaceShipWireframe_;
+		spaceShipWireframe_ = 0;
+	}
+
+	// Release the background image
+	if(background_)
+	{
+		background_->destroy();
+		delete background_;
+		background_ = 0;
+	}
+
 	std::vector<Object3D*>::iterator objectsIt;
 	for(objectsIt = scenario_.begin(); objectsIt != scenario_.end(); objectsIt++)
 	{
 		(*objectsIt)->destroy();
+	}
+
+	std::vector<PieceClass*>::iterator pieceIt;
+	for(pieceIt = pieces_.begin(); pieceIt != pieces_.end(); pieceIt++)
+	{
+		(*pieceIt)->destroy();
 	}
 }
 
@@ -215,14 +286,23 @@ void SecondScreenState::notify(InputManager* notifier, InputStruct arg)
 		// Check if the left mouse is pressed to interested objects
 		case LEFT_BUTTON:
 			{
-				lightPos_[0].x = ((arg.mouseInfo.x*28)/screenWidth_)-14;
-				lightPos_[0].y = -(((arg.mouseInfo.y*20)/screenHeight_)-10);
+				lightPos_[0].x = ((arg.mouseInfo.x/screenWidth_)*8)-4;
+				lightPos_[0].y = (1-(arg.mouseInfo.y/screenHeight_))*5;
+
+				std::vector<PieceClass*>::iterator pieceIt;
+				for(pieceIt = pieces_.begin(); pieceIt != pieces_.end(); pieceIt++)
+				{
+					if((*pieceIt)->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
+					{
+						(*pieceIt)->makeItFall();
+					}
+				}
 			}
 			break;
 		case RIGHT_BUTTON:
 			{
-				lightPos_[1].x = ((arg.mouseInfo.x*28)/screenWidth_)-14;
-				lightPos_[1].y = -(((arg.mouseInfo.y*20)/screenHeight_)-10);
+				lightPos_[1].x = ((arg.mouseInfo.x/screenWidth_)*8)-4;
+				lightPos_[1].y = (1-(arg.mouseInfo.y/screenHeight_))*5;
 			}
 			break;
 		default:
@@ -235,7 +315,20 @@ void SecondScreenState::notify(InputManager* notifier, InputStruct arg)
 
 void SecondScreenState::notify(KinectClass* notifier, KinectStruct arg)
 {
-	
+	kinectHandPos_ = Point(arg.handPos.x*screenWidth_/320, arg.handPos.y*screenHeight_/240);
+
+	std::stringstream kinectext;
+	kinectext << "Kinect: " << kinectHandPos_.x << "x" << kinectHandPos_.y;
+	kinectHandText_->setText(kinectext.str(), graphicsManager_->getDeviceContext());
+
+	std::vector<PieceClass*>::iterator pieceIt;
+	for(pieceIt = pieces_.begin(); pieceIt != pieces_.end(); pieceIt++)
+	{
+		if((*pieceIt)->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+		{
+			(*pieceIt)->lightIt();
+		}
+	}
 }
 
 void SecondScreenState::loadConfigurationFromXML()
@@ -342,6 +435,87 @@ void SecondScreenState::createScenarioObject(std::string scenario, std::string x
 	{
 		MessageBoxA(NULL, "Could not load the selected model.", "Visualizer - Error", MB_ICONERROR | MB_OK);
 	}
+}
+
+bool SecondScreenState::loadPieces()
+{
+	std::stringstream root;
+	root << "./Data/configuration/level2/pieces/pieces.xml";
+
+	//Loading animations XML file
+	pugi::xml_document fruitsDoc;
+	if(!fruitsDoc.load_file(root.str().c_str()))
+	{
+		std::stringstream error;
+		error << "Could not load object .xml file!" << root.str();
+		MessageBoxA(NULL, error.str().c_str(), "SecondScreen - Piece - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	pugi::xml_node root_node;
+	// Get initial node
+	if(!(root_node = fruitsDoc.child("pieces")))
+	{
+		MessageBoxA(NULL, "Could not find the fruits root node.", "SecondScreen - Piece - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	for(pugi::xml_node fruitNode = root_node.first_child(); fruitNode; fruitNode = fruitNode.next_sibling())
+	{
+		std::string node_name = fruitNode.name();
+
+		if(node_name ==  "piece")
+		{
+			pugi::xml_node modelNode;
+			modelNode = fruitNode.child("model");
+
+			pugi::xml_text modelName = modelNode.text();
+
+			// Parse transformation data
+			pugi::xml_node positionNode;
+			positionNode = fruitNode.child("position");
+			Point pos = Point(positionNode.attribute("x").as_float(), positionNode.attribute("y").as_float(), positionNode.attribute("z").as_float());
+
+			pugi::xml_node scaleNode;
+			scaleNode = fruitNode.child("scale");
+			Vector scale = Vector(scaleNode.attribute("x").as_float(), scaleNode.attribute("y").as_float(), scaleNode.attribute("z").as_float());
+
+			pugi::xml_node rotationNode;
+			rotationNode = fruitNode.child("rotation");
+			float rotX = rotationNode.attribute("x").as_float();
+			float rotY = rotationNode.attribute("y").as_float();
+			float rotZ = rotationNode.attribute("z").as_float();
+
+			PieceClass* piece = new PieceClass();
+			if(!piece)
+			{
+				return false;
+			}
+
+			if(!piece->setup(graphicsManager_, modelName.as_string(), pos, terrainHeight_, scale, rotX, rotY, rotZ))
+			{
+				MessageBoxA(NULL, "Could not initialize fruit.", "SecondScreen - Piece - Error", MB_ICONERROR | MB_OK);
+				return false;
+			}				
+
+			pugi::xml_node collisionNode = fruitNode.child("collision");
+
+			positionNode = collisionNode.child("position");
+			pos = Point(positionNode.attribute("x").as_float(), positionNode.attribute("y").as_float(), positionNode.attribute("z").as_float());
+
+			piece->getCollisionSphere()->setRelativePosition(pos);
+
+			pugi::xml_node radiusNode;
+			radiusNode = collisionNode.child("radius");
+			float radius = radiusNode.text().as_float();
+
+			piece->getCollisionSphere()->setRadius(radius);
+
+			pieces_.push_back(piece);
+		}
+	}
+
+	return true;
 }
 
 void SecondScreenState::changeLevel(LevelState level)

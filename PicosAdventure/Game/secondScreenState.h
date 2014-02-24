@@ -16,8 +16,8 @@
 
 #include "../Utils/clockClass.h"
 
-#include "picoClass.h"
-#include "fruitClass.h"
+#include "picoFirstClass.h"
+#include "pieceClass.h"
 
 #include <mmsystem.h>
 
@@ -26,18 +26,18 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 	enum LevelState
 		{
 			INTRODUCTION,
-			FIRST_LEVEL = 1,
-			SECOND_LEVEL,
-			THIRD_LEVEL,
-			FOURTH_LEVEL,
+			MOUNTING = 1,
+			COLLECTING,
 			ENDING
 		};
 
-	enum SubLevelState
+	enum IntroLevel
 		{
-			PLAYING,
-			FADING,
-			SELECT_POLAROID
+			TO_PIECE,
+			LIGHT_IT,
+			DRAG_IT,
+			WORK,
+			GIVE_POWER
 		};
 
 	public:
@@ -61,6 +61,8 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 		void loadScenario(std::string scenario);
 		void createScenarioObject(std::string scenario, std::string xmlName);
 
+		bool loadPieces();
+
 		void changeLevel(LevelState level);
 
 		CameraClass*				camera_;
@@ -72,10 +74,15 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 
 		// Game state and control variables
 		LevelState					levelState_;
-		SubLevelState				subLevelState_;
+		IntroLevel					introLevelState_;
 
 		float						playingTime_;
 		float						fadeTime_;
+
+		// Kinect
+		Point						kinectHandPos_;
+		ImageClass*					kinectHand_;
+		TextClass*					kinectHandText_;
 
 		// Scenario structure
 		ImageClass*					background_;
@@ -83,6 +90,9 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 
 		std::vector<Object3D*>		scenario_;
 		float						terrainHeight_;
+
+		Object3D*					spaceShipWireframe_;
+		std::vector<PieceClass*>	pieces_;
 
 		// Pointlights
 		XMFLOAT4					lightPos_[2];

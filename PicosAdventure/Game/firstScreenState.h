@@ -16,7 +16,7 @@
 #include "../Utils/listenerClass.h"
 #include "../Utils/textClass.h"
 
-#include "picoClass.h"
+#include "picoFirstClass.h"
 #include "fruitClass.h"
 #include "birdClass.h"
 #include "spaceShipClass.h"
@@ -104,7 +104,7 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		float						terrainHeight_;
 
 		// Characters!
-		PicoClass*					pico_;
+		PicoFirstClass*				pico_;
 
 		BirdClass*					bird_;
 

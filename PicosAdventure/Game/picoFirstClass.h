@@ -1,5 +1,5 @@
-#ifndef _PICO_CLASS_H_
-#define _PICO_CLASS_H_
+#ifndef _PICO_FIRST_CLASS_H_
+#define _PICO_FIRST_CLASS_H_
 
 #include "../Application/inputManager.h"
 
@@ -24,7 +24,7 @@
 
 #define UNHIDDING_STEPS 2
 
-class PicoClass : public Listener<InputManager, InputStruct>, public Listener<FruitClass, Point>, public Listener<BirdClass, bool>, public Notifier<PicoClass, bool>
+class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listener<FruitClass, Point>, public Listener<BirdClass, bool>, public Notifier<PicoFirstClass, bool>
 {
 	private:
 		enum PicoStates
@@ -48,9 +48,9 @@ class PicoClass : public Listener<InputManager, InputStruct>, public Listener<Fr
 			};
 
 	public:
-		PicoClass();
-		PicoClass(const PicoClass&);
-		~PicoClass();
+		PicoFirstClass();
+		PicoFirstClass(const PicoFirstClass&);
+		~PicoFirstClass();
 
 		bool setup(GraphicsManager* graphicsManager, CameraClass* camera, SoundClass* soundManager);
 		void update(float elapsedTime);
@@ -141,4 +141,4 @@ class PicoClass : public Listener<InputManager, InputStruct>, public Listener<Fr
 		TextClass*	info_;
 };
 
-#endif //_PICO_CLASS_H_
+#endif //_PICO_FIRST_CLASS_H_

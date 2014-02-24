@@ -1,6 +1,6 @@
-#include "picoClass.h"
+#include "picoFirstClass.h"
 
-PicoClass::PicoClass()
+PicoFirstClass::PicoFirstClass()
 {
 	body_ = 0;
 	tips_ = 0;
@@ -37,17 +37,17 @@ PicoClass::PicoClass()
 	rotZ_ = 0.0f;
 }
 
-PicoClass::PicoClass(const PicoClass& other)
+PicoFirstClass::PicoFirstClass(const PicoFirstClass& other)
 {
 
 }
 
-PicoClass::~PicoClass()
+PicoFirstClass::~PicoFirstClass()
 {
 
 }
 
-bool PicoClass::setup(GraphicsManager* graphicsManager, CameraClass* camera, SoundClass* soundManager)
+bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera, SoundClass* soundManager)
 {
 	camera_ = camera;
 
@@ -66,7 +66,7 @@ bool PicoClass::setup(GraphicsManager* graphicsManager, CameraClass* camera, Sou
 	collisionTest_ = new SphereCollision();
 	collisionTest_->setup(graphicsManager, Point(0.0f, 1.6f, 0.0f), 0.6f);
 
-	position_.x = -8.25f;
+	position_.x = -35.25f;
 	position_.y = 0.0f;
 	position_.z = 0.25f;
 
@@ -141,7 +141,7 @@ bool PicoClass::setup(GraphicsManager* graphicsManager, CameraClass* camera, Sou
 	return true;
 }
 
-void PicoClass::update(float elapsedTime)
+void PicoFirstClass::update(float elapsedTime)
 {
 	expressionClock_->tick();
 
@@ -328,7 +328,7 @@ void PicoClass::update(float elapsedTime)
 	collisionTest_->setPosition(position_);
 }
 
-void PicoClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug)
+void PicoFirstClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug)
 {
 	if(debug)
 	{
@@ -389,7 +389,7 @@ void PicoClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, X
 	}
 }
 
-void PicoClass::destroy()
+void PicoFirstClass::destroy()
 {
 	// Release the model object
 	if(body_)
@@ -431,7 +431,7 @@ void PicoClass::destroy()
 	expressions_.clear();
 }
 
-void PicoClass::goToPosition(Point position)
+void PicoFirstClass::goToPosition(Point position)
 {
 	changeAnimation("walk", 0.4f);
 
@@ -442,7 +442,7 @@ void PicoClass::goToPosition(Point position)
 	picoState_ = WALKING;
 }
 
-void PicoClass::setToRest()
+void PicoFirstClass::setToRest()
 {
 	if(lookAtCamera(false))
 	{
@@ -454,27 +454,27 @@ void PicoClass::setToRest()
 	}
 }
 
-void PicoClass::setTipsColor(XMFLOAT4 color)
+void PicoFirstClass::setTipsColor(XMFLOAT4 color)
 {
 	tipsColor_ = color;
 }
 
-void PicoClass::setBodyTexture(TextureClass* texture)
+void PicoFirstClass::setBodyTexture(TextureClass* texture)
 {
 	body_->getTextureArrayClass()->getTexturesArray()[0] = texture->getTexture();
 }
 
-void PicoClass::setHat(Object3D* hat)
+void PicoFirstClass::setHat(Object3D* hat)
 {
 	hat_ = hat;
 }
 
-SphereCollision* PicoClass::getCollisionSphere()
+SphereCollision* PicoFirstClass::getCollisionSphere()
 {
 	return collisionTest_;
 }
 
-float PicoClass::approach(float goal, float current, float dt)
+float PicoFirstClass::approach(float goal, float current, float dt)
 {
 	float difference = goal - current;
 
@@ -486,7 +486,7 @@ float PicoClass::approach(float goal, float current, float dt)
 	return goal;
 }
 
-void PicoClass::walk(float elapsedTime)
+void PicoFirstClass::walk(float elapsedTime)
 {
 	velocity_.x = objective_.x - position_.x;
 	velocity_.y = objective_.y - position_.y;
@@ -522,7 +522,7 @@ void PicoClass::walk(float elapsedTime)
 	}
 }
 
-bool PicoClass::lookAtCamera(bool check)
+bool PicoFirstClass::lookAtCamera(bool check)
 {
 	Point cameraPos = Point(camera_->getPosition().x, camera_->getPosition().y, camera_->getPosition().z);
 
@@ -581,7 +581,7 @@ bool PicoClass::lookAtCamera(bool check)
 	}*/
 }
 
-bool PicoClass::checkPicoArrivedObjective()
+bool PicoFirstClass::checkPicoArrivedObjective()
 {
 	if(position_.x < objective_.x+0.05 && position_.x > objective_.x-0.05 && position_.z < objective_.z+0.05 && position_.z > objective_.z-0.05)
 	{
@@ -591,7 +591,7 @@ bool PicoClass::checkPicoArrivedObjective()
 	return false;
 }
 
-void PicoClass::eatFruit()
+void PicoFirstClass::eatFruit()
 {
 	if(fallenFruits_.size() > 0)
 	{
@@ -622,7 +622,7 @@ void PicoClass::eatFruit()
 	}
 }
 
-void PicoClass::notify(InputManager* notifier, InputStruct arg)
+void PicoFirstClass::notify(InputManager* notifier, InputStruct arg)
 {
 	switch(arg.keyPressed){
 		default:
@@ -633,12 +633,12 @@ void PicoClass::notify(InputManager* notifier, InputStruct arg)
 	}
 }
 
-void PicoClass::notify(FruitClass* notifier, Point arg)
+void PicoFirstClass::notify(FruitClass* notifier, Point arg)
 {
 	fallenFruits_.push_back(notifier);
 }
 
-void PicoClass::notify(BirdClass* notifier, bool arg)
+void PicoFirstClass::notify(BirdClass* notifier, bool arg)
 {
 	if(picoState_ == WALKING && !arg)
 	{
@@ -657,7 +657,7 @@ void PicoClass::notify(BirdClass* notifier, bool arg)
 	}
 }
 
-void PicoClass::changeAnimation(std::string name, float time)
+void PicoFirstClass::changeAnimation(std::string name, float time)
 {
 	AnimatedObject3D* animatedTemp = dynamic_cast<AnimatedObject3D*>(body_);
 	AnimatedCal3DModelClass* cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
@@ -676,7 +676,7 @@ void PicoClass::changeAnimation(std::string name, float time)
 	}
 }
 
-void PicoClass::changeExpression(std::string newExpression)
+void PicoFirstClass::changeExpression(std::string newExpression)
 {
 	if(faceState_ != CHANGING && picoState_ != WALKING)
 	{
@@ -686,7 +686,7 @@ void PicoClass::changeExpression(std::string newExpression)
 	}
 }
 
-void PicoClass::loadExpressions(GraphicsManager* graphicsManager)
+void PicoFirstClass::loadExpressions(GraphicsManager* graphicsManager)
 {
 	TextureClass* temp1 = new TextureClass;
 	std::string filePath = "./Data/models/miniBossExtremidades/d-e-normal.dds";

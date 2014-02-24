@@ -288,7 +288,7 @@ void BirdClass::notify(FruitClass* notifier, Point arg)
 	}
 }
 
-void BirdClass::notify(PicoClass* notifier, bool arg)
+void BirdClass::notify(PicoFirstClass* notifier, bool arg)
 {
 	scared();
 }
