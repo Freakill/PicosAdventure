@@ -96,8 +96,8 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	loadConfigurationFromXML();
 
 	// Lights
-	lightPos_[0] = XMFLOAT4(-4.5f, 2.0f, -3.0f, 0.0f);
-	lightPos_[1] = XMFLOAT4(4.5f, 2.0f, -3.0f, 0.0f);
+	lightPos_[0] = XMFLOAT4(-4.5f, 2.0f, -3.5f, 0.0f);
+	lightPos_[1] = XMFLOAT4(4.5f, 2.0f, -3.5f, 0.0f);
 
 	debug_ = false;
 
