@@ -18,22 +18,25 @@ ParticleSystem::~ParticleSystem()
 {
 
 }
-bool ParticleSystem::setup(GraphicsManager* graphicsManager, std::string textureFilename)
+bool ParticleSystem::setup(GraphicsManager* graphicsManager, std::string textureFilename, float fallDistance)
 {
 	bool result;
 
+	graphicsManager_ = graphicsManager;
 
 	// Load the texture that is used for the particles.
 	result = loadTexture(graphicsManager->getDevice(), textureFilename);
 	if(!result)
 	{
+		MessageBoxA(NULL, "Could not load texture.", "ParticleSystem - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
 	// Initialize the particle system.
-	result = setupParticleSystem();
+	result = setupParticleSystem(fallDistance);
 	if(!result)
 	{
+		MessageBoxA(NULL, "Could not setup particle system.", "ParticleSystem - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -41,6 +44,7 @@ bool ParticleSystem::setup(GraphicsManager* graphicsManager, std::string texture
 	result = initializeBuffers(graphicsManager->getDevice());
 	if(!result)
 	{
+		MessageBoxA(NULL, "Could not initialize buffers.", "ParticleSystem - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -49,22 +53,24 @@ bool ParticleSystem::setup(GraphicsManager* graphicsManager, std::string texture
 	return true;
 }
 
-void ParticleSystem::update(GraphicsManager* graphicsManager, float elapsedTime)
+void ParticleSystem::update(float elapsedTime, float emit)
 {
 	bool result;
-
 
 	// Release old particles.
 	killParticles();
 
 	// Emit new particles.
-	emitParticles(elapsedTime);
+	if(emit)
+	{
+		emitParticles(elapsedTime);
+	}
 	
 	// Update the position of the particles.
 	updateParticles(elapsedTime);
 
 	// Update the dynamic vertex buffer with the new position of each particle.
-	result = updateBuffers(graphicsManager->getDeviceContext());
+	result = updateBuffers(graphicsManager_->getDeviceContext());
 }
 
 void ParticleSystem::draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light)
@@ -140,35 +146,35 @@ void ParticleSystem::destroyTexture()
 	return;
 }
 
-bool ParticleSystem::setupParticleSystem()
+bool ParticleSystem::setupParticleSystem(float fallDistance)
 {
 	int i;
 
 	// Set initial position of the particles
-	particleInitialPosition_.x = 0;
-	particleInitialPosition_.y = 5;
-	particleInitialPosition_.z = 0;
+	particleInitialPosition_.x = 0.0f;
+	particleInitialPosition_.y = 0.0f;
+	particleInitialPosition_.z = 0.0f;
 
 	// Set the random deviation of where the particles can be located when emitted.
-	particleDeviation_.x = 0.5f;
-	particleDeviation_.y = 0.1f;
-	particleDeviation_.z = 2.0f;
+	particleDeviation_.x = 0.1f;
+	particleDeviation_.y = 0.05f;
+	particleDeviation_.z = 0.5f;
 
 	// Set the speed and speed variation of particles.
 	particleVelocity_ = 1.0f;
 	particleVelocityVariation_ = 0.2f;
 
 	// Set the physical size of the particles.
-	particleSize_ = 0.2f;
+	particleSize_ = 0.15f;
 
 	// Set the number of particles to emit per second.
-	particlesPerSecond_ = 250.0f;
+	particlesPerSecond_ = 125.0f;
 
 	// Set the maximum falling distance for particles
-	fallingDistance_ = 6.0f;
+	fallingDistance_ = fallDistance;
 
 	// Set the maximum number of particles allowed in the particle system.
-	maxParticles_ = 5000;
+	maxParticles_ = 100;
 
 	// Create the particle list.
 	particleList_ = new ParticleType[maxParticles_];
@@ -343,9 +349,9 @@ void ParticleSystem::emitParticles(float elapsedTime)
 
 		velocity = particleVelocity_ + (((float)rand()-(float)rand())/RAND_MAX) * particleVelocityVariation_;
 
-		red   = (((float)rand()-(float)rand())/RAND_MAX) + 0.5f;
+		red   = 0.2f;//(((float)rand()-(float)rand())/RAND_MAX) + 0.5f;
 		green = (((float)rand()-(float)rand())/RAND_MAX) + 0.5f;
-		blue  = (((float)rand()-(float)rand())/RAND_MAX) + 0.5f;
+		blue  = 0.2f;//(((float)rand()-(float)rand())/RAND_MAX) + 0.5f;
 
 		// Now since the particles need to be rendered from back to front for blending we have to sort the particle array.
 		// We will sort using Z depth so we need to find where in the list the particle should be inserted.

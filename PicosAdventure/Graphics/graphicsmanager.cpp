@@ -83,7 +83,7 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
 	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
-	unsigned int creationFlags = D3D11_CREATE_DEVICE_SINGLETHREADED; //Create a bitwise ORed list of flags to activate when creating the device and context
+	unsigned int creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_SINGLETHREADED; //Create a bitwise ORed list of flags to activate when creating the device and context
 
 /*#ifdef _DEBUG
     creationFlags |= D3D11_CREATE_DEVICE_DEBUG; //If in debug mode we set the runtime layer to debug.
@@ -278,6 +278,16 @@ bool GraphicsManager::setup(HWND windowHandler, bool vsync, bool fullscreen, flo
 
 	// Create the blend state using the description.
 	result = d3dDevice_->CreateBlendState(&blendStateDescription, &alphaEnableBlendingState_);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Modify blend for the particles
+	blendStateDescription.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;//D3D11_BLEND_INV_SRC_ALPHA;
+
+	// Create the blend state using the description.
+	result = d3dDevice_->CreateBlendState(&blendStateDescription, &alphaEnableParticlesBlendingState_);
 	if(FAILED(result))
 	{
 		return false;
@@ -584,6 +594,11 @@ void GraphicsManager::getScreenSize(int& width, int& height)
 	return;
 }
 
+HWND GraphicsManager::getWindowHandler()
+{
+	return windowHandler_;
+}
+
 void GraphicsManager::turnOnSolidRasterizer()
 {
 	d3dDeviceContext_->RSSetState(solidRasterizerState_);
@@ -620,6 +635,23 @@ void GraphicsManager::turnOnAlphaBlending()
 	
 	// Turn on the alpha blending.
 	d3dDeviceContext_->OMSetBlendState(alphaEnableBlendingState_, blendFactor, 0xffffffff);
+
+	return;
+}
+
+void GraphicsManager::turnOnParticlesAlphaBlending()
+{
+	float blendFactor[4];
+	
+
+	// Setup the blend factor.
+	blendFactor[0] = 0.0f;
+	blendFactor[1] = 0.0f;
+	blendFactor[2] = 0.0f;
+	blendFactor[3] = 0.0f;
+	
+	// Turn on the alpha blending.
+	d3dDeviceContext_->OMSetBlendState(alphaEnableParticlesBlendingState_, blendFactor, 0xffffffff);
 
 	return;
 }

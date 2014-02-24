@@ -1,16 +1,14 @@
 #ifndef _PICO_CLASS_H_
 #define _PICO_CLASS_H_
 
-#include "../Engine/Object3DFactory.h"
-
 #include "../Application/inputManager.h"
+
+#include "../Engine/Object3DFactory.h"
+#include "../Engine/soundClass.h"
 
 #include "../Graphics/graphicsManager.h"
 #include "../Graphics/cameraClass.h"
 #include "../Graphics/lightClass.h"
-
-#include "fruitClass.h"
-//#include "birdClass.h"
 
 #include "../Math/pointClass.h"
 #include "../Math/vectorClass.h"
@@ -19,37 +17,42 @@
 #include "../Utils/textClass.h"
 #include "../Utils/clockClass.h"
 
+#include "fruitClass.h"
+#include "birdClass.h"
+
 #include <deque>
-
-enum PicoStates
-	{
-		HIDDEN,
-		UNHIDDING,
-		WAITING,
-		WALKING,
-		TURNING,
-		EATING,
-		CELEBRATING,
-		SCARED
-	};
-
-enum FaceStates
-	{
-		NORMAL,
-		CHANGING,
-		CHANGED
-	};
 
 #define UNHIDDING_STEPS 2
 
-class PicoClass : public Listener<InputManager, InputStruct>, public Listener<FruitClass, Point>, public Notifier<PicoClass, bool>
+class PicoClass : public Listener<InputManager, InputStruct>, public Listener<FruitClass, Point>, public Listener<BirdClass, bool>, public Notifier<PicoClass, bool>
 {
+	private:
+		enum PicoStates
+			{
+				HIDDING,
+				HIDDEN,
+				UNHIDDING,
+				WAITING,
+				WALKING,
+				TURNING,
+				EATING,
+				CELEBRATING,
+				SCARED
+			};
+
+		enum FaceStates
+			{
+				NORMAL,
+				CHANGING,
+				CHANGED
+			};
+
 	public:
 		PicoClass();
 		PicoClass(const PicoClass&);
 		~PicoClass();
 
-		bool setup(GraphicsManager* graphicsManager, CameraClass* camera);
+		bool setup(GraphicsManager* graphicsManager, CameraClass* camera, SoundClass* soundManager);
 		void update(float elapsedTime);
 		void draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug);
 		void destroy();
@@ -64,18 +67,18 @@ class PicoClass : public Listener<InputManager, InputStruct>, public Listener<Fr
 		void setBodyTexture(TextureClass* texture);
 		void setHat(Object3D* hat);
 
+		SphereCollision* getCollisionSphere();
+
 		virtual void notify(InputManager* notifier, InputStruct arg);
 		virtual void notify(FruitClass* notifier, Point arg);
-		//virtual void notify(BirdClass* notifier, bool arg);
-
-		SphereCollision* getCollisionSphere();
+		virtual void notify(BirdClass* notifier, bool arg);
 
 	private:
 		void loadExpressions(GraphicsManager* graphicsManager);
 		
 		float approach(float goal, float current, float dt);
 		void walk(float elapsedTime);
-		void lookAtCamera();
+		bool lookAtCamera(bool check);
 
 		bool checkPicoArrivedObjective();
 		void eatFruit();
@@ -109,6 +112,9 @@ class PicoClass : public Listener<InputManager, InputStruct>, public Listener<Fr
 		float		eatingWaitTime_;
 		float		celebratingWaitTime_;
 
+		// Sound
+		SoundClass*	soundManager_;
+
 		// Fruits
 		std::deque<FruitClass*> fallenFruits_;
 
@@ -123,6 +129,10 @@ class PicoClass : public Listener<InputManager, InputStruct>, public Listener<Fr
 		float		rotY_; 
 		float		newRotY_;
 		float		rotZ_;
+
+		// Beginning
+		Point		hiddingPosition_;
+		bool		hasToHide_;
 
 		// Unhidding
 		Point		positionUnhidding_[UNHIDDING_STEPS];

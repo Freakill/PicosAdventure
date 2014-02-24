@@ -2,6 +2,8 @@
 #define _FRUIT_CLASS_H_
 
 #include "../Engine/Object3DFactory.h"
+#include "../Engine/particleSystem.h"
+#include "../Engine/sphereCollision.h"
 
 #include "../Graphics/graphicsManager.h"
 
@@ -9,8 +11,6 @@
 #include "../Math/vectorClass.h"
 
 #include "../Utils/notifierClass.h"
-
-#include "../Engine/sphereCollision.h"
 
 #include <math.h>
 
@@ -22,17 +22,18 @@ enum FruitEffect
 		BODY
 	};
 
-enum FruitState
-	{
-		SPAWNING,
-		IN_TREE,
-		SHACKEN,
-		FALLING,
-		IN_FLOOR
-	};
-
 class FruitClass : public Notifier<FruitClass, Point>
 {
+	private:
+		enum FruitState
+			{
+				SPAWNING,
+				IN_TREE,
+				SHACKEN,
+				FALLING,
+				IN_FLOOR
+			};
+
 	public:
 		FruitClass();
 		FruitClass(const FruitClass&);
@@ -59,6 +60,8 @@ class FruitClass : public Notifier<FruitClass, Point>
 		float getRotationZ();
 
 		SphereCollision* getCollisionSphere();
+
+		ParticleSystem* leafs_;
 
 		void setFruitEffectType(FruitEffect effect);
 		FruitEffect getFruitEffect();

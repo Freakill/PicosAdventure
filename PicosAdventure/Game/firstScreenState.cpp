@@ -14,6 +14,11 @@ FirstScreenState::FirstScreenState()
 	camera_ = 0;
 	light_ = 0;
 	gameClock_ = 0;
+
+	soundManager_ = 0;
+
+	pico_ = 0;
+	bird_ = 0;
 }
 
 FirstScreenState::~FirstScreenState()
@@ -54,7 +59,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	// Initialize the light object.
 	light_->setAmbientColor(0.1f, 0.1f, 0.1f, 1.0f);
 	light_->setDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-	light_->setDirection(0.0f, -1.0f, 1.0f);
+	light_->setDirection(0.0f, -0.5f, 1.0f);
 
 	// load background and calculate its position
 	background_ = new ImageClass;
@@ -93,6 +98,20 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 
 	loadConfigurationFromXML();
 
+	// SOUND
+	soundManager_ = new SoundClass;
+	if(!soundManager_)
+	{
+		return false;
+	}
+ 
+	// Initialize the sound object.
+	if(!soundManager_->setup(graphicsManager_->getWindowHandler(), "comer_1"))
+	{
+		MessageBox(NULL, L"Could not initialize Direct Sound.", L"FirstScreen - Error", MB_OK);
+		return false;
+	}
+
 	// Create the Pico object.
 	pico_ = new PicoClass();
 	if(!pico_)
@@ -100,7 +119,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 		return false;
 	}
 
-	if(!pico_->setup(graphicsManager_, camera_))
+	if(!pico_->setup(graphicsManager_, camera_, soundManager_))
 	{
 		MessageBoxA(NULL, "Could not initialize Pico :(.", "Error", MB_ICONERROR | MB_OK);
 		return false;
@@ -109,6 +128,35 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 
 	// Load the fruits
 	loadFruits();
+
+	// Create the bird object.
+	bird_ = new BirdClass;
+	if(!bird_)
+	{
+		return false;
+	}
+
+	if(!bird_->setup(graphicsManager_))
+	{
+		MessageBoxA(NULL, "Could not initialize the bird (is the word).", "Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	bird_->addListener(*pico_);
+	pico_->addListener(*bird_);
+
+	// Create the space ship.
+	spaceShip_ = new SpaceShipClass;
+	if(!spaceShip_)
+	{
+		return false;
+	}
+
+	if(!spaceShip_->setup(graphicsManager_))
+	{
+		MessageBoxA(NULL, "Could not initialize the SpaceShip.", "Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
 
 	debug_ = false;
 
@@ -125,7 +173,21 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 		return false;
 	}
 
-	setupGUI(graphicsManager, inputManager);
+	kinectHandText_ = new TextClass();
+	if(!kinectHandText_)
+	{
+		return false;
+	}
+
+	// Initialize the text object.
+	if(!kinectHandText_->setup(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), graphicsManager->getShader2D(), screenWidth_, screenHeight_, 20, 20, "Kinect: "))
+	{
+		std::string textToDisplay = "Could not initialize the frame text object for Kinect text.";
+		MessageBoxA(NULL, textToDisplay.c_str(), "GUIFrame - Error", MB_OK);
+		return false;
+	}
+
+	setupGUI(graphicsManager, inputManager, kinectManager);
 
 	// Setup clock at the end so it starts when we run
 	gameClock_ = new ClockClass();
@@ -136,6 +198,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	gameClock_->reset();
 
 	kinectManager->addListener(*this);
+	inputManager->addListener(*this);
 
 	return true;
 }
@@ -160,6 +223,7 @@ void FirstScreenState::update(float elapsedTime)
 	{
 		case INTRODUCTION:
 			{
+				spaceShip_->update(elapsedTime);
 				if(gameClock_->getTime() > fadeTime_)
 				{
 					changeLevel(FIRST_LEVEL);
@@ -176,7 +240,8 @@ void FirstScreenState::update(float elapsedTime)
 		case FOURTH_LEVEL:
 			{
 				updateLevel();
-				// Add update bird
+
+				bird_->update(elapsedTime);
 			}
 			break;
 		default:
@@ -217,6 +282,11 @@ void FirstScreenState::draw()
 		(*objectsIt)->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_);
 	}
 
+	if(levelState_ == INTRODUCTION)
+	{
+		spaceShip_->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
+	}
+
 	// Draw the loaded fruits in game
 	std::vector<FruitClass*>::iterator fruitIt;
 	for(fruitIt = fruitsInGame_.begin(); fruitIt != fruitsInGame_.end(); fruitIt++)
@@ -225,6 +295,8 @@ void FirstScreenState::draw()
 	}
 
 	pico_->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
+	
+	bird_->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
 
 	if(subLevelState_ == SELECT_POLAROID)
 	{
@@ -247,6 +319,30 @@ void FirstScreenState::draw()
 
 void FirstScreenState::destroy()
 {
+	// We delete the bird
+	if(bird_)
+	{
+		bird_->destroy();
+		delete bird_;
+		bird_ = 0;
+	}
+
+	// WE KILL PICO MUAHAHA
+	if(pico_)
+	{
+		pico_->destroy();
+		delete pico_;
+		pico_ = 0;
+	}
+
+	// Release the background image
+	if(background_)
+	{
+		background_->destroy();
+		delete background_;
+		background_ = 0;
+	}
+
 	std::vector<Object3D*>::iterator objectsIt;
 	for(objectsIt = scenario_.begin(); objectsIt != scenario_.end(); objectsIt++)
 	{
@@ -278,6 +374,16 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 				gameClock_->stop();
 			}
 			break;
+		case 13: // Enter
+			{
+				bird_->setStealFood(!bird_->getStealFood());
+			}
+			break;
+		case 32: // Space
+			{
+				bird_->scared();
+			}
+			break;
 		default:
 			{
 				
@@ -297,6 +403,11 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 					{
 						(*fruitIt)->makeItFall();
 					}
+				}
+				if(pico_->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
+				{
+					pico_->changeExpression("feliz");
+					soundManager_->playHiFile();
 				}
 			}
 			break;
@@ -348,6 +459,7 @@ void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
 									}
 								}
 
+								bird_->setStealFood(true);
 								changeLevel(THIRD_LEVEL);
 							}
 							break;
@@ -383,10 +495,7 @@ void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
 
 void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 {
-	int screenWidth, screenHeight;
-	graphicsManager_->getScreenSize(screenWidth, screenHeight);
-
-	kinectHandPos_ = Point(arg.handPos.x*screenWidth/320, arg.handPos.y*screenHeight/240);
+	kinectHandPos_ = Point(arg.handPos.x*screenWidth_/320, arg.handPos.y*screenHeight_/240);
 
 	std::stringstream kinectext;
 	kinectext << "Kinect: " << kinectHandPos_.x << "x" << kinectHandPos_.y;
@@ -397,13 +506,19 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 	{
 		if((*fruitIt)->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
 		{
-			(*fruitIt)->makeItFall();
+			(*fruitIt)->shakeIt();
 		}
 	}
 
 	if(pico_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
 	{
 		pico_->changeExpression("feliz");
+		soundManager_->playHiFile();
+	}
+
+	if(bird_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+	{
+		bird_->scared();
 	}
 }
 
@@ -451,9 +566,14 @@ void FirstScreenState::updateLevel()
 	}
 }
 
-void FirstScreenState::setupGUI(GraphicsManager* graphicsManager, InputManager* inputManager)
+void FirstScreenState::setupGUI(GraphicsManager* graphicsManager, InputManager* inputManager, KinectClass* kinectManager)
 {
 	polaroidGUI_ = new GUIManager;
+
+	if(!polaroidGUI_->setup(graphicsManager))
+	{
+		MessageBoxA(NULL, "Could not create Polaroid GUI", "FirstScreen - Error", MB_ICONERROR | MB_OK);
+	}
 
 	int screenWidth, screenHeight;
 	graphicsManager->getScreenSize(screenWidth, screenHeight);
@@ -462,8 +582,8 @@ void FirstScreenState::setupGUI(GraphicsManager* graphicsManager, InputManager* 
 	polaroidFrame_->setup(graphicsManager, "Polaroids", Point(0, 0), screenWidth, screenHeight);
 	polaroidGUI_->addFrame(polaroidFrame_);
 
-	inputManager->addListener(*this);
 	inputManager->addListener(*polaroidGUI_);
+	kinectManager->addListener(*polaroidGUI_);
 }
 
 void FirstScreenState::loadConfigurationFromXML()
@@ -728,6 +848,7 @@ void FirstScreenState::addFruitsToGame()
 	{
 		fruitsInGame_.push_back(fruits_.at(i));
 		fruits_.at(i)->addListener(*pico_);
+		fruits_.at(i)->addListener(*bird_);
 	}
 }
 

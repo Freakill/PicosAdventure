@@ -7,7 +7,6 @@ PicoClass::PicoClass()
 	eyes_ = 0;
 	hat_ = 0;
 
-	picoState_ = HIDDEN;
 	waitedTime_ = 0.0f;
 	eatingWaitTime_ = 0.0f;
 	celebratingWaitTime_ = 0.0f;
@@ -48,7 +47,7 @@ PicoClass::~PicoClass()
 
 }
 
-bool PicoClass::setup(GraphicsManager* graphicsManager, CameraClass* camera)
+bool PicoClass::setup(GraphicsManager* graphicsManager, CameraClass* camera, SoundClass* soundManager)
 {
 	camera_ = camera;
 
@@ -65,17 +64,21 @@ bool PicoClass::setup(GraphicsManager* graphicsManager, CameraClass* camera)
 	loadExpressions(graphicsManager);
 
 	collisionTest_ = new SphereCollision();
-	collisionTest_->setup(graphicsManager, Point(0.0f, 1.6f, 0.0f), 0.8f);
+	collisionTest_->setup(graphicsManager, Point(0.0f, 1.6f, 0.0f), 0.6f);
 
-	position_.x = -5.25f;
+	position_.x = -8.25f;
 	position_.y = 0.0f;
 	position_.z = 0.25f;
+
+	hiddingPosition_.x = -5.5f;
+	hiddingPosition_.y = 0.0f;
+	hiddingPosition_.z = 0.25f;
 
 	scaling_.x = 0.041f;
 	scaling_.y = 0.041f;
 	scaling_.z = 0.041f;
 
-	lookAtCamera();
+	lookAtCamera(false);
 
 	positionUnhidding_[0].x = -3.0f;
 	positionUnhidding_[0].y = 0.0f;
@@ -129,6 +132,12 @@ bool PicoClass::setup(GraphicsManager* graphicsManager, CameraClass* camera)
 		return false;
 	}
 
+	hasToHide_ = true;
+	picoState_ = HIDDING;
+	goToPosition(hiddingPosition_);
+
+	soundManager_ = soundManager;
+
 	return true;
 }
 
@@ -153,11 +162,23 @@ void PicoClass::update(float elapsedTime)
 
 	switch(picoState_)
 	{
+		case HIDDING:
+			{
+				if(lookAtCamera(true))
+				{
+					changeAnimation("backTree", 0.2f);
+					picoState_ = HIDDEN;
+					hasToHide_ = false;
+				}
+			}
+			break;
 		case HIDDEN:
 			{
 				if(fallenFruits_.size() > 0)
 				{
 					changeExpression("sorpresa");
+					soundManager_->playSurpriseFile();
+
 					goToPosition(positionUnhidding_[unhiddingStep_]);
 					unhiddingStep_++;
 					picoState_ = UNHIDDING;
@@ -190,7 +211,10 @@ void PicoClass::update(float elapsedTime)
 				if(fallenFruits_.size() > 0)
 				{
 					Point fallenFruitPos = fallenFruits_.front()->getPosition();
+
 					changeExpression("sorpresa");
+					soundManager_->playSurpriseFile();
+
 					goToPosition(fallenFruitPos);
 				}
 			}
@@ -201,7 +225,14 @@ void PicoClass::update(float elapsedTime)
 
 				if(checkPicoArrivedObjective())
 				{
-					eatFruit();
+					if(hasToHide_)
+					{
+						picoState_ = HIDDING;
+					}
+					else
+					{
+						eatFruit();
+					}
 				}
 			}
 			break;
@@ -218,6 +249,7 @@ void PicoClass::update(float elapsedTime)
 				{
 					changeAnimation("celebration", 0.4f);
 					changeExpression("feliz");
+					soundManager_->playCelebratingFile();
 
 					waitedTime_ = 0.0f;
 
@@ -412,12 +444,14 @@ void PicoClass::goToPosition(Point position)
 
 void PicoClass::setToRest()
 {
-	changeAnimation("idle", 0.2f);
+	if(lookAtCamera(false))
+	{
+		changeAnimation("idle", 0.2f);
 
-	lookAtCamera();
-	picoState_ = WAITING;
+		picoState_ = WAITING;
 
-	fallenFruits_.clear();
+		fallenFruits_.clear();
+	}
 }
 
 void PicoClass::setTipsColor(XMFLOAT4 color)
@@ -488,7 +522,7 @@ void PicoClass::walk(float elapsedTime)
 	}
 }
 
-void PicoClass::lookAtCamera()
+bool PicoClass::lookAtCamera(bool check)
 {
 	Point cameraPos = Point(camera_->getPosition().x, camera_->getPosition().y, camera_->getPosition().z);
 
@@ -498,17 +532,53 @@ void PicoClass::lookAtCamera()
 
 	Vector normalizedLookAt = lookAt_.normalize();
 
-	rotX_ = 0.0f;
-	rotY_ = acos(normalizedLookAt.x);//3.141592f-1.570796f/4; 
-	rotZ_ = 0.0f;
+	newRotY_ = acos(normalizedLookAt.x);//3.141592f-1.570796f/4; 
+
 	if(normalizedLookAt.x > 0)
+	{
+		newRotY_ += XM_PIDIV2;
+	}
+	else
+	{
+		newRotY_ += XM_PIDIV2;
+	}
+
+	if(check)
+	{
+		if(rotY_ > newRotY_-0.1f && rotY_ < newRotY_+0.1f)
+		{
+			rotY_ = newRotY_;
+
+			return true;
+		}
+		else
+		{
+			if(rotY_ < newRotY_)
+			{
+				rotY_ += 0.04f;
+			}
+			if(rotY_ > newRotY_)
+			{
+				rotY_ -= 0.04f;
+			}
+		}
+
+		return false;
+	}
+	else
+	{
+		rotY_ = newRotY_;
+
+		return true;
+	}
+	/*if(normalizedLookAt.x > 0)
 	{
 		rotY_ += XM_PIDIV2;
 	}
 	else
 	{
 		rotY_ += XM_PIDIV2;
-	}
+	}*/
 }
 
 bool PicoClass::checkPicoArrivedObjective()
@@ -525,27 +595,30 @@ void PicoClass::eatFruit()
 {
 	if(fallenFruits_.size() > 0)
 	{
-		changeAnimation("eat", 0.2f);
+		if(lookAtCamera(true))
+		{
+			changeAnimation("eat", 0.2f);
+			soundManager_->playEatingFile();
 
-		Point fruitPos = fallenFruits_.front()->getPosition();
-		fruitPos.y = fruitPos.y + 1.6f;
-		fruitPos.z = fruitPos.z - 0.85f;
-		fallenFruits_.front()->setPosition(fruitPos);
+			Point fruitPos = fallenFruits_.front()->getPosition();
+			fruitPos.y = fruitPos.y + 1.6f;
+			fruitPos.z = fruitPos.z - 0.85f;
+			fallenFruits_.front()->setPosition(fruitPos);
 
-		lookAtCamera();
+			waitedTime_ = 0.0f;
 
-		waitedTime_ = 0.0f;
-
-		picoState_ = EATING;
-		notifyListeners(false);
+			picoState_ = EATING;
+			notifyListeners(false);
+		}
 	}
 	else
 	{
-		changeAnimation("idle", 0.2f);
+		if(lookAtCamera(true))
+		{
+			changeAnimation("idle", 0.2f);
 
-		lookAtCamera();
-
-		picoState_ = WAITING;
+			picoState_ = WAITING;
+		}
 	}
 }
 
@@ -565,14 +638,13 @@ void PicoClass::notify(FruitClass* notifier, Point arg)
 	fallenFruits_.push_back(notifier);
 }
 
-/*void PicoClass::notify(BirdClass* notifier, bool arg)
+void PicoClass::notify(BirdClass* notifier, bool arg)
 {
 	if(picoState_ == WALKING && !arg)
 	{
-		bodyModel_->setAnimationToPlay("negation", 0.2f);
-		tipsModel_->setAnimationToPlay("negation", 0.2f);
+		changeAnimation("negation", 0.2f);
 
-		lookAtCamera();
+		lookAtCamera(false);
 
 		picoState_ = SCARED;
 	}
@@ -583,7 +655,7 @@ void PicoClass::notify(FruitClass* notifier, Point arg)
 
 		goToPosition(fallenFruitPos);
 	}
-}*/
+}
 
 void PicoClass::changeAnimation(std::string name, float time)
 {
@@ -606,9 +678,12 @@ void PicoClass::changeAnimation(std::string name, float time)
 
 void PicoClass::changeExpression(std::string newExpression)
 {
-	newExpression_ = newExpression;
-	faceState_ = CHANGING;
-	expressionClock_->reset();
+	if(faceState_ != CHANGING && picoState_ != WALKING)
+	{
+		newExpression_ = newExpression;
+		faceState_ = CHANGING;
+		expressionClock_->reset();
+	}
 }
 
 void PicoClass::loadExpressions(GraphicsManager* graphicsManager)

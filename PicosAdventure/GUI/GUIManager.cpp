@@ -12,6 +12,13 @@ GUIManager::~GUIManager()
 {
 }
 
+bool GUIManager::setup(GraphicsManager* graphicsManager)
+{
+	graphicsManager->getScreenSize(screenWidth_, screenHeight_);
+
+	return true;
+}
+
 void GUIManager::update(float elapsedTime)
 {
 	std::map<std::string, GUIFrame*>::iterator it;
@@ -65,5 +72,19 @@ void GUIManager::notify(InputManager* notifier, InputStruct arg)
 
 			}
 			break;
+	}
+}
+
+void GUIManager::notify(KinectClass* notifier, KinectStruct arg)
+{
+	Point kinectHandPos = Point(arg.handPos.x*screenWidth_/320, arg.handPos.y*screenHeight_/240);
+
+	std::map<std::string, GUIFrame*>::iterator it;
+	for(it = guiFrames_.begin(); it != guiFrames_.end(); ++it)
+	{
+		if(it->second->offer(kinectHandPos))
+		{
+			break;
+		}
 	}
 }

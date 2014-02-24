@@ -34,6 +34,8 @@ FruitClass::FruitClass()
 	rotY_ = 0.0f; 
 	rotZ_ = 0.0f;
 
+	leafs_ = 0;
+
 	textureEffect_ = 0;
 	hatEffect_ = 0;
 }
@@ -74,7 +76,7 @@ bool FruitClass::setup(GraphicsManager *graphicsManager, std::string fileName, P
 
 	spawningTime_ = 2.0f;
 
-	fallTime_ = 2.0f;
+	fallTime_ = 1.0f;
 	shaken_ = false;
 	
 	rotX_ = rotX;
@@ -84,6 +86,17 @@ bool FruitClass::setup(GraphicsManager *graphicsManager, std::string fileName, P
 	fruitState_ = SPAWNING;
 
 	floorHeight_ = floorHeight;
+
+	leafs_ = new ParticleSystem;
+	if(!leafs_)
+	{
+		MessageBoxA(NULL, "Could not create leafs instance", "Fruit - Error", MB_ICONERROR | MB_OK);
+	}
+
+	if(leafs_ && !leafs_->setup(graphicsManager, "leaf", 5))
+	{
+		MessageBoxA(NULL, "Could not setup leafs object", "Fruit - Error", MB_ICONERROR | MB_OK);
+	}
 
 	collisionTest_ = new SphereCollision();
 	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 0.4f);
@@ -95,6 +108,8 @@ bool FruitClass::setup(GraphicsManager *graphicsManager, std::string fileName, P
 
 void FruitClass::update(float elapsedTime)
 {
+	collisionTest_->setPosition(position_);
+
 	switch(fruitState_)
 	{
 		case SPAWNING:
@@ -125,6 +140,8 @@ void FruitClass::update(float elapsedTime)
 				{
 					shakenTime_ += elapsedTime;
 					shaken_ = false;
+					leafs_->update(elapsedTime*1000, true);
+					return;
 				}
 
 				shakenTime_ -= 0.001;
@@ -150,12 +167,12 @@ void FruitClass::update(float elapsedTime)
 			break;
 		case IN_FLOOR:
 			{
-				//position_.y = floorHeight_;
+				
 			}
 			break;
 	}
 
-	collisionTest_->setPosition(position_);
+	leafs_->update(elapsedTime*1000, false);
 }
 
 void FruitClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug)
@@ -188,6 +205,11 @@ void FruitClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, 
 	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&movingMatrix)));
 
 	model_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	graphicsManager->turnOnParticlesAlphaBlending();
+	graphicsManager->turnZBufferOff();
+		leafs_->draw(graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	graphicsManager->turnZBufferOn();
+	graphicsManager->turnOffAlphaBlending();
 }
 
 void FruitClass::destroy()

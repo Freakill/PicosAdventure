@@ -25,8 +25,8 @@ class ParticleSystem
 		ParticleSystem(const ParticleSystem&);
 		~ParticleSystem();
 
-		bool setup(GraphicsManager* graphicsManager, std::string fileName);
-		void update(GraphicsManager* graphicsManager, float elapsedTime);
+		bool setup(GraphicsManager* graphicsManager, std::string fileName, float fallDistance);
+		void update(float elapsedTime, float emit);
 		void draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light);
 		void destroy();
 
@@ -37,7 +37,7 @@ class ParticleSystem
 		bool loadTexture(ID3D11Device* device, std::string fileName);
 		void destroyTexture();
 
-		bool setupParticleSystem();
+		bool setupParticleSystem(float fallDistance);
 		void destroyParticleSystem();
 
 		bool initializeBuffers(ID3D11Device* device);
@@ -68,6 +68,7 @@ class ParticleSystem
 		ID3D11Buffer* vertexBuffer_;
 		ID3D11Buffer* indexBuffer_;
 
+		GraphicsManager* graphicsManager_;
 		Shader3DClass*	particlesShader_;
 };
 

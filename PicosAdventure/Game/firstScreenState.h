@@ -3,21 +3,23 @@
 
 #include "../Application/applicationState.h"
 
+#include "../Engine/Object3DFactory.h"
+#include "../Engine/soundClass.h"
+
 #include "../Graphics/Cal3DModelClass.h"
 #include "../Graphics/textureClass.h"
 #include "../Graphics/lightClass.h"
 
+#include "../GUI/GUIManager.h"
+
+#include "../Utils/clockClass.h"
 #include "../Utils/listenerClass.h"
 #include "../Utils/textClass.h"
 
-#include "../GUI/GUIManager.h"
-
-#include "../Engine/Object3DFactory.h"
-
-#include "../Utils/clockClass.h"
-
 #include "picoClass.h"
 #include "fruitClass.h"
+#include "birdClass.h"
+#include "spaceShipClass.h"
 
 #include <mmsystem.h>
 
@@ -51,15 +53,15 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		virtual void destroy();
 
 		virtual void notify(InputManager* notifier, InputStruct arg);
-		void notify(GUIButton* notifier, ButtonStruct arg);
-		void notify(KinectClass* notifier, KinectStruct arg);
+		virtual void notify(GUIButton* notifier, ButtonStruct arg);
+		virtual void notify(KinectClass* notifier, KinectStruct arg);
 
 	private:
 		static FirstScreenState firstScreenState_; //singleton
 
 		void updateLevel();
 
-		void setupGUI(GraphicsManager* graphicsManager, InputManager* inputManager);
+		void setupGUI(GraphicsManager* graphicsManager, InputManager* inputManager, KinectClass* kinectManager);
 
 		void loadConfigurationFromXML();
 
@@ -101,7 +103,12 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		std::vector<Object3D*>		scenario_;
 		float						terrainHeight_;
 
+		// Characters!
 		PicoClass*					pico_;
+
+		BirdClass*					bird_;
+
+		SpaceShipClass*				spaceShip_;
 
 		// Fruit vector and in game fruit vector
 		std::vector<FruitClass*>	fruits_;
@@ -110,6 +117,9 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		// Classes for managing between game image selection
 		GUIManager*					polaroidGUI_;
 		GUIFrame*					polaroidFrame_;
+
+		// Sound
+		SoundClass*					soundManager_;
 
 		// Debug
 		bool						debug_;

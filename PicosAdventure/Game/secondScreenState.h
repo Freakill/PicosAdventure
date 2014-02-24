@@ -84,6 +84,9 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 		std::vector<Object3D*>		scenario_;
 		float						terrainHeight_;
 
+		// Pointlights
+		XMFLOAT4					lightPos_[2];
+
 		// Debug
 		bool						debug_;
 		TextClass*					FPS_;

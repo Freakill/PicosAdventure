@@ -51,6 +51,8 @@ class GraphicsManager
 
 		void getScreenSize(int&, int&);
 
+		HWND getWindowHandler();
+
 		void turnOnSolidRasterizer();
 		void turnOnWireframeRasterizer();
 
@@ -58,6 +60,7 @@ class GraphicsManager
 		void turnZBufferOff();
 
 		void turnOnAlphaBlending();
+		void turnOnParticlesAlphaBlending();
 		void turnOffAlphaBlending();
 
 	private:
@@ -87,6 +90,7 @@ class GraphicsManager
 		ID3D11RasterizerState* wireframeRasterizerState_;
 		
 		ID3D11BlendState* alphaEnableBlendingState_;
+		ID3D11BlendState* alphaEnableParticlesBlendingState_;
 		ID3D11BlendState* alphaDisableBlendingState_;
 
 		XMFLOAT4X4 projectionMatrix_;

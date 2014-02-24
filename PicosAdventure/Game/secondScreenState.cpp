@@ -95,6 +95,9 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 
 	loadConfigurationFromXML();
 
+	// Lights
+	lightPos_[0] = XMFLOAT4(-4.5f, 2.0f, -3.0f, 0.0f);
+	lightPos_[1] = XMFLOAT4(4.5f, 2.0f, -3.0f, 0.0f);
 
 	debug_ = false;
 
@@ -120,6 +123,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	gameClock_->reset();
 
 	kinectManager->addListener(*this);
+	inputManager->addListener(*this);
 
 	return true;
 }
@@ -127,6 +131,14 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 void SecondScreenState::update(float elapsedTime)
 {	
 	gameClock_->tick();
+
+	// Update light positions
+	std::vector<Object3D*>::iterator objectsIt;
+	for(objectsIt = scenario_.begin(); objectsIt != scenario_.end(); objectsIt++)
+	{
+		PointlightDiffuseShader3DClass* pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>((*objectsIt)->getShader3D());
+		pointlightShader->setPositions(lightPos_[0], lightPos_[1]);
+	}
 
 	switch(levelState_)
 	{
@@ -203,7 +215,14 @@ void SecondScreenState::notify(InputManager* notifier, InputStruct arg)
 		// Check if the left mouse is pressed to interested objects
 		case LEFT_BUTTON:
 			{
-				
+				lightPos_[0].x = ((arg.mouseInfo.x*28)/screenWidth_)-14;
+				lightPos_[0].y = -(((arg.mouseInfo.y*20)/screenHeight_)-10);
+			}
+			break;
+		case RIGHT_BUTTON:
+			{
+				lightPos_[1].x = ((arg.mouseInfo.x*28)/screenWidth_)-14;
+				lightPos_[1].y = -(((arg.mouseInfo.y*20)/screenHeight_)-10);
 			}
 			break;
 		default:
@@ -291,6 +310,14 @@ void SecondScreenState::createScenarioObject(std::string scenario, std::string x
 
 	pugi::xml_text modelName = modelNode.text();
 	objectLoadedTemp = Object3DFactory::Instance()->CreateObject3D("StaticObject3D", graphicsManager_, modelName.as_string());
+
+	// Add pointlight shader
+	// Set specific multitexture shader for tips and increment textures array
+	Shader3DClass* shaderTemp = Shader3DFactory::Instance()->CreateShader3D("PointlightDiffuseShader3D", graphicsManager_);
+	objectLoadedTemp->setShader3D(shaderTemp);
+
+	PointlightDiffuseShader3DClass* pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>(objectLoadedTemp->getShader3D());
+	pointlightShader->setPositions(lightPos_[0], lightPos_[1]);
 
 	if(objectLoadedTemp)
 	{

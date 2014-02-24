@@ -44,16 +44,16 @@
     <IntDir>$(SolutionDir)Temp\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Build\$(Configuration)\</OutDir>
     <TargetName>$(ProjectName)$(Configuration)</TargetName>
-    <IncludePath>$(IncludePath);$(DXSDK_DIR)\Include;$(CAL3D)\src</IncludePath>
-    <LibraryPath>$(LibraryPath);$(DXSDK_DIR)\Lib\x86;$(CAL3D)\bin\Debug</LibraryPath>
+    <IncludePath>$(IncludePath);$(DXSDK_DIR)\Include;$(CAL3D)\src;$(KINECTSDK10_DIR)inc;$(KINECT_TOOLKIT_DIR)inc</IncludePath>
+    <LibraryPath>$(LibraryPath);$(DXSDK_DIR)\Lib\x86;$(CAL3D)\bin\Debug;$(KINECTSDK10_DIR)lib\x86;$(KINECT_TOOLKIT_DIR)Lib\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)$(Configuration)</TargetName>
     <IntDir>$(SolutionDir)Temp\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)Build\$(Configuration)\</OutDir>
-    <IncludePath>$(IncludePath);$(DXSDK_DIR)\Include;$(CAL3D)\src</IncludePath>
-    <LibraryPath>$(LibraryPath);$(DXSDK_DIR)\Lib\x86;$(CAL3D)\bin\Release</LibraryPath>
+    <IncludePath>$(IncludePath);$(DXSDK_DIR)\Include;$(CAL3D)\src;$(KINECTSDK10_DIR)inc;$(KINECT_TOOLKIT_DIR)inc</IncludePath>
+    <LibraryPath>$(LibraryPath);$(DXSDK_DIR)\Lib\x86;$(CAL3D)\bin\Release;$(KINECTSDK10_DIR)lib\x86;$(KINECT_TOOLKIT_DIR)Lib\x86</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -66,11 +66,12 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>cal3d_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cal3d_d.lib;Kinect10.lib;KinectBackgroundRemoval180_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /e /i /y "$(SolutionDir)Data\*.*" "$(SolutionDir)Build\$(Configuration)\Data"
-xcopy /e /i /y "$(CAL3D)\bin\Debug\cal3d_d.dll" "$(SolutionDir)Build\$(Configuration)"</Command>
+xcopy /e /i /y "$(CAL3D)\bin\Debug\cal3d_d.dll" "$(SolutionDir)Build\$(Configuration)"
+xcopy /e /i /y "$(KINECT_TOOLKIT_DIR)\bin\KinectBackgroundRemoval180_32.dll" "$(SolutionDir)Build\$(Configuration)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -88,7 +89,7 @@ xcopy /e /i /y "$(CAL3D)\bin\Debug\cal3d_d.dll" "$(SolutionDir)Build\$(Configura
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>cal3d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cal3d.lib;Kinect10.lib;KinectBackgroundRemoval180_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /e /i /y "$(SolutionDir)Data\*.*" "$(SolutionDir)Build\$(Configuration)\Data"
@@ -105,12 +106,15 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClCompile Include="Engine\Object3D.cpp" />
     <ClCompile Include="Engine\Object3DFactory.cpp" />
     <ClCompile Include="Engine\particleSystem.cpp" />
+    <ClCompile Include="Engine\soundClass.cpp" />
     <ClCompile Include="Engine\sphereCollision.cpp" />
     <ClCompile Include="Engine\StaticObject3D.cpp" />
+    <ClCompile Include="Game\birdClass.cpp" />
     <ClCompile Include="Game\firstScreenState.cpp" />
     <ClCompile Include="Game\fruitClass.cpp" />
     <ClCompile Include="Game\picoClass.cpp" />
     <ClCompile Include="Game\secondScreenState.cpp" />
+    <ClCompile Include="Game\spaceShipClass.cpp" />
     <ClCompile Include="Graphics\animatedCal3DModelClass.cpp" />
     <ClCompile Include="Graphics\Cal3DmodelClass.cpp" />
     <ClCompile Include="Graphics\cameraClass.cpp" />
@@ -123,6 +127,7 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClCompile Include="Graphics\modelClass.cpp" />
     <ClCompile Include="Graphics\multitextureShader3D.cpp" />
     <ClCompile Include="Graphics\OBJModelClass.cpp" />
+    <ClCompile Include="Graphics\pointlightDiffuseShader3D.cpp" />
     <ClCompile Include="Graphics\shader2DClass.cpp" />
     <ClCompile Include="Graphics\shader3DClass.cpp" />
     <ClCompile Include="Graphics\shader3DFactory.cpp" />
@@ -149,12 +154,15 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClInclude Include="Engine\Object3D.h" />
     <ClInclude Include="Engine\Object3DFactory.h" />
     <ClInclude Include="Engine\particleSystem.h" />
+    <ClInclude Include="Engine\soundClass.h" />
     <ClInclude Include="Engine\sphereCollision.h" />
     <ClInclude Include="Engine\StaticObject3D.h" />
+    <ClInclude Include="Game\birdClass.h" />
     <ClInclude Include="Game\firstScreenState.h" />
     <ClInclude Include="Game\fruitClass.h" />
     <ClInclude Include="Game\picoClass.h" />
     <ClInclude Include="Game\secondScreenState.h" />
+    <ClInclude Include="Game\spaceShipClass.h" />
     <ClInclude Include="Graphics\animatedCal3DModelClass.h" />
     <ClInclude Include="Graphics\Cal3DmodelClass.h" />
     <ClInclude Include="Graphics\cameraClass.h" />
@@ -167,6 +175,7 @@ xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configura
     <ClInclude Include="Graphics\modelClass.h" />
     <ClInclude Include="Graphics\multitextureShader3D.h" />
     <ClInclude Include="Graphics\OBJModelClass.h" />
+    <ClInclude Include="Graphics\pointlightDiffuseShader3D.h" />
     <ClInclude Include="Graphics\shader2DClass.h" />
     <ClInclude Include="Graphics\shader3DClass.h" />
     <ClInclude Include="Graphics\shader3DFactory.h" />

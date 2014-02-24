@@ -61,6 +61,7 @@ bool GUIButton::setup(GraphicsManager* graphicsManager, std::string name, Point 
 	viewportPosition_.x = (screenWidth_/2)+position_.x;
 	viewportPosition_.y = (screenHeight_/2)-position_.y;
 
+	selectTime_ = 0.0f;
 	selectionTime_ = 2.0f;
 	selected_ = false;
 
@@ -117,6 +118,10 @@ bool GUIButton::setup(GraphicsManager* graphicsManager, std::string name, Point 
 
 	viewportPosition_.x = (screenWidth_/2)+position_.x;
 	viewportPosition_.y = (screenHeight_/2)-position_.y;
+
+	selectTime_ = 0.0f;
+	selectionTime_ = 2.0f;
+	selected_ = false;
 
 	if(purpose == SELECT_OBJECT)
 	{
@@ -226,8 +231,6 @@ bool GUIButton::offer(Point mouseClick)
 {
 	if(checkInside(mouseClick))
 	{
-		ButtonStruct buttonStruct = {buttonPurpose_, buttonName_};
-
 		if(buttonPurpose_ == SELECT_OBJECT)
 		{
 			buttonActive_ = !buttonActive_;
@@ -237,6 +240,8 @@ bool GUIButton::offer(Point mouseClick)
 
 		if(selectTime_ > selectionTime_)
 		{
+			ButtonStruct buttonStruct = {buttonPurpose_, buttonName_};
+
 			notifyListeners(buttonStruct);
 
 			selectTime_ = 0.0f;

@@ -56,7 +56,7 @@ bool ApplicationManager::setup(HWND windowsHandler, InputManager* inputManager, 
 		return false;
 	}
 
-	if(!changeState(FirstScreenState::Instance()))
+	if(!changeState(SecondScreenState::Instance()))
 	{
 		return false;
 	}
@@ -104,6 +104,13 @@ void ApplicationManager::destroy()
 	{
 		delete clockClass_;
 		clockClass_ = 0;
+	}
+
+	if(kinectManager_)
+	{
+		kinectManager_->destroy();
+		delete kinectManager_;
+		kinectManager_ = 0;
 	}
 
 	if(appState_)

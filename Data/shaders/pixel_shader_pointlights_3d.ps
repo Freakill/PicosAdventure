@@ -1,0 +1,93 @@
+///////////////////////////////
+// Filename: pixel_shader_3d.ps //
+///////////////////////////////
+
+/////////////
+// DEFINES //
+/////////////
+#define NUM_LIGHTS 2
+#define RANGE 3.0f
+
+/////////////
+// GLOBALS //
+/////////////
+Texture2D shaderTexture;
+SamplerState SampleType;
+
+cbuffer LightColorBuffer
+{
+    float4 lightColor[NUM_LIGHTS];
+};
+
+cbuffer LightBuffer
+{
+	float4 ambientColor;
+    float4 diffuseColor;
+    float3 lightDirection;
+    float padding;
+};
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+	float4 worldPos : POSITION;
+	float3 normal : NORMAL;
+	float2 tex : TEXCOORD0;
+	float3 lightPos1 : TEXCOORD1;
+    float3 lightPos2 : TEXCOORD2;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 PixelShader3D(PixelInputType input) : SV_TARGET
+{
+    float4 textureColor;
+	float  lightIntensity1, lightIntensity2;
+	float3 lightToPixelVec1, lightToPixelVec2;
+	float dist1, dist2;
+    float4 color, color1, color2;
+	
+	// Sample the texture pixel at this location.
+    textureColor = shaderTexture.Sample(SampleType, input.tex);
+
+	//Create the vector between light position and pixels position
+	lightToPixelVec1 = input.lightPos1 - input.worldPos;
+	lightToPixelVec2 = input.lightPos2 - input.worldPos;
+	
+    // Calculate the different amounts of light on this pixel based on the positions of the lights.
+    lightIntensity1 = saturate(dot(input.normal, input.lightPos1));
+    lightIntensity2 = saturate(dot(input.normal, input.lightPos2));
+	
+	//Find the distance between the light pos and pixel pos
+	dist1 = length(lightToPixelVec1);
+	dist2 = length(lightToPixelVec2);
+	
+	if(dist1 < RANGE){
+		//color1 = diffuseColor[0] * lightIntensity1;
+		color1 = lightIntensity1 * textureColor * lightColor[0] * (RANGE-dist1)/RANGE;
+		color1 /= 0.01f + (0.01f * dist1) + (0.01f * (dist1*dist1));
+	}else{
+		color1 = float4(0.012f, 0.025f, 0.1f, 1.0f)*textureColor;
+	}
+	if(dist2 < RANGE){
+		//color2 = diffuseColor[1] * lightIntensity2;
+		color2 = lightIntensity2 * textureColor * lightColor[1] * (RANGE-dist2)/RANGE;
+		color2 /= 0.01f + (0.01f * dist2) + (0.01f * (dist2*dist2));
+	}else{
+		color2 = float4(0.012f, 0.025f, 0.1f, 1.0f)*textureColor;
+	}
+
+    // Determine the diffuse color amount of each of the four lights.
+    //color1 = diffuseColor[0] * lightIntensity1;
+    //color2 = diffuseColor[1] * lightIntensity2;
+
+    // Multiply the texture pixel by the combination of all four light colors to get the final result.
+    color = saturate(color1 + color2);// * textureColor;
+	
+    return color;
+}
