@@ -1,0 +1,85 @@
+#ifndef _SOUND_FIRST_CLASS_H_
+#define _SOUND_FIRST_CLASS_H_
+
+#pragma comment(lib, "dsound.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "winmm.lib")
+
+#include <windows.h>
+#include <mmsystem.h>
+#include <dsound.h>
+#include <stdio.h>
+#include <string>
+
+///////////////////////////////////////////////////////////////////////////////
+// Class name: SoundClass
+///////////////////////////////////////////////////////////////////////////////
+class SoundFirstClass
+{
+	private:
+		struct WaveHeaderType
+		{
+			char chunkId[4];
+			unsigned long chunkSize;
+			char format[4];
+			char subChunkId[4];
+			unsigned long subChunkSize;
+			unsigned short audioFormat;
+			unsigned short numChannels;
+			unsigned long sampleRate;
+			unsigned long bytesPerSecond;
+			unsigned short blockAlign;
+			unsigned short bitsPerSample;
+			char dataChunkId[4];
+			unsigned long dataSize;
+		};
+
+	public:
+		SoundFirstClass();
+		SoundFirstClass(const SoundFirstClass&);
+		~SoundFirstClass();
+
+		bool setup(HWND, std::string fileName);
+		void destroy();
+
+		// Pico players
+		bool playCelebratingFile();
+		bool playEatingFile();
+		bool playHiFile();
+		bool playPointingFile();
+		bool playPurrFile();
+		bool playSurpriseFile();
+		bool playTransformationFile();
+
+		// Game players
+		bool playForest();
+		bool playFruitFall();
+		bool playLeaves();
+
+	private:
+		bool setupDirectSound(HWND);
+		void destroyDirectSound();
+
+		bool loadWaveFile(char*, IDirectSoundBuffer8**);
+		void destroyWaveFile(IDirectSoundBuffer8**);
+
+	private:
+		IDirectSound8* m_DirectSound;
+		IDirectSoundBuffer* m_primaryBuffer;
+
+		// Pico Buffers
+		IDirectSoundBuffer8* celebratingBuffer_[2];
+		IDirectSoundBuffer8* eatingBuffer_[3];
+		IDirectSoundBuffer8* hiBuffer_;
+		IDirectSoundBuffer8* pointingBuffer_[2];
+		IDirectSoundBuffer8* purrBuffer_[2];
+		IDirectSoundBuffer8* surpriseBuffer_[2];
+		IDirectSoundBuffer8* transformationBuffer_;
+
+		// Game Buffers
+		IDirectSoundBuffer8* forestBuffer_;
+		IDirectSoundBuffer8* fruitFallBuffer_;
+		IDirectSoundBuffer8* leavesBuffer_;
+};
+
+#endif //_SOUND_FIRST_CLASS_H_

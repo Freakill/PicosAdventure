@@ -47,7 +47,7 @@ PicoFirstClass::~PicoFirstClass()
 
 }
 
-bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera, SoundClass* soundManager)
+bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera, SoundFirstClass* soundManager)
 {
 	camera_ = camera;
 
@@ -113,8 +113,18 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 	}
 	expressionClock_->reset();
 
+	inactivityClock_ = new ClockClass();
+	if(!inactivityClock_)
+	{
+		return false;
+	}
+	inactivityClock_->reset();
+
 	eatingWaitTime_ = 2.0f;
 	celebratingWaitTime_ = 1.2f;
+	inactivityTime_ = 30.0f;
+
+	pointing_ = false;
 
 	int screenWidth, screenHeight;
 	graphicsManager->getScreenSize(screenWidth, screenHeight);
@@ -144,6 +154,7 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 void PicoFirstClass::update(float elapsedTime)
 {
 	expressionClock_->tick();
+	inactivityClock_->tick();
 
 	body_->update(elapsedTime);
 	tips_->update(elapsedTime);
@@ -202,12 +213,33 @@ void PicoFirstClass::update(float elapsedTime)
 						Point fallenFruitPos = fallenFruits_.front()->getPosition();
 						goToPosition(fallenFruitPos);
 						picoState_ = WAITING;
+						inactivityClock_->reset();
 					}
 				}
 			}
 			break;
 		case WAITING:
 			{
+				if(!pointing_ && inactivityClock_->getTime() > inactivityTime_)
+				{
+					if(position_.x < 0)
+					{
+						changeAnimation("point_right", 0.4f);
+						changeExpression("normal");
+						soundManager_->playPointingFile();
+						//MessageBoxA(NULL, "Lol", "Lol", MB_OK);
+					}
+					else
+					{
+						changeAnimation("point_left", 0.4f);
+						changeExpression("normal");
+						soundManager_->playPointingFile();
+						//MessageBoxA(NULL, "Lol", "Lol", MB_OK);
+					}
+
+					pointing_ = true;
+				}
+
 				if(fallenFruits_.size() > 0)
 				{
 					Point fallenFruitPos = fallenFruits_.front()->getPosition();
@@ -216,6 +248,7 @@ void PicoFirstClass::update(float elapsedTime)
 					soundManager_->playSurpriseFile();
 
 					goToPosition(fallenFruitPos);
+					pointing_ = false;
 				}
 			}
 			break;
@@ -250,6 +283,7 @@ void PicoFirstClass::update(float elapsedTime)
 					changeAnimation("celebration", 0.4f);
 					changeExpression("feliz");
 					soundManager_->playCelebratingFile();
+					soundManager_->playTransformationFile();
 
 					waitedTime_ = 0.0f;
 
@@ -290,6 +324,7 @@ void PicoFirstClass::update(float elapsedTime)
 					waitedTime_ = 0.0f;
 
 					picoState_ = WAITING;
+					inactivityClock_->reset();
 				}
 			}
 			break;

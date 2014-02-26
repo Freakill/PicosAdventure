@@ -99,7 +99,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	loadConfigurationFromXML();
 
 	// SOUND
-	soundManager_ = new SoundClass;
+	soundManager_ = new SoundFirstClass;
 	if(!soundManager_)
 	{
 		return false;
@@ -200,6 +200,8 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	kinectManager->addListener(*this);
 	inputManager->addListener(*this);
 
+	soundManager_->playForest();
+
 	return true;
 }
 
@@ -242,6 +244,11 @@ void FirstScreenState::update(float elapsedTime)
 				updateLevel();
 
 				bird_->update(elapsedTime);
+			}
+			break;
+		case ENDING:
+			{
+
 			}
 			break;
 		default:
@@ -407,7 +414,7 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 				if(pico_->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
 				{
 					pico_->changeExpression("feliz");
-					soundManager_->playHiFile();
+					soundManager_->playPurrFile();
 				}
 			}
 			break;
@@ -480,6 +487,23 @@ void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
 								changeLevel(FOURTH_LEVEL);
 							}
 							break;
+						case FOURTH_LEVEL:
+							{
+								std::string name = arg.buttonInfo;
+
+								std::vector<FruitClass*>::iterator it;
+								for(it = fruitsInGame_.begin(); it != fruitsInGame_.end(); it++)
+								{
+									if((*it)->getName() == name)
+									{
+										//pico_->setHat((*it)->getHatEffect());
+										break;
+									}
+								}
+
+								changeLevel(ENDING);
+							}
+							break;
 					}
 
 					pico_->setToRest();
@@ -507,13 +531,14 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 		if((*fruitIt)->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
 		{
 			(*fruitIt)->shakeIt();
+			soundManager_->playLeaves();
 		}
 	}
 
 	if(pico_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
 	{
 		pico_->changeExpression("feliz");
-		soundManager_->playHiFile();
+		soundManager_->playPurrFile();
 	}
 
 	if(bird_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
@@ -763,7 +788,7 @@ bool FirstScreenState::loadFruits()
 					return false;
 				}
 
-				if(!fruit->setup(graphicsManager_, modelName.as_string(), pos, terrainHeight_, scale, rotX, rotY, rotZ))
+				if(!fruit->setup(graphicsManager_, soundManager_, modelName.as_string(), pos, terrainHeight_, scale, rotX, rotY, rotZ))
 				{
 					MessageBoxA(NULL, "Could not initialize fruit.", "Visualizer - Fruit - Error", MB_ICONERROR | MB_OK);
 					return false;
@@ -972,7 +997,16 @@ void FirstScreenState::changeLevel(LevelState level)
 	levelState_ = level;
 	subLevelState_ = PLAYING;
 
-	addFruitsToGame();
+	if(levelState_ != ENDING)
+	{
+		addFruitsToGame();
+	}
+	else
+	{
+		pico_->changeAnimation("DanceAss", 0.2f);
+		pico_->changeExpression("feliz");
+		soundManager_->playCelebratingFile();
+	}
 
 	// Reset clock
 	gameClock_->reset();

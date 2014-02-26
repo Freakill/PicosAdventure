@@ -4,7 +4,8 @@
 #include "../Application/applicationState.h"
 
 #include "../Engine/Object3DFactory.h"
-#include "../Engine/soundClass.h"
+
+#include "../Game/soundFirstClass.h"
 
 #include "../Graphics/Cal3DModelClass.h"
 #include "../Graphics/textureClass.h"
@@ -119,7 +120,7 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		GUIFrame*					polaroidFrame_;
 
 		// Sound
-		SoundClass*					soundManager_;
+		SoundFirstClass*					soundManager_;
 
 		// Debug
 		bool						debug_;

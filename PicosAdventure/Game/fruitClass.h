@@ -5,6 +5,8 @@
 #include "../Engine/particleSystem.h"
 #include "../Engine/sphereCollision.h"
 
+#include "../Game/soundFirstClass.h"
+
 #include "../Graphics/graphicsManager.h"
 
 #include "../Math/pointClass.h"
@@ -39,7 +41,7 @@ class FruitClass : public Notifier<FruitClass, Point>
 		FruitClass(const FruitClass&);
 		~FruitClass();
 
-		bool setup(GraphicsManager* graphicsManager, std::string fileName, Point position, float floorHeight, Vector scaling, float rotX, float rotY, float rotZ);
+		bool setup(GraphicsManager* graphicsManager, SoundFirstClass* soundManager, std::string fileName, Point position, float floorHeight, Vector scaling, float rotX, float rotY, float rotZ);
 		void update(float elapsedTime);
 		void draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug);
 		void destroy();
@@ -84,6 +86,8 @@ class FruitClass : public Notifier<FruitClass, Point>
 	private:
 		Object3D*	model_;
 		SphereCollision* collisionTest_;
+
+		SoundFirstClass*	soundManager_;
 
 		std::string name_;
 

@@ -4,7 +4,8 @@
 #include "../Application/inputManager.h"
 
 #include "../Engine/Object3DFactory.h"
-#include "../Engine/soundClass.h"
+
+#include "../Game/soundFirstClass.h"
 
 #include "../Graphics/graphicsManager.h"
 #include "../Graphics/cameraClass.h"
@@ -52,7 +53,7 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 		PicoFirstClass(const PicoFirstClass&);
 		~PicoFirstClass();
 
-		bool setup(GraphicsManager* graphicsManager, CameraClass* camera, SoundClass* soundManager);
+		bool setup(GraphicsManager* graphicsManager, CameraClass* camera, SoundFirstClass* soundManager);
 		void update(float elapsedTime);
 		void draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug);
 		void destroy();
@@ -107,13 +108,17 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 		std::string actualExpression_;
 		std::string newExpression_;
 		ClockClass* expressionClock_;
+		ClockClass* inactivityClock_;
 
 		float		waitedTime_;
 		float		eatingWaitTime_;
 		float		celebratingWaitTime_;
+		float		inactivityTime_;
+
+		bool		pointing_;
 
 		// Sound
-		SoundClass*	soundManager_;
+		SoundFirstClass*	soundManager_;
 
 		// Fruits
 		std::deque<FruitClass*> fallenFruits_;

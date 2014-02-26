@@ -48,7 +48,7 @@ FruitClass::~FruitClass()
 {
 }
 
-bool FruitClass::setup(GraphicsManager *graphicsManager, std::string fileName, Point position, float floorHeight, Vector scaling, float rotX, float rotY, float rotZ)
+bool FruitClass::setup(GraphicsManager *graphicsManager, SoundFirstClass* soundManager, std::string fileName, Point position, float floorHeight, Vector scaling, float rotX, float rotY, float rotZ)
 {
 	model_ = Object3DFactory::Instance()->CreateObject3D("StaticObject3D", graphicsManager, fileName);
 
@@ -102,6 +102,8 @@ bool FruitClass::setup(GraphicsManager *graphicsManager, std::string fileName, P
 	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 0.4f);
 
 	hasFallen_ = false;
+
+	soundManager_ = soundManager;
 
 	return true;
 }
@@ -263,6 +265,8 @@ void FruitClass::makeItFall()
 		velocity_.x = 0.0f;
 		velocity_.y = -1.6f;
 		velocity_.z = 0.0f;
+
+		soundManager_->playFruitFall();
 
 		fruitState_ = FALLING;
 		hasFallen_ = true;

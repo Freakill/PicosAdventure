@@ -195,9 +195,6 @@
     <ClCompile Include="Application\kinectClass.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\soundClass.cpp">
-      <Filter>Source Files\Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\pointlightDiffuseShader3D.cpp">
       <Filter>Source Files\Graphics\Shaders</Filter>
     </ClCompile>
@@ -220,6 +217,9 @@
       <Filter>Source Files\Game\FirstLevel</Filter>
     </ClCompile>
     <ClCompile Include="Game\spaceShipClass.cpp">
+      <Filter>Source Files\Game\FirstLevel</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\soundFirstClass.cpp">
       <Filter>Source Files\Game\FirstLevel</Filter>
     </ClCompile>
   </ItemGroup>
@@ -347,9 +347,6 @@
     <ClInclude Include="Application\kinectClass.h">
       <Filter>Header Files\Application</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\soundClass.h">
-      <Filter>Header Files\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\pointlightDiffuseShader3D.h">
       <Filter>Header Files\Graphics\Shaders</Filter>
     </ClInclude>
@@ -369,6 +366,9 @@
       <Filter>Header Files\Game\FirstLevel</Filter>
     </ClInclude>
     <ClInclude Include="Game\spaceShipClass.h">
+      <Filter>Header Files\Game\FirstLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\soundFirstClass.h">
       <Filter>Header Files\Game\FirstLevel</Filter>
     </ClInclude>
   </ItemGroup>
