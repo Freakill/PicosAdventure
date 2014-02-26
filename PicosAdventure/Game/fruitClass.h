@@ -77,6 +77,9 @@ class FruitClass : public Notifier<FruitClass, Point>
 		void setHatEffect(Object3D* hat);
 		Object3D* getHatEffect();
 
+		void setBodyEffect(XMFLOAT3 scale);
+		XMFLOAT3 getBodyEffect();
+
 		void shakeIt();
 		void makeItFall();
 		void resetFruit();
@@ -119,7 +122,8 @@ class FruitClass : public Notifier<FruitClass, Point>
 		FruitEffect fruitEffect_;
 		XMFLOAT4	colorEffect_;
 		TextureClass* textureEffect_;
-		Object3D* hatEffect_;
+		Object3D*	hatEffect_;
+		XMFLOAT3	bodyEffect_;
 
 };
 

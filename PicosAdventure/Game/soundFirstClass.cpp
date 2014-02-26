@@ -19,11 +19,21 @@ SoundFirstClass::SoundFirstClass()
 	surpriseBuffer_[0] = 0;
 	surpriseBuffer_[1] = 0;
 	transformationBuffer_ = 0;
+	birthdayBuffer_ = 0;
+	pirateBuffer_ = 0;
+	tropicalBuffer_ = 0;
 
 	// Game
 	forestBuffer_ = 0;
 	fruitFallBuffer_ = 0;
 	leavesBuffer_ = 0;
+
+	// Other
+	birdEnterBuffer_ = 0;
+	birdEatBuffer_ = 0;
+	changeLevelBuffer_ = 0;
+	selectionBuffer_ = 0;
+	happySongBuffer_ = 0;
 }
 
 
@@ -46,6 +56,7 @@ bool SoundFirstClass::setup(HWND hwnd, std::string fileName)
 	result = setupDirectSound(hwnd);
 	if(!result)
 	{
+		MessageBoxA(NULL, "Could not setup Direct Sound", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -53,97 +64,160 @@ bool SoundFirstClass::setup(HWND hwnd, std::string fileName)
 	result = loadWaveFile("./Data/sounds/Feliz_celebracion_1.wav", &celebratingBuffer_[0]);
 	if(!result)
 	{
+		MessageBoxA(NULL, "1", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 	result = loadWaveFile("./Data/sounds/Feliz_celebracion_2.wav", &celebratingBuffer_[1]);
 	if(!result)
 	{
+		MessageBoxA(NULL, "2", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
-	// Load a wave audio file onto a secondary buffer.
 	result = loadWaveFile("./Data/sounds/comer_1.wav", &eatingBuffer_[0]);
 	if(!result)
 	{
+		MessageBoxA(NULL, "3", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 	result = loadWaveFile("./Data/sounds/comer_2.wav", &eatingBuffer_[1]);
 	if(!result)
 	{
+		MessageBoxA(NULL, "4", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 	result = loadWaveFile("./Data/sounds/comer_3.wav", &eatingBuffer_[2]);
 	if(!result)
 	{
+		MessageBoxA(NULL, "5", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
-	// Load a wave audio file onto a secondary buffer.
 	result = loadWaveFile("./Data/sounds/Hola_1.wav", &hiBuffer_);
 	if(!result)
 	{
+		MessageBoxA(NULL, "6", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
-	// Load a wave audio file onto a secondary buffer.
 	result = loadWaveFile("./Data/sounds/pointing_1.wav", &pointingBuffer_[0]);
 	if(!result)
 	{
+		MessageBoxA(NULL, "7", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 	result = loadWaveFile("./Data/sounds/pointing_2.wav", &pointingBuffer_[1]);
 	if(!result)
 	{
+		MessageBoxA(NULL, "8", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
-	// Load a wave audio file onto a secondary buffer.
 	result = loadWaveFile("./Data/sounds/ronronear_1.wav", &purrBuffer_[0]);
 	if(!result)
 	{
+		MessageBoxA(NULL, "9", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 	result = loadWaveFile("./Data/sounds/ronronear_2.wav", &purrBuffer_[1]);
 	if(!result)
 	{
+		MessageBoxA(NULL, "10", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
-	// Load a wave audio file onto a secondary buffer.
 	result = loadWaveFile("./Data/sounds/Sorprendido_1.wav", &surpriseBuffer_[0]);
 	if(!result)
 	{
+		MessageBoxA(NULL, "11", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 	result = loadWaveFile("./Data/sounds/Sorprendido_2.wav", &surpriseBuffer_[1]);
 	if(!result)
 	{
-		return false;
-	}
-	// Load a wave audio file onto a secondary buffer.
-	result = loadWaveFile("./Data/sounds/transformation.wav", &transformationBuffer_);
-	if(!result)
-	{
+		MessageBoxA(NULL, "12", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
+	result = loadWaveFile("./Data/sounds/transformation.wav", &transformationBuffer_);
+	if(!result)
+	{
+		MessageBoxA(NULL, "13", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	result = loadWaveFile("./Data/sounds/birthday_song.wav", &birthdayBuffer_);
+	if(!result)
+	{
+		MessageBoxA(NULL, "14", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	result = loadWaveFile("./Data/sounds/pirate_song.wav", &pirateBuffer_);
+	if(!result)
+	{
+		MessageBoxA(NULL, "15", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	result = loadWaveFile("./Data/sounds/tropical_song.wav", &tropicalBuffer_);
+	if(!result)
+	{
+		MessageBoxA(NULL, "16", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
 
 	// FOREST
 	result = loadWaveFile("./Data/sounds/background_forest.wav", &forestBuffer_);
 	if(!result)
 	{
+		MessageBoxA(NULL, "17", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
 	result = loadWaveFile("./Data/sounds/fruit_fall.wav", &fruitFallBuffer_);
 	if(!result)
 	{
+		MessageBoxA(NULL, "18", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
 	result = loadWaveFile("./Data/sounds/leaves.wav", &leavesBuffer_);
 	if(!result)
 	{
+		MessageBoxA(NULL, "19", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	// OTHER
+	result = loadWaveFile("./Data/sounds/bird_enter.wav", &birdEnterBuffer_);
+	if(!result)
+	{
+		MessageBoxA(NULL, "20", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+	result = loadWaveFile("./Data/sounds/bird_on_fruit.wav", &birdEatBuffer_);
+	if(!result)
+	{
+		MessageBoxA(NULL, "21", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+	result = loadWaveFile("./Data/sounds/change_level.wav", &changeLevelBuffer_);
+	if(!result)
+	{
+		MessageBoxA(NULL, "22", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+	result = loadWaveFile("./Data/sounds/selection.wav", &selectionBuffer_);
+	if(!result)
+	{
+		MessageBoxA(NULL, "23", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+	result = loadWaveFile("./Data/sounds/happy.wav", &happySongBuffer_);
+	if(!result)
+	{
+		MessageBoxA(NULL, "24", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -167,11 +241,21 @@ void SoundFirstClass::destroy()
 	destroyWaveFile(&surpriseBuffer_[0]);
 	destroyWaveFile(&surpriseBuffer_[1]);
 	destroyWaveFile(&transformationBuffer_);
+	destroyWaveFile(&birthdayBuffer_);
+	destroyWaveFile(&pirateBuffer_);
+	destroyWaveFile(&tropicalBuffer_);
 
 	// Release game secondary buffers
 	destroyWaveFile(&forestBuffer_);
 	destroyWaveFile(&fruitFallBuffer_);
 	destroyWaveFile(&leavesBuffer_);
+
+	// Other
+	destroyWaveFile(&birdEnterBuffer_);
+	destroyWaveFile(&birdEatBuffer_);
+	destroyWaveFile(&changeLevelBuffer_);
+	destroyWaveFile(&selectionBuffer_);
+	destroyWaveFile(&happySongBuffer_);
 
 	// Shutdown the Direct Sound API.
 	destroyDirectSound();
@@ -680,6 +764,105 @@ bool SoundFirstClass::playTransformationFile()
 	return true;
 }
 
+bool SoundFirstClass::playBirthdayFile()
+{
+	HRESULT result;
+	
+	DWORD status;
+	birthdayBuffer_->GetStatus(&status);
+	if(!(status && DSBSTATUS_PLAYING))
+	{
+		// Set position at the beginning of the sound buffer.
+		result = birthdayBuffer_->SetCurrentPosition(0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Set volume of the buffer to 100%.
+		result = birthdayBuffer_->SetVolume(DSBVOLUME_MAX);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Play the contents of the secondary sound buffer.
+		result = birthdayBuffer_->Play(0, 0, 0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool SoundFirstClass::playPirateFile()
+{
+	HRESULT result;
+	
+	DWORD status;
+	pirateBuffer_->GetStatus(&status);
+	if(!(status && DSBSTATUS_PLAYING))
+	{
+		// Set position at the beginning of the sound buffer.
+		result = pirateBuffer_->SetCurrentPosition(0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Set volume of the buffer to 100%.
+		result = pirateBuffer_->SetVolume(DSBVOLUME_MAX);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Play the contents of the secondary sound buffer.
+		result = pirateBuffer_->Play(0, 0, 0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool SoundFirstClass::playTropicalFile()
+{
+	HRESULT result;
+	
+	DWORD status;
+	tropicalBuffer_->GetStatus(&status);
+	if(!(status && DSBSTATUS_PLAYING))
+	{
+		// Set position at the beginning of the sound buffer.
+		result = tropicalBuffer_->SetCurrentPosition(0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Set volume of the buffer to 100%.
+		result = tropicalBuffer_->SetVolume(DSBVOLUME_MAX);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Play the contents of the secondary sound buffer.
+		result = tropicalBuffer_->Play(0, 0, 0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 bool SoundFirstClass::playForest()
 {
 	HRESULT result;
@@ -769,7 +952,172 @@ bool SoundFirstClass::playLeaves()
 		}
 
 		// Play the contents of the secondary sound buffer.
-		result = leavesBuffer_->Play(0, 0, DSBPLAY_LOOPING);
+		result = leavesBuffer_->Play(0, 0, 0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool SoundFirstClass::playBirdEnter()
+{
+	HRESULT result;
+
+	DWORD status;
+	birdEnterBuffer_->GetStatus(&status);
+	if(!(status && DSBSTATUS_PLAYING))
+	{
+		// Set position at the beginning of the sound buffer.
+		result = birdEnterBuffer_->SetCurrentPosition(0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Set volume of the buffer to 100%.
+		result = birdEnterBuffer_->SetVolume(DSBVOLUME_MAX);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Play the contents of the secondary sound buffer.
+		result = birdEnterBuffer_->Play(0, 0, 0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool SoundFirstClass::playBirdEat()
+{
+	HRESULT result;
+
+	DWORD status;
+	birdEatBuffer_->GetStatus(&status);
+	if(!(status && DSBSTATUS_PLAYING))
+	{
+		// Set position at the beginning of the sound buffer.
+		result = birdEatBuffer_->SetCurrentPosition(0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Set volume of the buffer to 100%.
+		result = birdEatBuffer_->SetVolume(DSBVOLUME_MAX);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Play the contents of the secondary sound buffer.
+		result = birdEatBuffer_->Play(0, 0, 0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool SoundFirstClass::playChangeLevel()
+{
+	HRESULT result;
+
+	DWORD status;
+	changeLevelBuffer_->GetStatus(&status);
+	if(!(status && DSBSTATUS_PLAYING))
+	{
+		// Set position at the beginning of the sound buffer.
+		result = changeLevelBuffer_->SetCurrentPosition(0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Set volume of the buffer to 100%.
+		result = changeLevelBuffer_->SetVolume(DSBVOLUME_MAX);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Play the contents of the secondary sound buffer.
+		result = changeLevelBuffer_->Play(0, 0, 0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool SoundFirstClass::playSelection()
+{
+	HRESULT result;
+
+	DWORD status;
+	selectionBuffer_->GetStatus(&status);
+	if(!(status && DSBSTATUS_PLAYING))
+	{
+		// Set position at the beginning of the sound buffer.
+		result = selectionBuffer_->SetCurrentPosition(0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Set volume of the buffer to 100%.
+		result = selectionBuffer_->SetVolume(DSBVOLUME_MAX);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Play the contents of the secondary sound buffer.
+		result = selectionBuffer_->Play(0, 0, 0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool SoundFirstClass::playHappySong()
+{
+	HRESULT result;
+
+	DWORD status;
+	happySongBuffer_->GetStatus(&status);
+	if(!(status && DSBSTATUS_PLAYING))
+	{
+		// Set position at the beginning of the sound buffer.
+		result = happySongBuffer_->SetCurrentPosition(0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Set volume of the buffer to 100%.
+		result = happySongBuffer_->SetVolume(DSBVOLUME_MAX);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Play the contents of the secondary sound buffer.
+		result = happySongBuffer_->Play(0, 0, 0);
 		if(FAILED(result))
 		{
 			return false;

@@ -1,22 +1,22 @@
 <?xml version="1.0"?>
 <polaroids>
 	<polaroid>
-		<image>polaroid_armor</image>
+		<image>armadura</image>
 		<position x="-0.475" y="0.15"/>
 		<size x="0.2" y="0.4"/>
 	</polaroid>
 	<polaroid>
-		<image>polaroid_stars</image>
+		<image>pijama</image>
 		<position x="-0.225" y="0.15"/>
 		<size x="0.2" y="0.4"/>
 	</polaroid>
 	<polaroid>
-		<image>polaroid_fire</image>
+		<image>fire</image>
 		<position x="0.025" y="0.15"/>
 		<size x="0.2" y="0.4"/>
 	</polaroid>
 	<polaroid>
-		<image>polaroid_ice</image>
+		<image>ice</image>
 		<position x="0.275" y="0.15"/>
 		<size x="0.2" y="0.4"/>
 	</polaroid>

@@ -90,6 +90,7 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		LevelState					levelState_;
 		SubLevelState				subLevelState_;
 
+		float						introductionTime_;
 		float						playingTime_;
 		float						fadeTime_;
 
@@ -114,13 +115,14 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		// Fruit vector and in game fruit vector
 		std::vector<FruitClass*>	fruits_;
 		std::vector<FruitClass*>	fruitsInGame_;
+		std::vector<Object3D*>		hatsFromFruits_;
 
 		// Classes for managing between game image selection
 		GUIManager*					polaroidGUI_;
 		GUIFrame*					polaroidFrame_;
 
 		// Sound
-		SoundFirstClass*					soundManager_;
+		SoundFirstClass*			soundManager_;
 
 		// Debug
 		bool						debug_;

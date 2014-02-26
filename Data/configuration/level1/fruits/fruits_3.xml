@@ -15,7 +15,7 @@
 	</fruit>
 	<fruit>
 		<model>pescado</model>
-		<position x="-1.25" y="3.1" z="-2.5" />
+		<position x="-1.25" y="3.1" z="-3.0" />
 		<scale x="1" y="1" z="1" />
 		<rotation x="0" y="0" z="0" />
 		<effect type="hat">
@@ -28,7 +28,7 @@
 	</fruit>
 	<fruit>
 		<model>gengibre</model>
-		<position x="1.75" y="3.2" z="-3.0" />
+		<position x="1.75" y="3.2" z="-3.2" />
 		<scale x="1" y="1" z="1" />
 		<rotation x="0" y="0" z="0" />
 		<effect type="hat">
@@ -41,7 +41,7 @@
 	</fruit>
 	<fruit>
 		<model>tarta</model>
-		<position x="3.25" y="2.8" z="-2.5" />
+		<position x="3.25" y="2.8" z="-2.8" />
 		<scale x="1" y="1" z="1" />
 		<rotation x="0" y="0" z="0" />
 		<effect type="hat">

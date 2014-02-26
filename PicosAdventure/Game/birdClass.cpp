@@ -8,9 +8,13 @@ BirdClass::BirdClass()
 
 	birdState_ = HIDDEN;
 
-	initialPosition_.x = 0.0f;
-	initialPosition_.y = 0.0f;
-	initialPosition_.z = 0.0f;
+	leftInitialPosition_.x = 0.0f;
+	leftInitialPosition_.y = 0.0f;
+	leftInitialPosition_.z = 0.0f;
+
+	rightInitialPosition_.x = 0.0f;
+	rightInitialPosition_.y = 0.0f;
+	rightInitialPosition_.z = 0.0f;
 
 	position_.x = 0.0f;
 	position_.y = 0.0f;
@@ -43,17 +47,21 @@ BirdClass::~BirdClass()
 {
 }
 
-bool BirdClass::setup(GraphicsManager* graphicsManager)
+bool BirdClass::setup(GraphicsManager* graphicsManager, SoundFirstClass* soundManager)
 {
 	model_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "pajaro");
 
-	initialPosition_.x = -8.0f;
-	initialPosition_.y = 7.0f;
-	initialPosition_.z = 3.5f;
+	leftInitialPosition_.x = -8.0f;
+	leftInitialPosition_.y = 7.0f;
+	leftInitialPosition_.z = 3.5f;
 
-	position_.x = initialPosition_.x;
-	position_.y = initialPosition_.y;
-	position_.z = initialPosition_.z;
+	rightInitialPosition_.x = 8.0f;
+	rightInitialPosition_.y = 7.0f;
+	rightInitialPosition_.z = 3.5f;
+
+	position_.x = leftInitialPosition_.x;
+	position_.y = leftInitialPosition_.y;
+	position_.z = leftInitialPosition_.z;
 
 	birdState_ = HIDDEN;
 
@@ -68,7 +76,9 @@ bool BirdClass::setup(GraphicsManager* graphicsManager)
 	stealFood_ = false;
 
 	collisionTest_ = new SphereCollision();
-	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 0.5f);
+	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 0.8f);
+
+	soundManager_ = soundManager;
 
 	return true;
 }
@@ -85,7 +95,21 @@ void BirdClass::update(float elapsedTime)
 				{
 					Point fallenFruitPos = fallenFruit_->getPosition();
 
+					if(fallenFruitPos.x <0)
+					{
+						position_.x = leftInitialPosition_.x;
+						position_.y = leftInitialPosition_.y;
+						position_.z = leftInitialPosition_.z;
+					}
+					else
+					{
+						position_.x = rightInitialPosition_.x;
+						position_.y = rightInitialPosition_.y;
+						position_.z = rightInitialPosition_.z;
+					}
+
 					goToPosition(fallenFruitPos);
+					soundManager_->playBirdEnter();
 				}
 			}
 			break;
@@ -98,6 +122,8 @@ void BirdClass::update(float elapsedTime)
 			{
 				fly(elapsedTime);
 
+				soundManager_->playBirdEnter();
+
 				checkArrivedObjective();
 			}
 			break;
@@ -109,6 +135,8 @@ void BirdClass::update(float elapsedTime)
 		case RUNNING_AWAY:
 			{
 				fly(elapsedTime);
+
+				soundManager_->playBirdEnter();
 
 				checkArrivedObjective();
 			}
@@ -165,9 +193,9 @@ void BirdClass::setStealFood(bool steal)
 {
 	if(steal)
 	{
-		position_.x = initialPosition_.x;
-		position_.y = initialPosition_.y;
-		position_.z = initialPosition_.z;
+		position_.x = leftInitialPosition_.x;
+		position_.y = leftInitialPosition_.y;
+		position_.z = leftInitialPosition_.z;
 
 		birdState_ = HIDDEN;
 	}
@@ -199,7 +227,7 @@ void BirdClass::scared()
 	{
 		notifyListeners(true);
 
-		goToPosition(initialPosition_);
+		goToPosition(leftInitialPosition_);
 
 		fallenFruit_ = 0;
 
@@ -256,6 +284,7 @@ void BirdClass::checkArrivedObjective()
 				rotY_ = 3.141592f;
 
 				birdState_ = TEASING;
+				soundManager_->playBirdEat();
 			}
 			else
 			{

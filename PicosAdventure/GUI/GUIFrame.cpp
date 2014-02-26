@@ -227,7 +227,7 @@ GUIButton* GUIFrame::addButton(GraphicsManager* graphicsManager, std::string nam
 	GUIButton* button = new GUIButton();
 
 	// Having the final vertical position, we setup the button
-	button->setup(graphicsManager, name, pos, size.x, size.y, image, SELECT_OBJECT);
+	button->setup(graphicsManager, name, pos, size.x, size.y, image, LOAD_OBJECT);
 
 	// We add it to the map of buttons to keep track of it
 	guiButtons_.insert(std::pair<std::string, GUIButton*>(button->getName(), button));

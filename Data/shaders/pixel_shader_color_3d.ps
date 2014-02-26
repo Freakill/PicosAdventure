@@ -8,6 +8,11 @@
 Texture2D shaderTexture;
 SamplerState SampleType;
 
+cbuffer LightBuffer
+{
+    float4 diffuseColor;
+};
+
 //////////////
 // TYPEDEFS //
 //////////////
@@ -31,7 +36,7 @@ float4 PixelShader3D(PixelInputType input) : SV_TARGET
     textureColor = shaderTexture.Sample(SampleType, input.tex);
 	
 	// Combine the texture color and the particle color to get the final color result.
-    finalColor = textureColor * input.color;
+    finalColor = textureColor * input.color * diffuseColor;
 	
     return finalColor;
 }

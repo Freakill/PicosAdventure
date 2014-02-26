@@ -41,6 +41,7 @@ bool ColorShader3DClass::setupShader(ID3D11Device* device, WCHAR* vsFilename, WC
 	unsigned int numElements;
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC lightBufferDesc;
 
 	// Initialize the pointers this function will use to null.
 	errorMessage = 0;
@@ -183,6 +184,22 @@ bool ColorShader3DClass::setupShader(ID3D11Device* device, WCHAR* vsFilename, WC
 		return false;
 	}
 
+	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
+	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(ColorLightBufferType);
+	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc.MiscFlags = 0;
+	lightBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device->CreateBuffer(&lightBufferDesc, NULL, &colorLightBuffer_);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
 	return true;
 }
 
@@ -192,6 +209,7 @@ bool ColorShader3DClass::setShaderParameters(ID3D11DeviceContext* deviceContext,
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
+	ColorLightBufferType* dataPtr2;
 	unsigned int bufferNumber;
 
 	// Transpose the matrices to prepare them for the shader.
@@ -225,6 +243,28 @@ bool ColorShader3DClass::setShaderParameters(ID3D11DeviceContext* deviceContext,
 
 	// Set shader texture resource in the pixel shader.
 	deviceContext->PSSetShaderResources(0, 1, textureArray);
+
+	// Lock the light constant buffer so it can be written to.
+	result = deviceContext->Map(colorLightBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr2 = (ColorLightBufferType*)mappedResource.pData;
+
+	// Copy the lighting variables into the constant buffer.
+	dataPtr2->diffuseColor = light->getDiffuseColor();
+
+	// Unlock the constant buffer.
+	deviceContext->Unmap(colorLightBuffer_, 0);
+
+	// Set the position of the light constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Finally set the light constant buffer in the pixel shader with the updated values.
+	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &colorLightBuffer_);
 
 	return true;
 }

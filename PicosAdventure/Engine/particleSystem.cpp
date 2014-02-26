@@ -18,7 +18,7 @@ ParticleSystem::~ParticleSystem()
 {
 
 }
-bool ParticleSystem::setup(GraphicsManager* graphicsManager, std::string textureFilename, float fallDistance)
+bool ParticleSystem::setup(GraphicsManager* graphicsManager, std::string textureFilename, Point initialPosition, float fallDistance)
 {
 	bool result;
 
@@ -33,7 +33,7 @@ bool ParticleSystem::setup(GraphicsManager* graphicsManager, std::string texture
 	}
 
 	// Initialize the particle system.
-	result = setupParticleSystem(fallDistance);
+	result = setupParticleSystem(initialPosition, fallDistance);
 	if(!result)
 	{
 		MessageBoxA(NULL, "Could not setup particle system.", "ParticleSystem - Error", MB_ICONERROR | MB_OK);
@@ -146,14 +146,14 @@ void ParticleSystem::destroyTexture()
 	return;
 }
 
-bool ParticleSystem::setupParticleSystem(float fallDistance)
+bool ParticleSystem::setupParticleSystem(Point initialPosition, float fallDistance)
 {
 	int i;
 
 	// Set initial position of the particles
-	particleInitialPosition_.x = 0.0f;
-	particleInitialPosition_.y = 0.0f;
-	particleInitialPosition_.z = 0.0f;
+	particleInitialPosition_.x = initialPosition.x;
+	particleInitialPosition_.y = initialPosition.y;
+	particleInitialPosition_.z = initialPosition.z;
 
 	// Set the random deviation of where the particles can be located when emitted.
 	particleDeviation_.x = 0.1f;
@@ -165,16 +165,16 @@ bool ParticleSystem::setupParticleSystem(float fallDistance)
 	particleVelocityVariation_ = 0.2f;
 
 	// Set the physical size of the particles.
-	particleSize_ = 0.15f;
+	particleSize_ = 0.12f;
 
 	// Set the number of particles to emit per second.
-	particlesPerSecond_ = 125.0f;
+	particlesPerSecond_ = 75.0f;
 
 	// Set the maximum falling distance for particles
 	fallingDistance_ = fallDistance;
 
 	// Set the maximum number of particles allowed in the particle system.
-	maxParticles_ = 100;
+	maxParticles_ = 60;
 
 	// Create the particle list.
 	particleList_ = new ParticleType[maxParticles_];

@@ -6,7 +6,7 @@
 		<scale x="1" y="1" z="1" />
 		<rotation x="0" y="0" z="0" />
 		<effect type="body">
-			<color r="1.0" g="0.0" b="0.0" />
+			<scale x="0.05" y="0.041" z="0.05" />
 		</effect>
 		<collision>
 			<position x="0.0" y="0.4" z="0.0" />
@@ -14,38 +14,25 @@
 		</collision>
 	</fruit>
 	<fruit>
-		<model>galleta</model>
-		<position x="-1.25" y="3.1" z="-2.5" />
+		<model>banana</model>
+		<position x="-1.25" y="3.1" z="-3.0" />
 		<scale x="1" y="1" z="1" />
 		<rotation x="0" y="0" z="0" />
 		<effect type="body">
-			<color r="0.2" g="0.9" b="0.2" />
+			<scale x="0.033" y="0.041" z="0.033" />
 		</effect>
 		<collision>
-			<position x="0.0" y="0.2" z="0.0" />
+			<scale x="0.8" y="0.8" z="0.8" />
 			<radius> 0.3 </radius>
 		</collision>
 	</fruit>
 	<fruit>
-		<model>polo</model>
-		<position x="1.75" y="3.2" z="-3.0" />
-		<scale x="1" y="1" z="1" />
-		<rotation x="0" y="0" z="0" />
-		<effect type="body">
-			<color r="1.0" g="0.5" b="0.0" />
-		</effect>
-		<collision>
-			<position x="0.0" y="0.4" z="0.0" />
-			<radius> 0.4 </radius>
-		</collision>
-	</fruit>
-	<fruit>
 		<model>helado</model>
-		<position x="3.25" y="2.8" z="-2.5" />
+		<position x="3.25" y="2.8" z="-2.8" />
 		<scale x="1" y="1" z="1" />
 		<rotation x="0" y="0" z="0" />
 		<effect type="body">
-			<color r="0.0" g="0.7" b="1.0" />
+			<scale x="0.041" y="0.041" z="0.041" />
 		</effect>
 		<collision>
 			<position x="0.0" y="0.4" z="0.0" />

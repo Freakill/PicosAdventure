@@ -50,11 +50,21 @@ class SoundFirstClass
 		bool playPurrFile();
 		bool playSurpriseFile();
 		bool playTransformationFile();
+		bool playBirthdayFile();
+		bool playPirateFile();
+		bool playTropicalFile();
 
 		// Game players
 		bool playForest();
 		bool playFruitFall();
 		bool playLeaves();
+
+		// Other
+		bool playBirdEnter();
+		bool playBirdEat();
+		bool playChangeLevel();
+		bool playSelection();
+		bool playHappySong();
 
 	private:
 		bool setupDirectSound(HWND);
@@ -75,11 +85,21 @@ class SoundFirstClass
 		IDirectSoundBuffer8* purrBuffer_[2];
 		IDirectSoundBuffer8* surpriseBuffer_[2];
 		IDirectSoundBuffer8* transformationBuffer_;
+		IDirectSoundBuffer8* birthdayBuffer_;
+		IDirectSoundBuffer8* pirateBuffer_;
+		IDirectSoundBuffer8* tropicalBuffer_;
 
 		// Game Buffers
 		IDirectSoundBuffer8* forestBuffer_;
 		IDirectSoundBuffer8* fruitFallBuffer_;
 		IDirectSoundBuffer8* leavesBuffer_;
+
+		//Others
+		IDirectSoundBuffer8* birdEnterBuffer_;
+		IDirectSoundBuffer8* birdEatBuffer_;
+		IDirectSoundBuffer8* changeLevelBuffer_;
+		IDirectSoundBuffer8* selectionBuffer_;
+		IDirectSoundBuffer8* happySongBuffer_;
 };
 
 #endif //_SOUND_FIRST_CLASS_H_

@@ -93,7 +93,8 @@ xcopy /e /i /y "$(KINECT_TOOLKIT_DIR)\bin\KinectBackgroundRemoval180_32.dll" "$(
     </Link>
     <PostBuildEvent>
       <Command>xcopy /e /i /y "$(SolutionDir)Data\*.*" "$(SolutionDir)Build\$(Configuration)\Data"
-xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configuration)"</Command>
+xcopy /e /i /y "$(CAL3D)\bin\release\cal3d.dll" "$(SolutionDir)Build\$(Configuration)"
+xcopy /e /i /y "$(KINECT_TOOLKIT_DIR)\bin\KinectBackgroundRemoval180_32.dll" "$(SolutionDir)Build\$(Configuration)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

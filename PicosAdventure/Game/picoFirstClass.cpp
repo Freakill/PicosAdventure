@@ -10,6 +10,12 @@ PicoFirstClass::PicoFirstClass()
 	waitedTime_ = 0.0f;
 	eatingWaitTime_ = 0.0f;
 	celebratingWaitTime_ = 0.0f;
+	inactivityTime1_ = 0.0f;
+	inactivityTime2_ = 0.0f;
+	inactivityTime3_ = 0.0f;
+	pointingTime_ =0.0f;
+
+	behindFruit_ = 0.0f;
 
 	position_.x = 0.0f;
 	position_.y = 0.0f;
@@ -84,9 +90,9 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 	positionUnhidding_[0].y = 0.0f;
 	positionUnhidding_[0].z = -0.25f;
 
-	positionUnhidding_[1].x = -3.0f;
+	positionUnhidding_[1].x = -2.5f;
 	positionUnhidding_[1].y = 0.0f;
-	positionUnhidding_[1].z = -2.75f;
+	positionUnhidding_[1].z = -2.45f;
 
 	unhiddingStep_ = 0;
 
@@ -122,9 +128,18 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 
 	eatingWaitTime_ = 2.0f;
 	celebratingWaitTime_ = 1.2f;
-	inactivityTime_ = 30.0f;
+	inactivityTime1_ = 30.0f;
+	inactivityTime2_ = 20.0f;
+	inactivityTime3_ = 10.0f;
+	pointingTime_ = 4.0f;
 
-	pointing_ = false;
+	pointing1_ = false;
+	pointing2_ = false;
+	pointing3_ = false;
+
+	pointed1_ = false;
+	pointed2_ = false;
+	pointed3_ = false;
 
 	int screenWidth, screenHeight;
 	graphicsManager->getScreenSize(screenWidth, screenHeight);
@@ -141,6 +156,8 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 		MessageBoxA(NULL, "Could not initialize the FPS text object.", "GUIFrame - Error", MB_OK);
 		return false;
 	}
+
+	behindFruit_ = 0.5f;
 
 	hasToHide_ = true;
 	picoState_ = HIDDING;
@@ -159,10 +176,10 @@ void PicoFirstClass::update(float elapsedTime)
 	body_->update(elapsedTime);
 	tips_->update(elapsedTime);
 	eyes_->update(elapsedTime);
-	if(hat_)
+	/*if(hat_)
 	{
 		hat_->update(elapsedTime);
-	}
+	}*/
 
 	// Update textures for the tips
 	tips_->getTextureArrayClass()->getTexturesArray()[0] = expressions_.at(actualExpression_)->getTexture();
@@ -211,6 +228,8 @@ void PicoFirstClass::update(float elapsedTime)
 					else
 					{
 						Point fallenFruitPos = fallenFruits_.front()->getPosition();
+						fallenFruitPos.z += behindFruit_;
+
 						goToPosition(fallenFruitPos);
 						picoState_ = WAITING;
 						inactivityClock_->reset();
@@ -220,7 +239,7 @@ void PicoFirstClass::update(float elapsedTime)
 			break;
 		case WAITING:
 			{
-				if(!pointing_ && inactivityClock_->getTime() > inactivityTime_)
+				if(!pointing1_ && !pointing2_ && !pointing3_ && inactivityClock_->getTime() > inactivityTime1_)
 				{
 					if(position_.x < 0)
 					{
@@ -237,18 +256,93 @@ void PicoFirstClass::update(float elapsedTime)
 						//MessageBoxA(NULL, "Lol", "Lol", MB_OK);
 					}
 
-					pointing_ = true;
+					pointing1_ = true;
+					inactivityClock_->reset();
+				}
+
+				if(pointing1_ && !pointing2_ && !pointing3_ && !pointed1_ && inactivityClock_->getTime() > pointingTime_)
+				{
+					changeAnimation("idle", 0.2f);
+					changeExpression("normal");
+
+					pointed1_ = true;
+					inactivityClock_->reset();
+				}
+
+				if(!pointing2_ && !pointing3_ && pointing1_ && pointed1_ && inactivityClock_->getTime() > inactivityTime2_)
+				{
+					if(position_.x < 0)
+					{
+						changeAnimation("point_right", 0.4f);
+						changeExpression("normal");
+						soundManager_->playPointingFile();
+						//MessageBoxA(NULL, "Lol", "Lol", MB_OK);
+					}
+					else
+					{
+						changeAnimation("point_left", 0.4f);
+						changeExpression("normal");
+						soundManager_->playPointingFile();
+						//MessageBoxA(NULL, "Lol", "Lol", MB_OK);
+					}
+
+					pointing2_ = true;
+					inactivityClock_->reset();
+				}
+
+				if(pointing1_ && pointing2_ && !pointing3_ && !pointed2_ && inactivityClock_->getTime() > pointingTime_)
+				{
+					changeAnimation("idle", 0.2f);
+					changeExpression("normal");
+
+					pointed2_ = true;
+					inactivityClock_->reset();
+				}
+
+				if(!pointing3_ && pointing2_ && pointing1_ && pointed2_ && inactivityClock_->getTime() > inactivityTime3_)
+				{
+					if(position_.x < 0)
+					{
+						changeAnimation("point_right", 0.4f);
+						changeExpression("normal");
+						soundManager_->playPointingFile();
+						//MessageBoxA(NULL, "Lol", "Lol", MB_OK);
+					}
+					else
+					{
+						changeAnimation("point_left", 0.4f);
+						changeExpression("normal");
+						soundManager_->playPointingFile();
+						//MessageBoxA(NULL, "Lol", "Lol", MB_OK);
+					}
+
+					pointing3_ = true;
+					inactivityClock_->reset();
+				}
+
+				if(pointing1_ && pointing2_ && pointing3_ && inactivityClock_->getTime() > pointingTime_)
+				{
+					changeAnimation("idle", 0.2f);
+					changeExpression("normal");
+
+					pointing3_ = false;
+					inactivityClock_->reset();
 				}
 
 				if(fallenFruits_.size() > 0)
 				{
 					Point fallenFruitPos = fallenFruits_.front()->getPosition();
+					fallenFruitPos.z += behindFruit_;
 
 					changeExpression("sorpresa");
 					soundManager_->playSurpriseFile();
 
 					goToPosition(fallenFruitPos);
-					pointing_ = false;
+					pointing1_ = false;
+					pointing2_ = false;
+					pointing3_ = false;
+
+					inactivityClock_->reset();
 				}
 			}
 			break;
@@ -277,6 +371,8 @@ void PicoFirstClass::update(float elapsedTime)
 		case EATING:
 			{
 				waitedTime_ += elapsedTime;
+
+				notifyListeners(false);
 
 				if(waitedTime_ > eatingWaitTime_)
 				{
@@ -312,6 +408,30 @@ void PicoFirstClass::update(float elapsedTime)
 						case HAT:
 							{
 								hat_ = fallenFruits_.front()->getHatEffect();
+
+								if(fallenFruits_.front()->getHatEffect()->getModel()->getModelName() == "gorroCumple")
+								{
+									soundManager_->playHappySong();
+								}
+								else if(fallenFruits_.front()->getHatEffect()->getModel()->getModelName() == "gorroFrutas")
+								{
+									soundManager_->playTropicalFile();
+								}
+								else if(fallenFruits_.front()->getHatEffect()->getModel()->getModelName() == "gorroPirata")
+								{
+									soundManager_->playPirateFile();
+								}
+								else if(fallenFruits_.front()->getHatEffect()->getModel()->getModelName() == "gorroSanta")
+								{
+									soundManager_->playBirthdayFile();
+								}
+							}
+							break;
+						case BODY:
+							{
+								scaling_.x = fallenFruits_.front()->getBodyEffect().x;
+								scaling_.y = fallenFruits_.front()->getBodyEffect().y;
+								scaling_.z = fallenFruits_.front()->getBodyEffect().z;
 							}
 							break;
 					}
@@ -484,8 +604,18 @@ void PicoFirstClass::setToRest()
 		changeAnimation("idle", 0.2f);
 
 		picoState_ = WAITING;
+		inactivityClock_->reset();
 
 		fallenFruits_.clear();
+	}
+}
+
+void PicoFirstClass::makeHappy()
+{
+	if(picoState_ == WAITING)
+	{
+		changeExpression("feliz");
+		soundManager_->playPurrFile();
 	}
 }
 
@@ -636,8 +766,8 @@ void PicoFirstClass::eatFruit()
 			soundManager_->playEatingFile();
 
 			Point fruitPos = fallenFruits_.front()->getPosition();
-			fruitPos.y = fruitPos.y + 1.6f;
-			fruitPos.z = fruitPos.z - 0.85f;
+			fruitPos.y = fruitPos.y + 1.2f;
+			fruitPos.z = fruitPos.z - 0.35f;
 			fallenFruits_.front()->setPosition(fruitPos);
 
 			waitedTime_ = 0.0f;
@@ -687,6 +817,7 @@ void PicoFirstClass::notify(BirdClass* notifier, bool arg)
 	if(picoState_ == SCARED && arg)
 	{
 		Point fallenFruitPos = fallenFruits_.front()->getPosition();
+		fallenFruitPos.z += behindFruit_;
 
 		goToPosition(fallenFruitPos);
 	}

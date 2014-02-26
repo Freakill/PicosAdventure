@@ -76,7 +76,7 @@ bool FruitClass::setup(GraphicsManager *graphicsManager, SoundFirstClass* soundM
 
 	spawningTime_ = 2.0f;
 
-	fallTime_ = 1.0f;
+	fallTime_ = 0.5f;
 	shaken_ = false;
 	
 	rotX_ = rotX;
@@ -93,7 +93,7 @@ bool FruitClass::setup(GraphicsManager *graphicsManager, SoundFirstClass* soundM
 		MessageBoxA(NULL, "Could not create leafs instance", "Fruit - Error", MB_ICONERROR | MB_OK);
 	}
 
-	if(leafs_ && !leafs_->setup(graphicsManager, "leaf", 5))
+	if(leafs_ && !leafs_->setup(graphicsManager, "leaf", initialPosition_, 2.8))
 	{
 		MessageBoxA(NULL, "Could not setup leafs object", "Fruit - Error", MB_ICONERROR | MB_OK);
 	}
@@ -146,7 +146,7 @@ void FruitClass::update(float elapsedTime)
 					return;
 				}
 
-				shakenTime_ -= 0.006;
+				shakenTime_ -= 0.004;
 				if(shakenTime_ < 0.0)
 				{
 					shakenTime_ = 0.0f;
@@ -186,6 +186,12 @@ void FruitClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, 
 		graphicsManager->turnOnSolidRasterizer();
 	}
 
+	graphicsManager->turnOnParticlesAlphaBlending();
+	graphicsManager->turnZBufferOff();
+		leafs_->draw(graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	graphicsManager->turnZBufferOn();
+	graphicsManager->turnOffAlphaBlending();
+
 	XMFLOAT4X4 rotatingMatrixZ;
 	XMStoreFloat4x4(&rotatingMatrixZ, XMMatrixRotationZ(rotZ_));
 	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&rotatingMatrixZ)));
@@ -207,11 +213,6 @@ void FruitClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, 
 	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&movingMatrix)));
 
 	model_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
-	graphicsManager->turnOnParticlesAlphaBlending();
-	graphicsManager->turnZBufferOff();
-		leafs_->draw(graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
-	graphicsManager->turnZBufferOn();
-	graphicsManager->turnOffAlphaBlending();
 }
 
 void FruitClass::destroy()
@@ -385,6 +386,16 @@ void FruitClass::setHatEffect(Object3D* hat)
 Object3D* FruitClass::getHatEffect()
 {
 	return hatEffect_;
+}
+
+void FruitClass::setBodyEffect(XMFLOAT3 body)
+{
+	bodyEffect_ = body;
+}
+
+XMFLOAT3 FruitClass::getBodyEffect()
+{
+	return bodyEffect_;
 }
 
 bool FruitClass::hasFallen()

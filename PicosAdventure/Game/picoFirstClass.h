@@ -61,6 +61,8 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 		void goToPosition(Point position);
 		void setToRest();
 
+		void makeHappy();
+
 		void changeAnimation(std::string name, float time);
 		void changeExpression(std::string newExpression);
 
@@ -110,12 +112,23 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 		ClockClass* expressionClock_;
 		ClockClass* inactivityClock_;
 
+		float		behindFruit_;
+
 		float		waitedTime_;
 		float		eatingWaitTime_;
 		float		celebratingWaitTime_;
-		float		inactivityTime_;
+		
+		float		inactivityTime1_;
+		float		inactivityTime2_;
+		float		inactivityTime3_;
+		float		pointingTime_;
 
-		bool		pointing_;
+		bool		pointing1_;
+		bool		pointed1_;
+		bool		pointing2_;
+		bool		pointed2_;
+		bool		pointing3_;
+		bool		pointed3_;
 
 		// Sound
 		SoundFirstClass*	soundManager_;

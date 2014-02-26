@@ -7,6 +7,11 @@ class GraphicsManager;
 
 class ColorShader3DClass : public Shader3DClass
 {
+	private:
+		struct ColorLightBufferType
+			{
+				XMFLOAT4 diffuseColor;
+			};
 
 	public:
 		ColorShader3DClass();
@@ -20,6 +25,8 @@ class ColorShader3DClass : public Shader3DClass
 		virtual bool setupShader(ID3D11Device* device, WCHAR* vsFilename, WCHAR* psFilename);
 		virtual bool setShaderParameters(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, 
 										 XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView** textureArray, LightClass* light);
+
+		ID3D11Buffer* colorLightBuffer_;
 
 };
 

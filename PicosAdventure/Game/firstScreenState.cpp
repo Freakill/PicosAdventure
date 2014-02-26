@@ -136,7 +136,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 		return false;
 	}
 
-	if(!bird_->setup(graphicsManager_))
+	if(!bird_->setup(graphicsManager_, soundManager_))
 	{
 		MessageBoxA(NULL, "Could not initialize the bird (is the word).", "Error", MB_ICONERROR | MB_OK);
 		return false;
@@ -209,6 +209,13 @@ void FirstScreenState::update(float elapsedTime)
 {	
 	gameClock_->tick();
 
+	// Always update hats
+	std::vector<Object3D*>::iterator fruitHatIt;
+	for(fruitHatIt = hatsFromFruits_.begin(); fruitHatIt != hatsFromFruits_.end(); fruitHatIt++)
+	{
+		(*fruitHatIt)->update(elapsedTime);
+	}
+
 	// Update fruits logic
 	if(subLevelState_ == PLAYING)
 	{
@@ -226,7 +233,7 @@ void FirstScreenState::update(float elapsedTime)
 		case INTRODUCTION:
 			{
 				spaceShip_->update(elapsedTime);
-				if(gameClock_->getTime() > fadeTime_)
+				if(gameClock_->getTime() > introductionTime_)
 				{
 					changeLevel(FIRST_LEVEL);
 				}
@@ -411,10 +418,9 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 						(*fruitIt)->makeItFall();
 					}
 				}
-				if(pico_->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
+				if(subLevelState_ == PLAYING && pico_->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
 				{
-					pico_->changeExpression("feliz");
-					soundManager_->playPurrFile();
+					pico_->makeHappy();
 				}
 			}
 			break;
@@ -432,8 +438,10 @@ void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
 	{
 		switch(arg.buttonPurpose)
 		{
-			case(SELECT_OBJECT):
+			case(LOAD_OBJECT):
 				{
+					soundManager_->playSelection();
+
 					switch(levelState_)
 					{
 						case FIRST_LEVEL:
@@ -480,6 +488,7 @@ void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
 									if((*it)->getName() == name)
 									{
 										pico_->setHat((*it)->getHatEffect());
+
 										break;
 									}
 								}
@@ -535,10 +544,9 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 		}
 	}
 
-	if(pico_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+	if(subLevelState_ == PLAYING && pico_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
 	{
-		pico_->changeExpression("feliz");
-		soundManager_->playPurrFile();
+		pico_->makeHappy();
 	}
 
 	if(bird_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
@@ -557,6 +565,7 @@ void FirstScreenState::updateLevel()
 				{
 					// check if Pico is idle
 					subLevelState_ = FADING;
+					soundManager_->playChangeLevel();
 					gameClock_->reset();
 				}
 			}
@@ -629,6 +638,17 @@ void FirstScreenState::loadConfigurationFromXML()
 		MessageBoxA(NULL, "Could not load configuration node!", "FirstScreen - Error", MB_ICONERROR | MB_OK);
 	}
 
+	pugi::xml_node introductionNode;
+	if(!(introductionNode = rootNode.child("intro_time")))
+	{
+		MessageBoxA(NULL, "Could not load intorduction time node!", "FirstScreen - Error", MB_ICONERROR | MB_OK);
+		introductionTime_ = 25;
+	}
+	else
+	{
+		introductionTime_ = introductionNode.text().as_float();
+	}
+
 	pugi::xml_node playTimeNode;
 	if(!(playTimeNode = rootNode.child("play_time")))
 	{
@@ -644,7 +664,7 @@ void FirstScreenState::loadConfigurationFromXML()
 	if(!(fadeTimeNode = rootNode.child("fade_time")))
 	{
 		MessageBoxA(NULL, "Could not load fade time node!", "FirstScreen - Error", MB_ICONERROR | MB_OK);
-		fadeTime_ = 10;
+		fadeTime_ = 7;
 	}
 	else
 	{
@@ -844,6 +864,16 @@ bool FirstScreenState::loadFruits()
 
 					fruit->setFruitEffectType(HAT);
 					fruit->setHatEffect(temp);
+					hatsFromFruits_.push_back(temp);
+				}
+
+				if(effectType == "body")
+				{
+					pugi::xml_node bodyNode = effectNode.child("scale");
+					XMFLOAT3 body = XMFLOAT3(bodyNode.attribute("x").as_float(), bodyNode.attribute("y").as_float(), bodyNode.attribute("z").as_float());
+
+					fruit->setFruitEffectType(BODY);
+					fruit->setBodyEffect(body);
 				}
 
 				pugi::xml_node collisionNode = fruitNode.child("collision");
@@ -869,11 +899,23 @@ bool FirstScreenState::loadFruits()
 
 void FirstScreenState::addFruitsToGame()
 {
-	for(int i = (levelState_-1)*4; i < (levelState_-1)*4+4; i++)
+	if(levelState_ < 4)
 	{
-		fruitsInGame_.push_back(fruits_.at(i));
-		fruits_.at(i)->addListener(*pico_);
-		fruits_.at(i)->addListener(*bird_);
+		for(int i = (levelState_-1)*4; i < (levelState_-1)*4+4; i++)
+		{
+			fruitsInGame_.push_back(fruits_.at(i));
+			fruits_.at(i)->addListener(*pico_);
+			fruits_.at(i)->addListener(*bird_);
+		}
+	}
+	else
+	{
+		for(int i = (levelState_-1)*4; i < (levelState_-1)*4+3; i++)
+		{
+			fruitsInGame_.push_back(fruits_.at(i));
+			fruits_.at(i)->addListener(*pico_);
+			fruits_.at(i)->addListener(*bird_);
+		}
 	}
 }
 
@@ -921,14 +963,14 @@ bool FirstScreenState::createPolaroids()
 
 	// We first check if any has fallen, if none has been thrown, then we display all
 	bool noneHasFallen = true;
-	std::vector<FruitClass*>::iterator it;
+	/*std::vector<FruitClass*>::iterator it;
 	for(it = fruitsInGame_.begin(); it != fruitsInGame_.end(); it++)
 	{
 		if((*it)->hasFallen())
 		{
 			noneHasFallen = false;
 		}
-	}
+	}*/
 
 	int screenWidth, screenHeight;
 	graphicsManager_->getScreenSize(screenWidth, screenHeight);
@@ -970,7 +1012,7 @@ bool FirstScreenState::createPolaroids()
 					size = Point(sizeNode.attribute("x").as_float()*screenWidth, sizeNode.attribute("y").as_float()*screenHeight);
 				}
 
-				polaroidFrame_->addButton(graphicsManager_, fruitsInGame_.at(fruitIndex)->getName(), pos, size, "seafloor")->addListener(*this);
+				polaroidFrame_->addButton(graphicsManager_, fruitsInGame_.at(fruitIndex)->getName(), pos, size, imageName.as_string())->addListener(*this);
 			}
 		}
 		fruitIndex++;

@@ -8,6 +8,8 @@
 #include "../Engine/Object3DFactory.h"
 #include "../Engine/sphereCollision.h"
 
+#include "../Game/soundFirstClass.h"
+
 #include "../Graphics/graphicsManager.h"
 
 #include "../Math/pointClass.h"
@@ -36,7 +38,7 @@ class BirdClass : public Listener<FruitClass, Point>, public Listener<PicoFirstC
 		BirdClass(const BirdClass&);
 		~BirdClass();
 
-		bool setup(GraphicsManager* graphicsManager);
+		bool setup(GraphicsManager* graphicsManager, SoundFirstClass* soundManager);
 		void update(float elapsedTime);
 		void draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug);
 		void destroy();
@@ -61,12 +63,15 @@ class BirdClass : public Listener<FruitClass, Point>, public Listener<PicoFirstC
 		Object3D*	model_;
 		SphereCollision* collisionTest_;
 
+		SoundFirstClass* soundManager_;
+
 		BirdState	birdState_;
 		bool		stealFood_;
 
 		FruitClass* fallenFruit_;
 
-		Point		initialPosition_;
+		Point		leftInitialPosition_;
+		Point		rightInitialPosition_;
 		Point		position_;
 		Vector		velocity_;
 		Point		objective_;
