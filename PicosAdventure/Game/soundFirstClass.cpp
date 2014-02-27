@@ -11,7 +11,8 @@ SoundFirstClass::SoundFirstClass()
 	eatingBuffer_[0] = 0;
 	eatingBuffer_[1] = 0;
 	eatingBuffer_[2] = 0;
-	hiBuffer_ = 0;	
+	hiBuffer_[0] = 0;	
+	hiBuffer_[1] = 0;	
 	pointingBuffer_[0] = 0;
 	pointingBuffer_[1] = 0;
 	purrBuffer_[0] = 0;
@@ -20,6 +21,7 @@ SoundFirstClass::SoundFirstClass()
 	surpriseBuffer_[1] = 0;
 	transformationBuffer_ = 0;
 	birthdayBuffer_ = 0;
+	christmasBuffer_ = 0;
 	pirateBuffer_ = 0;
 	tropicalBuffer_ = 0;
 
@@ -93,10 +95,16 @@ bool SoundFirstClass::setup(HWND hwnd, std::string fileName)
 		return false;
 	}
 
-	result = loadWaveFile("./Data/sounds/Hola_1.wav", &hiBuffer_);
+	result = loadWaveFile("./Data/sounds/Hola_1.wav", &hiBuffer_[0]);
 	if(!result)
 	{
-		MessageBoxA(NULL, "6", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		MessageBoxA(NULL, "6.1", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+	result = loadWaveFile("./Data/sounds/Hola_2.wav", &hiBuffer_[1]);
+	if(!result)
+	{
+		MessageBoxA(NULL, "6.2", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -147,6 +155,13 @@ bool SoundFirstClass::setup(HWND hwnd, std::string fileName)
 	}
 
 	result = loadWaveFile("./Data/sounds/birthday_song.wav", &birthdayBuffer_);
+	if(!result)
+	{
+		MessageBoxA(NULL, "14", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	result = loadWaveFile("./Data/sounds/christmas_song.wav", &christmasBuffer_);
 	if(!result)
 	{
 		MessageBoxA(NULL, "14", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
@@ -233,7 +248,8 @@ void SoundFirstClass::destroy()
 	destroyWaveFile(&eatingBuffer_[0]);
 	destroyWaveFile(&eatingBuffer_[1]);
 	destroyWaveFile(&eatingBuffer_[2]);
-	destroyWaveFile(&hiBuffer_);
+	destroyWaveFile(&hiBuffer_[0]);
+	destroyWaveFile(&hiBuffer_[1]);
 	destroyWaveFile(&pointingBuffer_[0]);
 	destroyWaveFile(&pointingBuffer_[1]);
 	destroyWaveFile(&purrBuffer_[0]);
@@ -242,6 +258,7 @@ void SoundFirstClass::destroy()
 	destroyWaveFile(&surpriseBuffer_[1]);
 	destroyWaveFile(&transformationBuffer_);
 	destroyWaveFile(&birthdayBuffer_);
+	destroyWaveFile(&christmasBuffer_);
 	destroyWaveFile(&pirateBuffer_);
 	destroyWaveFile(&tropicalBuffer_);
 
@@ -594,26 +611,29 @@ bool SoundFirstClass::playHiFile()
 {
 	HRESULT result;
 	
-	DWORD status;
-	hiBuffer_->GetStatus(&status);
-	if(!(status && DSBSTATUS_PLAYING))
+	DWORD status[2];
+	hiBuffer_[0]->GetStatus(&status[0]);
+	hiBuffer_[1]->GetStatus(&status[1]);
+	if(!(status[0] && DSBSTATUS_PLAYING) && !(status[1] && DSBSTATUS_PLAYING))
 	{
+		int soundToPlay = rand() % 2;
+
 		// Set position at the beginning of the sound buffer.
-		result = hiBuffer_->SetCurrentPosition(0);
+		result = hiBuffer_[soundToPlay]->SetCurrentPosition(0);
 		if(FAILED(result))
 		{
 			return false;
 		}
 
 		// Set volume of the buffer to 100%.
-		result = hiBuffer_->SetVolume(DSBVOLUME_MAX);
+		result = hiBuffer_[soundToPlay]->SetVolume(DSBVOLUME_MAX);
 		if(FAILED(result))
 		{
 			return false;
 		}
 
 		// Play the contents of the secondary sound buffer.
-		result = hiBuffer_->Play(0, 0, 0);
+		result = hiBuffer_[soundToPlay]->Play(0, 0, 0);
 		if(FAILED(result))
 		{
 			return false;
@@ -788,6 +808,39 @@ bool SoundFirstClass::playBirthdayFile()
 
 		// Play the contents of the secondary sound buffer.
 		result = birthdayBuffer_->Play(0, 0, 0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool SoundFirstClass::playChristmasFile()
+{
+	HRESULT result;
+	
+	DWORD status;
+	christmasBuffer_->GetStatus(&status);
+	if(!(status && DSBSTATUS_PLAYING))
+	{
+		// Set position at the beginning of the sound buffer.
+		result = christmasBuffer_->SetCurrentPosition(0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Set volume of the buffer to 100%.
+		result = christmasBuffer_->SetVolume(DSBVOLUME_MAX);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Play the contents of the secondary sound buffer.
+		result = christmasBuffer_->Play(0, 0, 0);
 		if(FAILED(result))
 		{
 			return false;

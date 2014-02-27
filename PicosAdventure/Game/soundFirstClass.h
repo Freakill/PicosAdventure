@@ -51,6 +51,7 @@ class SoundFirstClass
 		bool playSurpriseFile();
 		bool playTransformationFile();
 		bool playBirthdayFile();
+		bool playChristmasFile();
 		bool playPirateFile();
 		bool playTropicalFile();
 
@@ -80,7 +81,7 @@ class SoundFirstClass
 		// Pico Buffers
 		IDirectSoundBuffer8* celebratingBuffer_[2];
 		IDirectSoundBuffer8* eatingBuffer_[3];
-		IDirectSoundBuffer8* hiBuffer_;
+		IDirectSoundBuffer8* hiBuffer_[2];
 		IDirectSoundBuffer8* pointingBuffer_[2];
 		IDirectSoundBuffer8* purrBuffer_[2];
 		IDirectSoundBuffer8* surpriseBuffer_[2];
@@ -88,6 +89,7 @@ class SoundFirstClass
 		IDirectSoundBuffer8* birthdayBuffer_;
 		IDirectSoundBuffer8* pirateBuffer_;
 		IDirectSoundBuffer8* tropicalBuffer_;
+		IDirectSoundBuffer8* christmasBuffer_;
 
 		// Game Buffers
 		IDirectSoundBuffer8* forestBuffer_;

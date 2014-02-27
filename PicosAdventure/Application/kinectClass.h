@@ -23,11 +23,30 @@
 
 class ApplicationManager;
 
+enum messageType
+	{
+		GREETINGS_KINECT,
+		HANDS_POSITION_ROT,
+		HOLD_HANDS,
+	
+	};
+
 struct KinectStruct
 	{
+		messageType type;
 		Point handPos;
-		Point elbowPos;
+		Point secondJoint;
+		Point thirdJoint;	
 		float handRot;
+		bool boolean;
+	};
+
+struct Player
+	{
+		Vector4 leftHand, rightHand;
+		Vector4 leftShoulder, rightShoulder;
+		Vector4 rightElbow, leftElbow;
+		double hipCenter;
 	};
 
 class KinectClass : public Notifier<KinectClass, KinectStruct>
@@ -44,6 +63,7 @@ class KinectClass : public Notifier<KinectClass, KinectStruct>
 
 	private:
 		Point SkeletonToScreen(Vector4 skeletonPoint, int width, int height);
+		void detectSekeltonsJoints(NUI_SKELETON_FRAME myFrame);
 
 		HRESULT			ProcessDepth();
 		HRESULT			ProcessColor();
@@ -81,9 +101,13 @@ class KinectClass : public Notifier<KinectClass, KinectStruct>
 		
 		DWORD           trackedSkeleton_;
 
-		// TRACKING HAND POSITION
-		Vector4 _handRightCoord;
-		Point _handRightScreenCoord;
+		Player players[2];
+		int numPlayer;
+		bool risedHand; 
+		int countSwipe;
+		int lastHandPosition,handPosition;
+		double handsDist;
+		KinectStruct kinectStruct;
 };
 
 #endif

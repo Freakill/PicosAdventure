@@ -76,7 +76,7 @@ bool BirdClass::setup(GraphicsManager* graphicsManager, SoundFirstClass* soundMa
 	stealFood_ = false;
 
 	collisionTest_ = new SphereCollision();
-	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 1.0f);
+	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 1.3f);
 
 	soundManager_ = soundManager;
 
@@ -261,7 +261,7 @@ void BirdClass::fly(float elapsedTime)
 	velocity_.z = objective_.z - position_.z;
 
 	Vector normalizedVelocity = velocity_.normalize();
-	velocity_ = normalizedVelocity * 8;
+	velocity_ = normalizedVelocity * 10;
 
 	rotY_ = acos(normalizedVelocity.z);
 	if(normalizedVelocity.x < 0)

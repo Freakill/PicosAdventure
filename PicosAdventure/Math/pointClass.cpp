@@ -31,3 +31,11 @@ Point Point::addVector(Vector v)
 
 	return p2;
 }
+
+double Point::dist(Point a)
+{
+	double xd = x - a.x;
+	double yd = y - a.y;
+	double yz = z - a.z;
+	return sqrt(xd*xd + yd*yd + yz*yz);
+}

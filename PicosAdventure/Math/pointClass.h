@@ -13,6 +13,7 @@ class Point
 		Point(float X, float Y, float Z);
 
 		Point addVector(Vector v);
+		double dist(Point a);
 
 		float x, y, z;
 };

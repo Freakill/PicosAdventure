@@ -10,7 +10,7 @@
 		</effect>
 		<collision>
 			<position x="0.0" y="0.4" z="0.0" />
-			<radius> 0.4 </radius>
+			<radius> 0.6 </radius>
 		</collision>
 	</fruit>
 	<fruit>
@@ -23,7 +23,7 @@
 		</effect>
 		<collision>
 			<position x="0.0" y="0.2" z="0.0" />
-			<radius> 0.3 </radius>
+			<radius> 0.5 </radius>
 		</collision>
 	</fruit>
 	<fruit>
@@ -35,7 +35,7 @@
 			<model>gorroSanta</model>
 		</effect>
 		<collision>
-			<position x="0.0" y="0.4" z="0.0" />
+			<position x="0.0" y="0.2" z="0.0" />
 			<radius> 0.4 </radius>
 		</collision>
 	</fruit>
@@ -48,8 +48,8 @@
 			<model>gorroCumple</model>
 		</effect>
 		<collision>
-			<position x="0.0" y="0.4" z="0.0" />
-			<radius> 0.4 </radius>
+			<position x="0.0" y="0.2" z="0.0" />
+			<radius> 0.5 </radius>
 		</collision>
 	</fruit>
 </fruits>

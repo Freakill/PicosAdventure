@@ -19,6 +19,14 @@ KinectClass::KinectClass()
 	D2DFactory_ = 0;
     renderTarget_ = 0;
     bitmap_ = 0;
+
+	risedHand = false;
+	countSwipe = 0;
+	lastHandPosition = 1;
+	handPosition = 1;
+	handsDist = 100;
+
+	numPlayer=0;
 }
 
 
@@ -429,46 +437,155 @@ HRESULT KinectClass::ProcessSkeleton()
 
     hr = backgroundRemovalStream_->ProcessSkeleton(NUI_SKELETON_COUNT, pSkeletonData, skeletonFrame.liTimeStamp);
 
-	for (int i = 0 ; i < NUI_SKELETON_COUNT; ++i)
-    {
-        NUI_SKELETON_TRACKING_STATE trackingState = skeletonFrame.SkeletonData[i].eTrackingState;
+	detectSekeltonsJoints(skeletonFrame);
 
-        if (NUI_SKELETON_TRACKED == trackingState)
-        {
-			_handRightCoord.x = skeletonFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].x;
-			_handRightCoord.y = skeletonFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].y;
-			_handRightCoord.z = skeletonFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].z;
-			_handRightCoord.w = skeletonFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].w;
+	//There is one player
+	if(numPlayer==1){
+		if(players[0].rightElbow.y < players[0].rightHand.y)
+		{
+			//Hand is rised
+			risedHand = true;
+			if(players[0].rightElbow.x < players[0].rightHand.x)
+			{
+				handPosition = 2;
+			}
+			else if(players[0].rightElbow.x > players[0].rightHand.x)
+			{
+				handPosition = 3;
+			}
+		}
+		//Hand is down
+		else
+		{
+			risedHand = false;
+			countSwipe = 0;
+		}
 
-			_handRightScreenCoord = SkeletonToScreen(_handRightCoord, 320, 240);
+		if(lastHandPosition != handPosition)
+		{
+			countSwipe++;
+		}
 
-			Vector4 elbowRightCoord;
-			Point elbowRightScreenCoord;
-			elbowRightCoord.x = skeletonFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].x;
-			elbowRightCoord.y = skeletonFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].y;
-			elbowRightCoord.z = skeletonFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].z;
-			elbowRightCoord.w = skeletonFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].w;
+		if(countSwipe == 4 && risedHand)
+		{
+			KinectStruct KinectStruct = {GREETINGS_KINECT};
+			notifyListeners(KinectStruct);
+			countSwipe = 0;
+		}
 
-			elbowRightScreenCoord = SkeletonToScreen(elbowRightCoord, 320, 240);
+		lastHandPosition = handPosition;
 
-			Vector armDirection;
-			armDirection.x = _handRightScreenCoord.x - elbowRightScreenCoord.x;
-			armDirection.y = _handRightScreenCoord.y - elbowRightScreenCoord.y;
-			Vector normalizedArmdDirection = armDirection.normalize();
+		Point handRightScreenCoord = SkeletonToScreen(players[0].rightHand, 320, 240);
+		Point handLeftScreenCoord = SkeletonToScreen(players[0].leftHand, 320, 240);
 
-			float rotZ_;
-			if(armDirection.x > 0)
-				rotZ_ = -(atan(armDirection.y/armDirection.x)-XM_2PI/4);
-			else
-				rotZ_ = -(atan(armDirection.y/armDirection.x)-XM_2PI/4)-XM_2PI/2;
+		Point elbowRightScreenCoord = SkeletonToScreen(players[0].rightElbow, 320, 240);
 
-			KinectStruct kinectStruct = {_handRightScreenCoord, elbowRightScreenCoord, rotZ_};
+		Vector armDirection;
+		armDirection.x = handRightScreenCoord.x - elbowRightScreenCoord.x;
+		armDirection.y = handRightScreenCoord.y - elbowRightScreenCoord.y;
+		Vector normalizedArmdDirection = armDirection.normalize();
 
-			notifyListeners(kinectStruct);
-        }
-    }
+		float rotZ_;
+		if(armDirection.x > 0)
+		{
+			rotZ_ = -(atan(armDirection.y/armDirection.x)-XM_2PI/4);
+		}
+		else
+		{
+			rotZ_ = -(atan(armDirection.y/armDirection.x)-XM_2PI/4)-XM_2PI/2;
+		}
+
+		KinectStruct kinectStruct = {HANDS_POSITION_ROT, handRightScreenCoord, elbowRightScreenCoord, Point(0,0,0), rotZ_};
+		KinectStruct kinectStruct2 = {HANDS_POSITION_ROT, handLeftScreenCoord, elbowRightScreenCoord, Point(0,0,0), rotZ_};
+		notifyListeners(kinectStruct);
+		notifyListeners(kinectStruct2);
+	}
+
+	//There are two players, compute distance between closest hands and define active region.
+	if(numPlayer==2){
+		if(players[0].hipCenter > players[1].hipCenter){
+
+			Point leftHandPoint = Point( players[0].leftHand.x, players[0].leftHand.y, players[0].leftHand.z);
+			Point rightHandPoint = Point(players[1].rightHand.x,players[1].rightHand.y,players[1].rightHand.z);
+
+			handsDist =leftHandPoint.dist(rightHandPoint);
+
+			Point handScreenCoord =  SkeletonToScreen(players[0].leftHand, 320, 240);
+			Point leftShoulderScreenCoord = SkeletonToScreen(players[0].leftShoulder, 320, 240);
+			Point rightShoulderScreenCoord = SkeletonToScreen(players[1].rightShoulder, 320, 240);
+
+			KinectStruct kinectStruct = {HOLD_HANDS,handScreenCoord,leftShoulderScreenCoord,rightShoulderScreenCoord};
+		}
+		else
+		{
+			Point leftHandPoint = Point( players[1].leftHand.x, players[1].leftHand.y, players[1].leftHand.z);
+			Point rightHandPoint = Point(players[0].rightHand.x,players[0].rightHand.y,players[0].rightHand.z);
+
+			handsDist = leftHandPoint.dist(rightHandPoint);
+
+			Point handScreenCoord =  SkeletonToScreen(players[0].rightHand, 320, 240);
+			Point rightShoulderScreenCoord = SkeletonToScreen(players[0].rightShoulder, 320, 240);
+			Point leftShoulderScreenCoord = SkeletonToScreen(players[1].leftShoulder, 320, 240);
+
+			KinectStruct kinectStruct = {HOLD_HANDS,handScreenCoord,leftShoulderScreenCoord,rightShoulderScreenCoord};
+
+		}
+	}
+
+
+	if (handsDist < 0.1){
+		kinectStruct.boolean = TRUE;
+		//MessageBox(NULL, L"MANOS JUNTAS", L"Message", MB_OKCANCEL);
+	}
+
+	else
+		kinectStruct.boolean = FALSE;
+
+	notifyListeners(kinectStruct);
 
     return hr;
+}
+
+void KinectClass::detectSekeltonsJoints(NUI_SKELETON_FRAME myFrame)
+{
+	numPlayer = 0;
+
+	for (int i = 0; i < NUI_SKELETON_COUNT; i++){
+
+		NUI_SKELETON_TRACKING_STATE trackingState = myFrame.SkeletonData[i].eTrackingState;
+
+		if (NUI_SKELETON_TRACKED == trackingState){
+			//First Skeleton on the LEFT, holds RIGHT hand
+			players[numPlayer].rightHand.x = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].x;
+			players[numPlayer].rightHand.y = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].y;
+			players[numPlayer].rightHand.z = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].z;
+			players[numPlayer].rightHand.w = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].w;
+
+			players[numPlayer].rightShoulder.x = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_RIGHT].x;
+			players[numPlayer].rightShoulder.y = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_RIGHT].y;
+			players[numPlayer].rightShoulder.z = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_RIGHT].z;
+			players[numPlayer].rightShoulder.w = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_RIGHT].w;
+
+			players[numPlayer].leftHand.x = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_LEFT].x;
+			players[numPlayer].leftHand.y = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_LEFT].y;
+			players[numPlayer].leftHand.z = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_LEFT].z;
+			players[numPlayer].leftHand.w = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_LEFT].w;
+
+			players[numPlayer].leftShoulder.x = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_LEFT].x;
+			players[numPlayer].leftShoulder.y = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_LEFT].y;
+			players[numPlayer].leftShoulder.z = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_LEFT].z;
+			players[numPlayer].leftShoulder.w = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_LEFT].w;
+
+			players[numPlayer].rightElbow.x =  myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].x;
+			players[numPlayer].rightElbow.y =  myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].y;
+			players[numPlayer].rightElbow.z =  myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].z;
+			players[numPlayer].rightElbow.w =  myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].w;
+
+			players[numPlayer].hipCenter = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER].x;
+
+			numPlayer++;
+		}
+	}
 }
 
 HRESULT KinectClass::ChooseSkeleton(NUI_SKELETON_DATA* pSkeletonData)

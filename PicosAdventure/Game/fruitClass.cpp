@@ -95,7 +95,7 @@ bool FruitClass::setup(GraphicsManager *graphicsManager, SoundFirstClass* soundM
 		MessageBoxA(NULL, "Could not create leafs instance", "Fruit - Error", MB_ICONERROR | MB_OK);
 	}
 
-	if(leafs_ && !leafs_->setup(graphicsManager, "leaf", initialPosition_, 2.8))
+	if(leafs_ && !leafs_->setup(graphicsManager, "hoja2", initialPosition_, 2.8))
 	{
 		MessageBoxA(NULL, "Could not setup leafs object", "Fruit - Error", MB_ICONERROR | MB_OK);
 	}
@@ -277,7 +277,7 @@ bool FruitClass::makeItFall()
 	{
 		velocity_.x = 0.0f;
 		velocity_.y = -1.6f;
-		velocity_.z = 0.0f;
+		velocity_.z = -0.3f;
 
 		soundManager_->playFruitFall();
 

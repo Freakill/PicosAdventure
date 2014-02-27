@@ -62,9 +62,11 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 		void setToRest();
 
 		void makeHappy();
+		void sayHello();
 		void makePointing();
 
 		void changeAnimation(std::string name, float time);
+		void executeAnimation(std::string name, float time);
 		void changeExpression(std::string newExpression);
 
 		void setTipsColor(XMFLOAT4 color);

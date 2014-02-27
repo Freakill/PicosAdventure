@@ -540,38 +540,58 @@ void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
 
 void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 {
-	kinectHandPos_ = Point(arg.handPos.x*screenWidth_/320, arg.handPos.y*screenHeight_/240);
-
-	std::stringstream kinectext;
-	kinectext << "Kinect: " << kinectHandPos_.x << "x" << kinectHandPos_.y;
-	kinectHandText_->setText(kinectext.str(), graphicsManager_->getDeviceContext());
-
-	std::vector<FruitClass*>::iterator fruitIt;
-	for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
+	switch(arg.type)
 	{
-		if((*fruitIt)->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
-		{
-			(*fruitIt)->shakeIt();
-			soundManager_->playLeaves();
-		}
-	}
+		case(HANDS_POSITION_ROT):
+			{
+				kinectHandPos_ = Point(arg.handPos.x*screenWidth_/320, arg.handPos.y*screenHeight_/240);
 
-	if(subLevelState_ == PLAYING && pico_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
-	{
-		pico_->makeHappy();
-	}
+				std::stringstream kinectext;
+				kinectext << "Kinect: " << kinectHandPos_.x << "x" << kinectHandPos_.y;
+				kinectHandText_->setText(kinectext.str(), graphicsManager_->getDeviceContext());
 
-	if(bird_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
-	{
-		bird_->scared();
-	}
+				std::vector<FruitClass*>::iterator fruitIt;
+				for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
+				{
+					if((*fruitIt)->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+					{
+						(*fruitIt)->shakeIt();
+						soundManager_->playLeaves();
+					}
+				}
 
-	if(!firstFallen_ && subLevelState_ == PLAYING && levelState_ == FIRST_LEVEL && firstAppleCollisionTest_->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
-	{
-		if(fruitsInGame_.at(1)->makeItFall())
-		{
-			firstFallen_ = true;
-		}
+				if(subLevelState_ == PLAYING && pico_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+				{
+					pico_->makeHappy();
+				}
+
+				if(bird_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+				{
+					bird_->scared();
+				}
+
+				if(!firstFallen_ && subLevelState_ == PLAYING && levelState_ == FIRST_LEVEL && firstAppleCollisionTest_->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+				{
+					if(fruitsInGame_.at(1)->makeItFall())
+					{
+						firstFallen_ = true;
+					}
+				}
+			}
+			break;
+		case(GREETINGS_KINECT):
+			{
+				if(subLevelState_ == PLAYING)
+				{
+					//MessageBoxA(NULL, "HOLA!", "Hola", MB_OK);
+					//pico_->sayHello();
+				}
+			}
+		default:
+			{
+
+			}
+			break;
 	}
 }
 

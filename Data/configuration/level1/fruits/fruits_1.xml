@@ -10,7 +10,7 @@
 		</effect>
 		<collision>
 			<position x="0.0" y="0.2" z="0.0" />
-			<radius> 0.2 </radius>
+			<radius> 0.4 </radius>
 		</collision>
 	</fruit>
 	<fruit>
@@ -23,7 +23,7 @@
 		</effect>
 		<collision>
 			<position x="0.0" y="0.2" z="0.0" />
-			<radius> 0.3 </radius>
+			<radius> 0.4 </radius>
 		</collision>
 	</fruit>
 	<fruit>
@@ -36,7 +36,7 @@
 		</effect>
 		<collision>
 			<position x="0.0" y="0.4" z="0.0" />
-			<radius> 0.4 </radius>
+			<radius> 0.5 </radius>
 		</collision>
 	</fruit>
 	<fruit>
@@ -49,7 +49,7 @@
 		</effect>
 		<collision>
 			<position x="0.0" y="0.4" z="0.0" />
-			<radius> 0.4 </radius>
+			<radius> 0.5 </radius>
 		</collision>
 	</fruit>
 </fruits>

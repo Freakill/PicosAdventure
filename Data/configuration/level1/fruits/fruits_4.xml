@@ -9,7 +9,7 @@
 			<scale x="0.05" y="0.041" z="0.05" />
 		</effect>
 		<collision>
-			<position x="0.0" y="0.4" z="0.0" />
+			<position x="0.0" y="0.3" z="0.0" />
 			<radius> 0.4 </radius>
 		</collision>
 	</fruit>
@@ -22,8 +22,8 @@
 			<scale x="0.033" y="0.041" z="0.033" />
 		</effect>
 		<collision>
-			<scale x="0.8" y="0.8" z="0.8" />
-			<radius> 0.3 </radius>
+			<position x="0.0" y="0.3" z="0.3" />
+			<radius> 0.5 </radius>
 		</collision>
 	</fruit>
 	<fruit>

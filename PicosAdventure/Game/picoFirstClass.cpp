@@ -172,7 +172,7 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 		return false;
 	}
 
-	behindFruit_ = 0.6f;
+	behindFruit_ = 1.2f;
 
 	hasToHide_ = true;
 	picoState_ = HIDDING;
@@ -399,14 +399,17 @@ void PicoFirstClass::update(float elapsedTime)
 					{
 						if((previousFruitEatenID_ == 1 || previousFruitEatenID_ == 3) && lastFruitEatenID_ == 2)
 						{
-							changeAnimation("DanceAss", 0.2f);
+							celebratingWaitTime_ = 0.7f;
+							changeAnimation("DanceAss", 0.4f);
 						}
 						else if((previousFruitEatenID_ == 2 || previousFruitEatenID_ == 4) && lastFruitEatenID_ == 3)
 						{
-							changeAnimation("DanceAss", 0.2f);
+							celebratingWaitTime_ = 0.7f;
+							changeAnimation("DanceAss", 0.4f);
 						}
 						else
 						{
+							celebratingWaitTime_ = 1.2f;
 							changeAnimation("celebration", 0.4f);
 						}
 
@@ -414,6 +417,7 @@ void PicoFirstClass::update(float elapsedTime)
 					}
 					else
 					{
+						celebratingWaitTime_ = 1.2f;
 						changeAnimation("celebration", 0.4f);
 					}
 
@@ -451,7 +455,7 @@ void PicoFirstClass::update(float elapsedTime)
 
 								if(fallenFruits_.front()->getHatEffect()->getModel()->getModelName() == "gorroCumple")
 								{
-									soundManager_->playHappySong();
+									soundManager_->playBirthdayFile();
 								}
 								else if(fallenFruits_.front()->getHatEffect()->getModel()->getModelName() == "gorroFrutas")
 								{
@@ -463,7 +467,7 @@ void PicoFirstClass::update(float elapsedTime)
 								}
 								else if(fallenFruits_.front()->getHatEffect()->getModel()->getModelName() == "gorroSanta")
 								{
-									soundManager_->playBirthdayFile();
+									soundManager_->playChristmasFile();
 								}
 							}
 							break;
@@ -670,6 +674,15 @@ void PicoFirstClass::makeHappy()
 	}
 }
 
+void PicoFirstClass::sayHello()
+{
+	if(picoState_ == WAITING)
+	{
+		//changeExpression("feliz");
+		soundManager_->playHiFile();
+	}
+}
+
 void PicoFirstClass::makePointing()
 {
 	if(position_.x < 0)
@@ -848,7 +861,7 @@ void PicoFirstClass::eatFruit()
 
 			Point fruitPos = fallenFruits_.front()->getPosition();
 			fruitPos.y = fruitPos.y + 1.2f;
-			fruitPos.z = fruitPos.z - 0.35f;
+			fruitPos.z = fruitPos.z + behindFruit_/3.5;
 			fallenFruits_.front()->setPosition(fruitPos);
 			previousFruitEatenID_ = lastFruitEatenID_;
 			lastFruitEatenID_ = fallenFruits_.front()->getLogicID();
@@ -922,6 +935,25 @@ void PicoFirstClass::changeAnimation(std::string name, float time)
 		animatedTemp = dynamic_cast<AnimatedObject3D*>(hats_[i]);
 		cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
 		cal3dTemp->setAnimationToPlay(name, time);
+	}
+}
+
+void PicoFirstClass::executeAnimation(std::string name, float time)
+{
+	AnimatedObject3D* animatedTemp = dynamic_cast<AnimatedObject3D*>(body_);
+	AnimatedCal3DModelClass* cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+	cal3dTemp->setAnimationToExecute(name, time);
+	animatedTemp = dynamic_cast<AnimatedObject3D*>(tips_);
+	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+	cal3dTemp->setAnimationToExecute(name, time);
+	animatedTemp = dynamic_cast<AnimatedObject3D*>(eyes_);
+	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+	cal3dTemp->setAnimationToExecute(name, time);
+	for(int i = 0; i < 4; i++)
+	{
+		animatedTemp = dynamic_cast<AnimatedObject3D*>(hats_[i]);
+		cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+		cal3dTemp->setAnimationToExecute(name, time);
 	}
 }
 
