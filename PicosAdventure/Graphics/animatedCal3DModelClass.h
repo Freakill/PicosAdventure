@@ -40,6 +40,9 @@ class AnimatedCal3DModelClass : public Cal3DModelClass
 		CalSkeleton* getSkeleton();
 		void setSkeleton(CalSkeleton* skeleton);
 
+		CalMesh* getMesh();
+		void setMesh(CalMesh* mesh);
+
 	private:
 		virtual bool setupBuffers(ID3D11Device*);
 		bool updateBuffers(ID3D11DeviceContext*);

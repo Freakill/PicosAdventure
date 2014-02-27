@@ -60,7 +60,7 @@ void GUIManager::notify(InputManager* notifier, InputStruct arg)
 				std::map<std::string, GUIFrame*>::iterator it;
 				for(it = guiFrames_.begin(); it != guiFrames_.end(); ++it)
 				{
-					if(it->second->offer(arg.mouseInfo))
+					if(it->second->offer(arg.mouseInfo, true))
 					{
 						break;
 					}

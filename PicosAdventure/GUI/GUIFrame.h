@@ -43,6 +43,7 @@ class GUIFrame
 		void reorganizeButtons();
 
 		bool offer(Point mouseClick);
+		bool offer(Point mouseClick, bool direct);
 
 		GUIButton* addButton(GraphicsManager* graphicsManager, std::string name, int height, ButtonPurpose buttonPurpose);
 		GUIButton* addButton(GraphicsManager* graphicsManager, std::string name, Point pos, Point size);

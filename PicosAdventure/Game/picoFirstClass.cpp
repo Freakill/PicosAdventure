@@ -5,7 +5,11 @@ PicoFirstClass::PicoFirstClass()
 	body_ = 0;
 	tips_ = 0;
 	eyes_ = 0;
-	hat_ = 0;
+	
+	for(int i = 0; i < 4; i++)
+	{
+		hats_[i] = 0;
+	}
 
 	waitedTime_ = 0.0f;
 	eatingWaitTime_ = 0.0f;
@@ -63,6 +67,12 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 	body_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossCuerpo");
 	tips_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossExtremidades");
 	eyes_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossOjos");
+	
+	hats_[0] = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "gorroFrutas");
+	hats_[1] = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "gorroPirata");
+	hats_[2] = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "gorroSanta");
+	hats_[3] = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "gorroCumple");
+	drawHat_ = false;
 
 	// Set specific multitexture shader for tips and increment textures array
 	Shader3DClass* shaderTemp = Shader3DFactory::Instance()->CreateShader3D("MultiTextureShader3D", graphicsManager);
@@ -162,7 +172,7 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 		return false;
 	}
 
-	behindFruit_ = 0.5f;
+	behindFruit_ = 0.6f;
 
 	hasToHide_ = true;
 	picoState_ = HIDDING;
@@ -181,9 +191,10 @@ void PicoFirstClass::update(float elapsedTime)
 	body_->update(elapsedTime);
 	tips_->update(elapsedTime);
 	eyes_->update(elapsedTime);
-	if(hat_)
+	
+	for(int i = 0; i < 4; i++)
 	{
-		hat_->update(elapsedTime);
+		hats_[i]->update(elapsedTime);
 	}
 
 	// Update textures for the tips
@@ -436,14 +447,7 @@ void PicoFirstClass::update(float elapsedTime)
 							break;
 						case HAT:
 							{
-								AnimatedObject3D* bodyTemp = dynamic_cast<AnimatedObject3D*>(body_);
-								AnimatedCal3DModelClass* bodyMdelTemp = dynamic_cast<AnimatedCal3DModelClass*>(bodyTemp->getModel());
-
-								hat_ = fallenFruits_.front()->getHatEffect();
-
-								AnimatedObject3D* hatTemp = dynamic_cast<AnimatedObject3D*>(hat_);
-								AnimatedCal3DModelClass* hatModelTemp = dynamic_cast<AnimatedCal3DModelClass*>(hatTemp->getModel());
-								hatModelTemp->setSkeleton(bodyMdelTemp->getSkeleton());
+								setHat(fallenFruits_.front()->getHatEffect());
 
 								if(fallenFruits_.front()->getHatEffect()->getModel()->getModelName() == "gorroCumple")
 								{
@@ -563,9 +567,9 @@ void PicoFirstClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatr
 
 	body_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
 	eyes_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
-	if(hat_)
+	if(drawHat_)
 	{
-		hat_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+		hats_[hatToDraw_]->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
 	}
 
 	tipsLight_->setAmbientColor(light->getAmbientColor().x, light->getAmbientColor().y, light->getAmbientColor().z, 1.0f);
@@ -573,11 +577,6 @@ void PicoFirstClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatr
 	tipsLight_->setDirection(light->getDirection().x, light->getDirection().y, light->getDirection().z);
 
 	tips_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, tipsLight_);
-
-	if(hat_)
-	{
-		hat_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
-	}
 }
 
 void PicoFirstClass::destroy()
@@ -607,11 +606,14 @@ void PicoFirstClass::destroy()
 	}
 
 	// Release the model object
-	if(hat_)
+	for(int i = 0; i < 4; i++)
 	{
-		hat_->destroy();
-		delete hat_;
-		hat_ = 0;
+		if(hats_[i])
+		{
+			hats_[i]->destroy();
+			delete hats_[i];
+			hats_[i] = 0;
+		}
 	}
 
 	std::map<std::string, TextureClass*>::iterator it;
@@ -641,6 +643,19 @@ void PicoFirstClass::setToRest()
 
 		picoState_ = WAITING;
 		inactivityClock_->reset();
+
+		pointing1_ = false;
+		pointing2_ = false;
+		pointing3_ = false;
+
+		pointed1_ = false;
+		pointed2_ = false;
+		pointed3_ = false;
+
+		pointed_ = false;
+
+		previousFruitEatenID_ = 0;
+		lastFruitEatenID_ = 0;
 
 		fallenFruits_.clear();
 	}
@@ -689,7 +704,15 @@ void PicoFirstClass::setBodyTexture(TextureClass* texture)
 
 void PicoFirstClass::setHat(Object3D* hat)
 {
-	hat_ = hat;
+	drawHat_ = true;
+
+	for(int i = 0; i < 4; i++)
+	{
+		if(hat->getModelName() == hats_[i]->getModelName())
+		{
+			hatToDraw_ = i;
+		}
+	}
 }
 
 SphereCollision* PicoFirstClass::getCollisionSphere()
@@ -894,9 +917,9 @@ void PicoFirstClass::changeAnimation(std::string name, float time)
 	animatedTemp = dynamic_cast<AnimatedObject3D*>(eyes_);
 	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
 	cal3dTemp->setAnimationToPlay(name, time);
-	if(hat_)
+	for(int i = 0; i < 4; i++)
 	{
-		animatedTemp = dynamic_cast<AnimatedObject3D*>(hat_);
+		animatedTemp = dynamic_cast<AnimatedObject3D*>(hats_[i]);
 		cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
 		cal3dTemp->setAnimationToPlay(name, time);
 	}

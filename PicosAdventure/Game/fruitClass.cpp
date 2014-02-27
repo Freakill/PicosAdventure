@@ -271,7 +271,7 @@ void FruitClass::shakeIt()
 	}
 }
 
-void FruitClass::makeItFall()
+bool FruitClass::makeItFall()
 {
 	if(fruitState_ == IN_TREE)
 	{
@@ -283,7 +283,9 @@ void FruitClass::makeItFall()
 
 		fruitState_ = FALLING;
 		hasFallen_ = true;
+		return true;
 	}
+	return false;
 }
 
 void FruitClass::resetFruit()

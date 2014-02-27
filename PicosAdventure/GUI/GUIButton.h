@@ -50,6 +50,7 @@ class GUIButton : public Notifier<GUIButton, ButtonStruct>
 		void setActive(bool active);
 
 		bool offer(Point mouseClick);
+		bool offer(Point mouseClick, bool direct);
 
 	private:
 		bool checkInside(Point pos);

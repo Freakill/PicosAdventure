@@ -176,6 +176,25 @@ bool GUIFrame::offer(Point mouseClick)
 	return false;
 }
 
+bool GUIFrame::offer(Point mouseClick, bool direct)
+{
+	// First we check if mouse position is inside the frame
+	if(checkInside(mouseClick))
+	{
+		// then we iterate over all Buttons and offer them the mouse
+		std::map<std::string, GUIButton*>::iterator it;
+		for(it = guiButtons_.begin(); it != guiButtons_.end(); ++it)
+		{
+			if(it->second->offer(mouseClick, direct))
+			{
+				break;
+			}
+		}
+	}
+
+	return false;
+}
+
 GUIButton* GUIFrame::addButton(GraphicsManager* graphicsManager, std::string name, int height, ButtonPurpose buttonPurpose)
 {
 	GUIButton* button = new GUIButton();

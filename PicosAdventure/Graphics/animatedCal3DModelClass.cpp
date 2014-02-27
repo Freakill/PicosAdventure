@@ -162,6 +162,17 @@ void AnimatedCal3DModelClass::setSkeleton(CalSkeleton* skeleton)
 	temp = skeleton;
 }
 
+CalMesh* AnimatedCal3DModelClass::getMesh()
+{
+	return cal3dModel_->getMesh(0);
+}
+
+void AnimatedCal3DModelClass::setMesh(CalMesh* mesh)
+{
+	CalMesh* temp = cal3dModel_->getMesh(0);
+	temp = mesh;
+}
+
 bool AnimatedCal3DModelClass::setupBuffers(ID3D11Device* device)
 {
 	TexturedVertexType *vertices = 0, *verticesSubmesh = 0;

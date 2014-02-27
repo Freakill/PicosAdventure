@@ -84,7 +84,7 @@ class FruitClass : public Notifier<FruitClass, Point>
 		XMFLOAT3 getBodyEffect();
 
 		void shakeIt();
-		void makeItFall();
+		bool makeItFall();
 		void resetFruit();
 
 		bool hasFallen();

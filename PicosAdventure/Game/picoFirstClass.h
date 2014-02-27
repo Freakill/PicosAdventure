@@ -93,7 +93,10 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 		Object3D*	body_;
 		Object3D*	tips_;
 		Object3D*	eyes_;
-		Object3D*	hat_;
+
+		Object3D*	hats_[4];
+		bool		drawHat_;
+		int			hatToDraw_;
 
 		SphereCollision* collisionTest_;
 

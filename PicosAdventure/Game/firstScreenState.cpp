@@ -130,7 +130,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	loadFruits();
 
 	firstAppleCollisionTest_ = new SphereCollision();
-	firstAppleCollisionTest_->setup(graphicsManager, Point(-1.25f, 2.5f, -3.0f), 1.0f);
+	firstAppleCollisionTest_->setup(graphicsManager, Point(-1.25f, 2.0f, -3.0f), 1.0f);
 	firstFallen_ = false;
 
 	// Create the bird object.
@@ -424,10 +424,12 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 				{
 					pico_->makeHappy();
 				}
-				if(!firstFallen_ && subLevelState_ == PLAYING && firstAppleCollisionTest_->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
+				if(!firstFallen_ && levelState_ == FIRST_LEVEL && subLevelState_ == PLAYING && firstAppleCollisionTest_->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
 				{
-					fruitsInGame_.at(1)->makeItFall();
-					firstFallen_ = true;
+					if(fruitsInGame_.at(1)->makeItFall())
+					{
+						firstFallen_ = true;
+					}
 				}
 			}
 			break;
@@ -495,7 +497,6 @@ void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
 									if((*it)->getName() == name)
 									{
 										pico_->setHat((*it)->getHatEffect());
-
 										break;
 									}
 								}
@@ -565,10 +566,12 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 		bird_->scared();
 	}
 
-	if(!firstFallen_ && subLevelState_ == PLAYING && firstAppleCollisionTest_->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+	if(!firstFallen_ && subLevelState_ == PLAYING && levelState_ == FIRST_LEVEL && firstAppleCollisionTest_->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
 	{
-		fruitsInGame_.at(1)->makeItFall();
-		firstFallen_ = true;
+		if(fruitsInGame_.at(1)->makeItFall())
+		{
+			firstFallen_ = true;
+		}
 	}
 }
 

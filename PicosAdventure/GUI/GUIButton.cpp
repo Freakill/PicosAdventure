@@ -264,6 +264,17 @@ bool GUIButton::offer(Point mouseClick)
 	return false;
 }
 
+bool GUIButton::offer(Point mouseClick, bool direct)
+{
+	ButtonStruct buttonStruct = {buttonPurpose_, buttonName_};
+
+	notifyListeners(buttonStruct);
+
+	selectTime_ = 0.0f;
+
+	return false;
+}
+
 bool GUIButton::checkInside(Point pos)
 {
 	if(pos.x >= viewportPosition_.x && pos.x <= viewportPosition_.x+width_ &&

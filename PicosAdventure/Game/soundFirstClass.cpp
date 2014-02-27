@@ -74,19 +74,19 @@ bool SoundFirstClass::setup(HWND hwnd, std::string fileName)
 		return false;
 	}
 
-	result = loadWaveFile("./Data/sounds/comer_1.wav", &eatingBuffer_[0]);
+	result = loadWaveFile("./Data/sounds/comer_1_long.wav", &eatingBuffer_[0]);
 	if(!result)
 	{
 		MessageBoxA(NULL, "3", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
-	result = loadWaveFile("./Data/sounds/comer_2.wav", &eatingBuffer_[1]);
+	result = loadWaveFile("./Data/sounds/comer_2_long.wav", &eatingBuffer_[1]);
 	if(!result)
 	{
 		MessageBoxA(NULL, "4", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
-	result = loadWaveFile("./Data/sounds/comer_3.wav", &eatingBuffer_[2]);
+	result = loadWaveFile("./Data/sounds/comer_3_long.wav", &eatingBuffer_[2]);
 	if(!result)
 	{
 		MessageBoxA(NULL, "5", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
@@ -879,7 +879,7 @@ bool SoundFirstClass::playForest()
 		}
 
 		// Set volume of the buffer to 100%.
-		result = forestBuffer_->SetVolume(3333);
+		result = forestBuffer_->SetVolume(DSBVOLUME_MAX);
 		if(FAILED(result))
 		{
 			return false;

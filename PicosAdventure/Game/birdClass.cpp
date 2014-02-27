@@ -76,7 +76,7 @@ bool BirdClass::setup(GraphicsManager* graphicsManager, SoundFirstClass* soundMa
 	stealFood_ = false;
 
 	collisionTest_ = new SphereCollision();
-	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 0.8f);
+	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 1.0f);
 
 	soundManager_ = soundManager;
 
