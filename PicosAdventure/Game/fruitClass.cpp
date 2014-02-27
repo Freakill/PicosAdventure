@@ -4,6 +4,8 @@ FruitClass::FruitClass()
 {
 	model_ = 0;
 
+	logicFruitID_ = 0;
+
 	initialPosition_.x = 0.0f;
 	initialPosition_.y = 0.0f;
 	initialPosition_.z = 0.0f;
@@ -244,6 +246,16 @@ void FruitClass::destroy()
 std::string FruitClass::getName()
 {
 	return name_;
+}
+
+int FruitClass::getLogicID()
+{
+	return logicFruitID_;
+}
+
+void FruitClass::setLogicID(int id)
+{
+	logicFruitID_ = id;
 }
 
 void FruitClass::shakeIt()

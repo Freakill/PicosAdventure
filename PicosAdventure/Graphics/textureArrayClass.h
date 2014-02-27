@@ -1,6 +1,8 @@
 #ifndef _TEXTURE_ARRAY_CLASS_H_
 #define _TEXTURE_ARRAY_CLASS_H_
 
+#pragma warning( disable : 4005 )
+
 #include <d3d11.h>
 #include <d3dx11tex.h>
 

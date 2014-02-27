@@ -129,6 +129,10 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	// Load the fruits
 	loadFruits();
 
+	firstAppleCollisionTest_ = new SphereCollision();
+	firstAppleCollisionTest_->setup(graphicsManager, Point(-1.25f, 2.5f, -3.0f), 1.0f);
+	firstFallen_ = false;
+
 	// Create the bird object.
 	bird_ = new BirdClass;
 	if(!bird_)
@@ -208,13 +212,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 void FirstScreenState::update(float elapsedTime)
 {	
 	gameClock_->tick();
-
-	// Always update hats
-	std::vector<Object3D*>::iterator fruitHatIt;
-	for(fruitHatIt = hatsFromFruits_.begin(); fruitHatIt != hatsFromFruits_.end(); fruitHatIt++)
-	{
-		(*fruitHatIt)->update(elapsedTime);
-	}
+	firstAppleCollisionTest_->setPosition(Point(0.0f, 0.0f, 0.0f));
 
 	// Update fruits logic
 	if(subLevelState_ == PLAYING)
@@ -328,6 +326,10 @@ void FirstScreenState::draw()
 			FPS_->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, orthoMatrix);
 		graphicsManager_->turnOffAlphaBlending();
 		graphicsManager_->turnZBufferOn();
+
+		graphicsManager_->turnOnWireframeRasterizer();
+			firstAppleCollisionTest_->draw(graphicsManager_->getDevice(), graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_);
+		graphicsManager_->turnOnSolidRasterizer();
 	}
 }
 
@@ -421,6 +423,11 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 				if(subLevelState_ == PLAYING && pico_->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
 				{
 					pico_->makeHappy();
+				}
+				if(!firstFallen_ && subLevelState_ == PLAYING && firstAppleCollisionTest_->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
+				{
+					fruitsInGame_.at(1)->makeItFall();
+					firstFallen_ = true;
 				}
 			}
 			break;
@@ -516,6 +523,10 @@ void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
 					}
 
 					pico_->setToRest();
+					if(levelState_ == SECOND_LEVEL)
+					{
+						pico_->makePointing();
+					}
 				}
 				break;
 			default:
@@ -553,6 +564,12 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 	{
 		bird_->scared();
 	}
+
+	if(!firstFallen_ && subLevelState_ == PLAYING && firstAppleCollisionTest_->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+	{
+		fruitsInGame_.at(1)->makeItFall();
+		firstFallen_ = true;
+	}
 }
 
 void FirstScreenState::updateLevel()
@@ -589,7 +606,7 @@ void FirstScreenState::updateLevel()
 			break;
 		case SELECT_POLAROID:
 			{
-
+				soundManager_->playChangeLevel();
 			}
 			break;
 		default:
@@ -864,7 +881,6 @@ bool FirstScreenState::loadFruits()
 
 					fruit->setFruitEffectType(HAT);
 					fruit->setHatEffect(temp);
-					hatsFromFruits_.push_back(temp);
 				}
 
 				if(effectType == "body")
@@ -899,22 +915,39 @@ bool FirstScreenState::loadFruits()
 
 void FirstScreenState::addFruitsToGame()
 {
+	int logicId = 1;
 	if(levelState_ < 4)
 	{
 		for(int i = (levelState_-1)*4; i < (levelState_-1)*4+4; i++)
 		{
+			// This ID will be used for Pico Logic
+			fruits_.at(i)->setLogicID(logicId);
+
+			// When we set at the game the first apple
+			if(levelState_ == FIRST_LEVEL && logicId == 2)
+			{
+				fruits_.at(i)->setPosition(Point(-1.25f, 2.5, -3.0));
+			}
+
 			fruitsInGame_.push_back(fruits_.at(i));
 			fruits_.at(i)->addListener(*pico_);
 			fruits_.at(i)->addListener(*bird_);
+
+			logicId++;
 		}
 	}
 	else
 	{
 		for(int i = (levelState_-1)*4; i < (levelState_-1)*4+3; i++)
 		{
+			// This ID will be used for Pico Logic
+			fruits_.at(i)->setLogicID(logicId);
+
 			fruitsInGame_.push_back(fruits_.at(i));
 			fruits_.at(i)->addListener(*pico_);
 			fruits_.at(i)->addListener(*bird_);
+
+			logicId++;
 		}
 	}
 }

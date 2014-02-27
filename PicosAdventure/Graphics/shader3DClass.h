@@ -1,6 +1,8 @@
 #ifndef _SHADER_3D_CLASS_H_
 #define _SHADER_3D_CLASS_H_
 
+#pragma warning( disable : 4005 )
+
 #include <dxgi.h>
 #include <d3d11.h>
 #include <d3dx11async.h>

@@ -3,9 +3,12 @@
 
 #include <windows.h>
 
+#pragma warning( disable : 4005 )
+
 #include <d3d11.h>
 #include <xnamath.h>
 #include <d3dx11async.h>
+
 #include <fstream>
 
 class Shader2DClass

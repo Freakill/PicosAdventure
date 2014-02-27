@@ -1,6 +1,8 @@
 #ifndef _STATIC_CAL3D_MODEL_CLASS_H_
 #define _STATIC_CAL3D_MODEL_CLASS_H_
 
+#pragma warning( disable : 4005 )
+
 #include <d3d11.h>
 #include <d3dx10math.h>
 

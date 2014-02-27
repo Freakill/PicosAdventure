@@ -1,6 +1,8 @@
 #ifndef _ANIMATED_CAL3D_MODEL_CLASS_H_
 #define _ANIMATED_CAL3D_MODEL_CLASS_H_
 
+#pragma warning( disable : 4005 )
+
 #include <d3d11.h>
 #include <d3dx10math.h>
 
@@ -34,6 +36,9 @@ class AnimatedCal3DModelClass : public Cal3DModelClass
 
 		void playAnimation();
 		void stopAnimation();
+
+		CalSkeleton* getSkeleton();
+		void setSkeleton(CalSkeleton* skeleton);
 
 	private:
 		virtual bool setupBuffers(ID3D11Device*);

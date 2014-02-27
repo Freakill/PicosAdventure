@@ -64,6 +64,7 @@ bool GUIButton::setup(GraphicsManager* graphicsManager, std::string name, Point 
 	selectTime_ = 0.0f;
 	selectionTime_ = 2.0f;
 	selected_ = false;
+	drawSelected_ = false;
 
 	if(purpose == SELECT_OBJECT)
 	{
@@ -141,6 +142,7 @@ void GUIButton::update(float elapsedTime)
 	{
 		selectTime_ += elapsedTime;
 		selected_ = false;
+		drawSelected_ = true;
 	}
 
 	selectTime_ -= 0.001;
@@ -158,7 +160,14 @@ void GUIButton::draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix,
 	}
 	else
 	{
-		background_->draw(deviceContext, position_.x, position_.y-2, worldMatrix, viewMatrix, orthoMatrix, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+		if(drawSelected_)
+		{
+			background_->draw(deviceContext, position_.x, position_.y-2, worldMatrix, viewMatrix, orthoMatrix, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+		}
+		else
+		{
+			background_->draw(deviceContext, position_.x, position_.y-2, worldMatrix, viewMatrix, orthoMatrix, XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f));
+		}
 	}
 
 	text_->draw(deviceContext, worldMatrix, viewMatrix, orthoMatrix);
@@ -246,6 +255,10 @@ bool GUIButton::offer(Point mouseClick)
 
 			selectTime_ = 0.0f;
 		}
+	}
+	else
+	{
+		drawSelected_ = false;
 	}
 
 	return false;

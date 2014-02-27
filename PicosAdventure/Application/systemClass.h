@@ -5,6 +5,8 @@
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
 
+#pragma warning( disable : 4005 )
+
 #include <windows.h>
 #include <Windowsx.h>
 

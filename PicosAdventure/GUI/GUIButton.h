@@ -68,6 +68,7 @@ class GUIButton : public Notifier<GUIButton, ButtonStruct>
 		float selectTime_;
 		float selectionTime_;
 		bool  selected_;
+		bool  drawSelected_;
 
 		int screenWidth_;
 		int screenHeight_;

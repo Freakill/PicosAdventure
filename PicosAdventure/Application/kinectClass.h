@@ -3,6 +3,8 @@
 
 #include <windows.h>
 
+#pragma warning( disable : 4005 )
+
 #include <D2D1.h>
 #include <xnamath.h>
 

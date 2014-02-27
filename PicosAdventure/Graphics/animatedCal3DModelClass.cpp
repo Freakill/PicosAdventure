@@ -151,6 +151,17 @@ void AnimatedCal3DModelClass::stopAnimation()
 	//cal3dModel_->getMixer()->blendCycle(animations_.at(animationToPlay_), 1.0f, 0.1f);
 }
 
+CalSkeleton* AnimatedCal3DModelClass::getSkeleton()
+{
+	return cal3dModel_->getSkeleton();
+}
+
+void AnimatedCal3DModelClass::setSkeleton(CalSkeleton* skeleton)
+{
+	CalSkeleton* temp = cal3dModel_->getSkeleton();
+	temp = skeleton;
+}
+
 bool AnimatedCal3DModelClass::setupBuffers(ID3D11Device* device)
 {
 	TexturedVertexType *vertices = 0, *verticesSubmesh = 0;

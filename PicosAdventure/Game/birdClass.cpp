@@ -52,11 +52,11 @@ bool BirdClass::setup(GraphicsManager* graphicsManager, SoundFirstClass* soundMa
 	model_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "pajaro");
 
 	leftInitialPosition_.x = -8.0f;
-	leftInitialPosition_.y = 7.0f;
+	leftInitialPosition_.y = 6.5f;
 	leftInitialPosition_.z = 3.5f;
 
 	rightInitialPosition_.x = 8.0f;
-	rightInitialPosition_.y = 7.0f;
+	rightInitialPosition_.y = 6.5f;
 	rightInitialPosition_.z = 3.5f;
 
 	position_.x = leftInitialPosition_.x;
@@ -223,11 +223,18 @@ void BirdClass::goToPosition(Point position)
 
 void BirdClass::scared()
 {
-	if(birdState_ != HIDDEN)
+	if(birdState_ != HIDDEN && birdState_ != RUNNING_AWAY)
 	{
 		notifyListeners(true);
 
-		goToPosition(leftInitialPosition_);
+		if(position_.x > 0)
+		{
+			goToPosition(leftInitialPosition_);
+		}
+		else
+		{
+			goToPosition(rightInitialPosition_);
+		}
 
 		fallenFruit_ = 0;
 

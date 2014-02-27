@@ -45,8 +45,8 @@ bool SpaceShipClass::setup(GraphicsManager* graphicsManager)
 	AnimatedCal3DModelClass* cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
 	cal3dTemp->setAnimationToPlay("nave", 0.4f);
 
-	initialPosition_.x = 30.0f;
-	initialPosition_.y = 20.0f;
+	initialPosition_.x = 40.0f;
+	initialPosition_.y = 25.0f;
 	initialPosition_.z = -5.0f;
 
 	position_.x = initialPosition_.x;
@@ -57,11 +57,11 @@ bool SpaceShipClass::setup(GraphicsManager* graphicsManager)
 	scaling_.y = 0.03f;
 	scaling_.z = 0.03f;
 	
-	rotX_ = XM_PI/2;
+	rotX_ = XM_PI/1.5;
 	rotY_ = XM_PI; 
-	rotZ_ = 0.0f;
+	rotZ_ = XM_PI/8;
 
-	goToPosition(Point(-15.0f, 0.0f, 20.0f));
+	goToPosition(Point(-20.0f, 0.0f, 30.0f));
 
 	return true;
 }
@@ -128,7 +128,7 @@ void SpaceShipClass::fly(float elapsedTime)
 	velocity_.z = objective_.z - position_.z;
 
 	Vector normalizedVelocity = velocity_.normalize();
-	velocity_ = normalizedVelocity*6;
+	velocity_ = normalizedVelocity*7;
 
 	//rotY_ = acos(normalizedVelocity.z);
 	/*if(normalizedVelocity.x < 0)

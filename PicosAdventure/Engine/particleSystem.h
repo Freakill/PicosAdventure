@@ -1,6 +1,8 @@
 #ifndef _PARTICLE_SYSTEM_H_
 #define _PARTICLE_SYSTEM_H_
 
+#pragma warning( disable : 4005 )
+
 #include <d3d11.h>
 #include <xnamath.h>
 

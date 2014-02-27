@@ -48,6 +48,9 @@ class FruitClass : public Notifier<FruitClass, Point>
 
 		std::string getName();
 
+		int getLogicID();
+		void setLogicID(int id);
+
 		void setPosition(Point newPosition);
 		Point getPosition();
 
@@ -93,6 +96,7 @@ class FruitClass : public Notifier<FruitClass, Point>
 		SoundFirstClass*	soundManager_;
 
 		std::string name_;
+		int			logicFruitID_;
 
 		Point		initialPosition_;
 		Point		position_;

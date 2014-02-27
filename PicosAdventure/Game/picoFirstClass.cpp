@@ -41,6 +41,9 @@ PicoFirstClass::PicoFirstClass()
 	rotY_ = 0.0f; 
 	newRotY_ = 0.0f;
 	rotZ_ = 0.0f;
+
+	previousFruitEatenID_ = 0;
+	lastFruitEatenID_ = 0;
 }
 
 PicoFirstClass::PicoFirstClass(const PicoFirstClass& other)
@@ -141,6 +144,8 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 	pointed2_ = false;
 	pointed3_ = false;
 
+	pointed_ = false;
+
 	int screenWidth, screenHeight;
 	graphicsManager->getScreenSize(screenWidth, screenHeight);
 
@@ -176,10 +181,10 @@ void PicoFirstClass::update(float elapsedTime)
 	body_->update(elapsedTime);
 	tips_->update(elapsedTime);
 	eyes_->update(elapsedTime);
-	/*if(hat_)
+	if(hat_)
 	{
 		hat_->update(elapsedTime);
-	}*/
+	}
 
 	// Update textures for the tips
 	tips_->getTextureArrayClass()->getTexturesArray()[0] = expressions_.at(actualExpression_)->getTexture();
@@ -246,15 +251,16 @@ void PicoFirstClass::update(float elapsedTime)
 						changeAnimation("point_right", 0.4f);
 						changeExpression("normal");
 						soundManager_->playPointingFile();
-						//MessageBoxA(NULL, "Lol", "Lol", MB_OK);
 					}
 					else
 					{
 						changeAnimation("point_left", 0.4f);
 						changeExpression("normal");
 						soundManager_->playPointingFile();
-						//MessageBoxA(NULL, "Lol", "Lol", MB_OK);
 					}
+
+					// Bool variable to later check if we give him the pointed fruit
+					pointed_ = true;
 
 					pointing1_ = true;
 					inactivityClock_->reset();
@@ -276,14 +282,12 @@ void PicoFirstClass::update(float elapsedTime)
 						changeAnimation("point_right", 0.4f);
 						changeExpression("normal");
 						soundManager_->playPointingFile();
-						//MessageBoxA(NULL, "Lol", "Lol", MB_OK);
 					}
 					else
 					{
 						changeAnimation("point_left", 0.4f);
 						changeExpression("normal");
 						soundManager_->playPointingFile();
-						//MessageBoxA(NULL, "Lol", "Lol", MB_OK);
 					}
 
 					pointing2_ = true;
@@ -306,14 +310,12 @@ void PicoFirstClass::update(float elapsedTime)
 						changeAnimation("point_right", 0.4f);
 						changeExpression("normal");
 						soundManager_->playPointingFile();
-						//MessageBoxA(NULL, "Lol", "Lol", MB_OK);
 					}
 					else
 					{
 						changeAnimation("point_left", 0.4f);
 						changeExpression("normal");
 						soundManager_->playPointingFile();
-						//MessageBoxA(NULL, "Lol", "Lol", MB_OK);
 					}
 
 					pointing3_ = true;
@@ -326,6 +328,7 @@ void PicoFirstClass::update(float elapsedTime)
 					changeExpression("normal");
 
 					pointing3_ = false;
+					pointed3_ = true;
 					inactivityClock_->reset();
 				}
 
@@ -341,6 +344,10 @@ void PicoFirstClass::update(float elapsedTime)
 					pointing1_ = false;
 					pointing2_ = false;
 					pointing3_ = false;
+
+					pointed1_ = false;
+					pointed2_ = false;
+					pointed3_ = false;
 
 					inactivityClock_->reset();
 				}
@@ -376,7 +383,29 @@ void PicoFirstClass::update(float elapsedTime)
 
 				if(waitedTime_ > eatingWaitTime_)
 				{
-					changeAnimation("celebration", 0.4f);
+					// If Pico has pointed at leats once, we check which is the fruit eaten and the last one.
+					if(pointed_)
+					{
+						if((previousFruitEatenID_ == 1 || previousFruitEatenID_ == 3) && lastFruitEatenID_ == 2)
+						{
+							changeAnimation("DanceAss", 0.2f);
+						}
+						else if((previousFruitEatenID_ == 2 || previousFruitEatenID_ == 4) && lastFruitEatenID_ == 3)
+						{
+							changeAnimation("DanceAss", 0.2f);
+						}
+						else
+						{
+							changeAnimation("celebration", 0.4f);
+						}
+
+						pointed_ = false;
+					}
+					else
+					{
+						changeAnimation("celebration", 0.4f);
+					}
+
 					changeExpression("feliz");
 					soundManager_->playCelebratingFile();
 					soundManager_->playTransformationFile();
@@ -407,7 +436,14 @@ void PicoFirstClass::update(float elapsedTime)
 							break;
 						case HAT:
 							{
+								AnimatedObject3D* bodyTemp = dynamic_cast<AnimatedObject3D*>(body_);
+								AnimatedCal3DModelClass* bodyMdelTemp = dynamic_cast<AnimatedCal3DModelClass*>(bodyTemp->getModel());
+
 								hat_ = fallenFruits_.front()->getHatEffect();
+
+								AnimatedObject3D* hatTemp = dynamic_cast<AnimatedObject3D*>(hat_);
+								AnimatedCal3DModelClass* hatModelTemp = dynamic_cast<AnimatedCal3DModelClass*>(hatTemp->getModel());
+								hatModelTemp->setSkeleton(bodyMdelTemp->getSkeleton());
 
 								if(fallenFruits_.front()->getHatEffect()->getModel()->getModelName() == "gorroCumple")
 								{
@@ -619,6 +655,28 @@ void PicoFirstClass::makeHappy()
 	}
 }
 
+void PicoFirstClass::makePointing()
+{
+	if(position_.x < 0)
+	{
+		changeAnimation("point_right", 0.4f);
+		changeExpression("normal");
+		soundManager_->playPointingFile();
+	}
+	else
+	{
+		changeAnimation("point_left", 0.4f);
+		changeExpression("normal");
+		soundManager_->playPointingFile();
+	}
+
+	// Bool variable to later check if we give him the pointed fruit
+	pointed_ = true;
+
+	pointing1_ = true;
+	inactivityClock_->reset();
+}
+
 void PicoFirstClass::setTipsColor(XMFLOAT4 color)
 {
 	tipsColor_ = color;
@@ -769,6 +827,8 @@ void PicoFirstClass::eatFruit()
 			fruitPos.y = fruitPos.y + 1.2f;
 			fruitPos.z = fruitPos.z - 0.35f;
 			fallenFruits_.front()->setPosition(fruitPos);
+			previousFruitEatenID_ = lastFruitEatenID_;
+			lastFruitEatenID_ = fallenFruits_.front()->getLogicID();
 
 			waitedTime_ = 0.0f;
 

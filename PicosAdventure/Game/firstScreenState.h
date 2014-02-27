@@ -105,6 +105,10 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		std::vector<Object3D*>		scenario_;
 		float						terrainHeight_;
 
+		// First fruit
+		SphereCollision*			firstAppleCollisionTest_;
+		bool						firstFallen_;
+
 		// Characters!
 		PicoFirstClass*				pico_;
 
@@ -115,7 +119,6 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		// Fruit vector and in game fruit vector
 		std::vector<FruitClass*>	fruits_;
 		std::vector<FruitClass*>	fruitsInGame_;
-		std::vector<Object3D*>		hatsFromFruits_;
 
 		// Classes for managing between game image selection
 		GUIManager*					polaroidGUI_;

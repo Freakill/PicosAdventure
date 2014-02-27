@@ -190,7 +190,7 @@ bool SoundFirstClass::setup(HWND hwnd, std::string fileName)
 	}
 
 	// OTHER
-	result = loadWaveFile("./Data/sounds/bird_enter.wav", &birdEnterBuffer_);
+	result = loadWaveFile("./Data/sounds/bird_fly.wav", &birdEnterBuffer_);
 	if(!result)
 	{
 		MessageBoxA(NULL, "20", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
@@ -879,7 +879,7 @@ bool SoundFirstClass::playForest()
 		}
 
 		// Set volume of the buffer to 100%.
-		result = forestBuffer_->SetVolume(DSBVOLUME_MAX);
+		result = forestBuffer_->SetVolume(3333);
 		if(FAILED(result))
 		{
 			return false;
