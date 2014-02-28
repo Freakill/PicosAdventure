@@ -12,6 +12,7 @@
 #include "../Math/pointClass.h"
 #include "../Math/vectorClass.h"
 
+#include "../Utils/clockClass.h"
 #include "../Utils/notifierClass.h"
 
 #include <math.h>
@@ -80,14 +81,17 @@ class FruitClass : public Notifier<FruitClass, Point>
 		void setHatEffect(Object3D* hat);
 		Object3D* getHatEffect();
 
-		void setBodyEffect(XMFLOAT3 scale);
-		XMFLOAT3 getBodyEffect();
+		void setBodyEffect(Object3D* body, Object3D* tips);
+		Object3D* getBodyEffect();
+		Object3D* getTipsEffect();
 
 		void shakeIt();
 		bool makeItFall();
 		void resetFruit();
 
 		bool hasFallen();
+
+		void activateAlert(bool active);
 
 	private:
 		Object3D*	model_;
@@ -122,12 +126,18 @@ class FruitClass : public Notifier<FruitClass, Point>
 
 		FruitState	fruitState_;
 
+		bool		inAlertMode_;
+		float		alertTime_;
+		bool		alertDisplay_;
+		ClockClass* alertClock_;
+
 		// EFFECTS
 		FruitEffect fruitEffect_;
 		XMFLOAT4	colorEffect_;
 		TextureClass* textureEffect_;
 		Object3D*	hatEffect_;
-		XMFLOAT3	bodyEffect_;
+		Object3D*	bodyEffect_;
+		Object3D*	tipsEffect_;
 
 };
 

@@ -112,9 +112,13 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		// Characters!
 		PicoFirstClass*				pico_;
 
+		bool						activatedSignaledFruit_;
+
 		BirdClass*					bird_;
 
 		SpaceShipClass*				spaceShip_;
+		float						spaceshipSoundTime_;
+		bool						spaceshipSoundPlayed_;
 
 		// Fruit vector and in game fruit vector
 		std::vector<FruitClass*>	fruits_;

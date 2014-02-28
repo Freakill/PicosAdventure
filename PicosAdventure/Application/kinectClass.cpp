@@ -528,7 +528,6 @@ HRESULT KinectClass::ProcessSkeleton()
 			Point leftShoulderScreenCoord = SkeletonToScreen(players[1].leftShoulder, 320, 240);
 
 			KinectStruct kinectStruct = {HOLD_HANDS,handScreenCoord,leftShoulderScreenCoord,rightShoulderScreenCoord};
-
 		}
 	}
 

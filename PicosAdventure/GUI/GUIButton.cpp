@@ -170,7 +170,7 @@ void GUIButton::draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix,
 		}
 	}
 
-	text_->draw(deviceContext, worldMatrix, viewMatrix, orthoMatrix);
+	//text_->draw(deviceContext, worldMatrix, viewMatrix, orthoMatrix);
 }
 
 void GUIButton::destroy()

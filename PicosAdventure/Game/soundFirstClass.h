@@ -45,6 +45,7 @@ class SoundFirstClass
 		// Pico players
 		bool playCelebratingFile();
 		bool playEatingFile();
+		bool playGoodbyeFile();
 		bool playHiFile();
 		bool playPointingFile();
 		bool playPurrFile();
@@ -65,6 +66,7 @@ class SoundFirstClass
 		bool playBirdEat();
 		bool playChangeLevel();
 		bool playSelection();
+		bool playSpaceshipFalling();
 		bool playHappySong();
 
 	private:
@@ -81,6 +83,7 @@ class SoundFirstClass
 		// Pico Buffers
 		IDirectSoundBuffer8* celebratingBuffer_[2];
 		IDirectSoundBuffer8* eatingBuffer_[3];
+		IDirectSoundBuffer8* goodbyeBuffer_[2];
 		IDirectSoundBuffer8* hiBuffer_[2];
 		IDirectSoundBuffer8* pointingBuffer_[2];
 		IDirectSoundBuffer8* purrBuffer_[2];
@@ -101,6 +104,7 @@ class SoundFirstClass
 		IDirectSoundBuffer8* birdEatBuffer_;
 		IDirectSoundBuffer8* changeLevelBuffer_;
 		IDirectSoundBuffer8* selectionBuffer_;
+		IDirectSoundBuffer8* spaceshipFallingBuffer_;
 		IDirectSoundBuffer8* happySongBuffer_;
 };
 

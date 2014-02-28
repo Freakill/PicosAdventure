@@ -1,6 +1,8 @@
 #ifndef _CAMERA_CLASS_H_
 #define _CAMERA_CLASS_H_
 
+#pragma warning( disable : 4005 )
+
 #include <dxgi.h>
 #include <xnamath.h>
 

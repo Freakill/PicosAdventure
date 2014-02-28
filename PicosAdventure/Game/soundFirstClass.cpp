@@ -11,6 +11,8 @@ SoundFirstClass::SoundFirstClass()
 	eatingBuffer_[0] = 0;
 	eatingBuffer_[1] = 0;
 	eatingBuffer_[2] = 0;
+	goodbyeBuffer_[0] = 0;	
+	goodbyeBuffer_[1] = 0;	
 	hiBuffer_[0] = 0;	
 	hiBuffer_[1] = 0;	
 	pointingBuffer_[0] = 0;
@@ -35,6 +37,7 @@ SoundFirstClass::SoundFirstClass()
 	birdEatBuffer_ = 0;
 	changeLevelBuffer_ = 0;
 	selectionBuffer_ = 0;
+	spaceshipFallingBuffer_ = 0;
 	happySongBuffer_ = 0;
 }
 
@@ -92,6 +95,19 @@ bool SoundFirstClass::setup(HWND hwnd, std::string fileName)
 	if(!result)
 	{
 		MessageBoxA(NULL, "5", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
+	result = loadWaveFile("./Data/sounds/Adios_1.wav", &goodbyeBuffer_[0]);
+	if(!result)
+	{
+		MessageBoxA(NULL, "5.1", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+	result = loadWaveFile("./Data/sounds/Adios_2.wav", &goodbyeBuffer_[1]);
+	if(!result)
+	{
+		MessageBoxA(NULL, "5.2", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -157,14 +173,14 @@ bool SoundFirstClass::setup(HWND hwnd, std::string fileName)
 	result = loadWaveFile("./Data/sounds/birthday_song.wav", &birthdayBuffer_);
 	if(!result)
 	{
-		MessageBoxA(NULL, "14", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		MessageBoxA(NULL, "14.1", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
 	result = loadWaveFile("./Data/sounds/christmas_song.wav", &christmasBuffer_);
 	if(!result)
 	{
-		MessageBoxA(NULL, "14", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		MessageBoxA(NULL, "14.2", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -229,6 +245,12 @@ bool SoundFirstClass::setup(HWND hwnd, std::string fileName)
 		MessageBoxA(NULL, "23", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
+	result = loadWaveFile("./Data/sounds/spaceship_falls.wav", &spaceshipFallingBuffer_);
+	if(!result)
+	{
+		MessageBoxA(NULL, "23.1", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
 	result = loadWaveFile("./Data/sounds/happy.wav", &happySongBuffer_);
 	if(!result)
 	{
@@ -248,6 +270,8 @@ void SoundFirstClass::destroy()
 	destroyWaveFile(&eatingBuffer_[0]);
 	destroyWaveFile(&eatingBuffer_[1]);
 	destroyWaveFile(&eatingBuffer_[2]);
+	destroyWaveFile(&goodbyeBuffer_[0]);
+	destroyWaveFile(&goodbyeBuffer_[1]);
 	destroyWaveFile(&hiBuffer_[0]);
 	destroyWaveFile(&hiBuffer_[1]);
 	destroyWaveFile(&pointingBuffer_[0]);
@@ -272,6 +296,7 @@ void SoundFirstClass::destroy()
 	destroyWaveFile(&birdEatBuffer_);
 	destroyWaveFile(&changeLevelBuffer_);
 	destroyWaveFile(&selectionBuffer_);
+	destroyWaveFile(&spaceshipFallingBuffer_);
 	destroyWaveFile(&happySongBuffer_);
 
 	// Shutdown the Direct Sound API.
@@ -598,6 +623,42 @@ bool SoundFirstClass::playEatingFile()
 
 		// Play the contents of the secondary sound buffer.
 		result = eatingBuffer_[soundToPlay]->Play(0, 0, 0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool SoundFirstClass::playGoodbyeFile()
+{
+	HRESULT result;
+	
+	DWORD status[2];
+	goodbyeBuffer_[0]->GetStatus(&status[0]);
+	goodbyeBuffer_[1]->GetStatus(&status[1]);
+	if(!(status[0] && DSBSTATUS_PLAYING) && !(status[1] && DSBSTATUS_PLAYING))
+	{
+		int soundToPlay = rand() % 2;
+
+		// Set position at the beginning of the sound buffer.
+		result = goodbyeBuffer_[soundToPlay]->SetCurrentPosition(0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Set volume of the buffer to 100%.
+		result = goodbyeBuffer_[soundToPlay]->SetVolume(DSBVOLUME_MAX);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Play the contents of the secondary sound buffer.
+		result = goodbyeBuffer_[soundToPlay]->Play(0, 0, 0);
 		if(FAILED(result))
 		{
 			return false;
@@ -1138,6 +1199,39 @@ bool SoundFirstClass::playSelection()
 
 		// Play the contents of the secondary sound buffer.
 		result = selectionBuffer_->Play(0, 0, 0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool SoundFirstClass::playSpaceshipFalling()
+{
+	HRESULT result;
+
+	DWORD status;
+	spaceshipFallingBuffer_->GetStatus(&status);
+	if(!(status && DSBSTATUS_PLAYING))
+	{
+		// Set position at the beginning of the sound buffer.
+		result = spaceshipFallingBuffer_->SetCurrentPosition(0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Set volume of the buffer to 100%.
+		result = spaceshipFallingBuffer_->SetVolume(DSBVOLUME_MAX);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Play the contents of the secondary sound buffer.
+		result = spaceshipFallingBuffer_->Play(0, 0, 0);
 		if(FAILED(result))
 		{
 			return false;

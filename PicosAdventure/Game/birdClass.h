@@ -80,6 +80,13 @@ class BirdClass : public Listener<FruitClass, Point>, public Listener<PicoFirstC
 		float		rotX_;
 		float		rotY_; 
 		float		rotZ_;
+
+		ClockClass* activateAlert_;
+		float		activateTime_;
+		bool		inAlertMode_;
+		float		alertTime_;
+		bool		alertDisplay_;
+		ClockClass* alertClock_;
 };
 
 #endif //_BIRD_CLASS_H_

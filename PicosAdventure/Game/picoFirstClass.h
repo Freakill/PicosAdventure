@@ -38,7 +38,9 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 				TURNING,
 				EATING,
 				CELEBRATING,
-				SCARED
+				SCARED,
+				WAITING_GOODBYE,
+				LEAVING
 			};
 
 		enum FaceStates
@@ -59,11 +61,19 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 		void destroy();
 
 		void goToPosition(Point position);
-		void setToRest();
+		void setToRest(bool ereasePrevious);
 
 		void makeHappy();
+
 		void sayHello();
+
 		void makePointing();
+		bool isPointing();
+		int getLastEaten();
+
+		void makeGoodbye();
+
+		void makeLeave();
 
 		void changeAnimation(std::string name, float time);
 		void executeAnimation(std::string name, float time);
@@ -72,6 +82,8 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 		void setTipsColor(XMFLOAT4 color);
 		void setBodyTexture(TextureClass* texture);
 		void setHat(Object3D* hat);
+		void setBody(Object3D* body);
+		void setTips(Object3D* tips);
 
 		SphereCollision* getCollisionSphere();
 
@@ -92,8 +104,10 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 		CameraClass* camera_;
 
 		// 3D Models
-		Object3D*	body_;
-		Object3D*	tips_;
+		Object3D*	body_[3];
+		int			bodyToDraw_;
+		Object3D*	tips_[3];
+		int			tipsToDraw_;
 		Object3D*	eyes_;
 
 		Object3D*	hats_[4];
@@ -124,6 +138,7 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 		float		eatingWaitTime_;
 		float		celebratingWaitTime_;
 		
+		// Logic behind the thing of discerning if child will understand or not what Pico asks
 		float		inactivityTime1_;
 		float		inactivityTime2_;
 		float		inactivityTime3_;
@@ -140,6 +155,12 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 
 		int			previousFruitEatenID_;
 		int			lastFruitEatenID_;
+
+		// For leaving
+		float		leavingTime_;
+		float		sayingGoddbyeTime_;
+
+		bool		saidGoodbye_;
 
 		// Sound
 		SoundFirstClass*	soundManager_;

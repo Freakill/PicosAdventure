@@ -78,6 +78,24 @@ bool BirdClass::setup(GraphicsManager* graphicsManager, SoundFirstClass* soundMa
 	collisionTest_ = new SphereCollision();
 	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 1.3f);
 
+	activateAlert_ = new ClockClass();
+	if(!activateAlert_)
+	{
+		return false;
+	}
+	activateAlert_->reset();
+	activateTime_ = 10.0f;
+
+	inAlertMode_ = false;
+	alertTime_ = 0.4f;
+	alertDisplay_ = true;
+	alertClock_ = new ClockClass();
+	if(!alertClock_)
+	{
+		return false;
+	}
+	alertClock_->reset();
+
 	soundManager_ = soundManager;
 
 	return true;
@@ -86,6 +104,16 @@ bool BirdClass::setup(GraphicsManager* graphicsManager, SoundFirstClass* soundMa
 void BirdClass::update(float elapsedTime)
 {
 	model_->update(elapsedTime);
+
+	alertClock_->tick();
+	if(inAlertMode_)
+	{
+		if(alertClock_->getTime() > alertTime_)
+		{
+			alertDisplay_ = !alertDisplay_;
+			alertClock_->reset();
+		}
+	}
 
 	switch(birdState_)
 	{
@@ -129,7 +157,11 @@ void BirdClass::update(float elapsedTime)
 			break;
 		case TEASING:
 			{
-				
+				activateAlert_->tick();
+				if(activateAlert_->getTime() > activateTime_)
+				{
+					inAlertMode_ = true;
+				}
 			}
 			break;
 		case RUNNING_AWAY:
@@ -175,7 +207,10 @@ void BirdClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, X
 	XMStoreFloat4x4(&movingMatrix, XMMatrixTranslation(position_.x, position_.y, position_.z));
 	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&movingMatrix)));
 
-	model_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	if(!inAlertMode_ || alertDisplay_)
+	{
+		model_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	}
 }
 
 void BirdClass::destroy()
@@ -239,6 +274,7 @@ void BirdClass::scared()
 		fallenFruit_ = 0;
 
 		birdState_ = RUNNING_AWAY;
+		inAlertMode_ = false;
 	}
 }
 
@@ -291,6 +327,7 @@ void BirdClass::checkArrivedObjective()
 				rotY_ = 3.141592f;
 
 				birdState_ = TEASING;
+				activateAlert_->reset();
 				soundManager_->playBirdEat();
 			}
 			else

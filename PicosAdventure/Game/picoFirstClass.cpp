@@ -2,8 +2,12 @@
 
 PicoFirstClass::PicoFirstClass()
 {
-	body_ = 0;
-	tips_ = 0;
+	for(int i = 0; i < 3; i++)
+	{
+		body_[i] = 0;
+		tips_[i] = 0;
+	}
+
 	eyes_ = 0;
 	
 	for(int i = 0; i < 4; i++)
@@ -64,8 +68,14 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 {
 	camera_ = camera;
 
-	body_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossCuerpo");
-	tips_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossExtremidades");
+	body_[0] = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossCuerpo");
+	body_[1] = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossDelgadoCuerpo");
+	body_[2] = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossGordoCuerpo");
+	bodyToDraw_ = 0;
+	tips_[0] = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossExtremidades");
+	tips_[1] = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossDelgadoExtremidades");
+	tips_[2] = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossGordoExtremidades");
+	tipsToDraw_ = 0;
 	eyes_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossOjos");
 	
 	hats_[0] = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "gorroFrutas");
@@ -75,10 +85,13 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 	drawHat_ = false;
 
 	// Set specific multitexture shader for tips and increment textures array
-	Shader3DClass* shaderTemp = Shader3DFactory::Instance()->CreateShader3D("MultiTextureShader3D", graphicsManager);
-	tips_->setShader3D(shaderTemp);
+	for(int i = 0; i < 3; i++)
+	{
+		Shader3DClass* shaderTemp = Shader3DFactory::Instance()->CreateShader3D("MultiTextureShader3D", graphicsManager);
+		tips_[i]->setShader3D(shaderTemp);
 
-	tips_->getTextureArrayClass()->setNumberTextures(2);
+		tips_[i]->getTextureArrayClass()->setNumberTextures(2);
+	}
 
 	loadExpressions(graphicsManager);
 
@@ -121,8 +134,11 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 	actualExpression_ = "normal";
 	newExpression_ = "normal";
 
-	MultiTextureShader3DClass* multitextureShader = dynamic_cast<MultiTextureShader3DClass*>(tips_->getShader3D());
-	multitextureShader->setPercentage(0.1);
+	for(int i = 0; i < 3; i++)
+	{
+		MultiTextureShader3DClass* multitextureShader = dynamic_cast<MultiTextureShader3DClass*>(tips_[i]->getShader3D());
+		multitextureShader->setPercentage(0.1);
+	}
 
 	// Setup clock at the end so it starts when we run
 	expressionClock_ = new ClockClass();
@@ -141,10 +157,10 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 
 	eatingWaitTime_ = 2.0f;
 	celebratingWaitTime_ = 1.2f;
-	inactivityTime1_ = 30.0f;
-	inactivityTime2_ = 20.0f;
-	inactivityTime3_ = 10.0f;
-	pointingTime_ = 4.0f;
+	inactivityTime1_ = 10.0f;
+	inactivityTime2_ = 15.0f;
+	inactivityTime3_ = 20.0f;
+	pointingTime_ = 12.0f;
 
 	pointing1_ = false;
 	pointing2_ = false;
@@ -155,6 +171,11 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 	pointed3_ = false;
 
 	pointed_ = false;
+
+	leavingTime_ = 5.0f;
+	sayingGoddbyeTime_ = 5.0f;
+
+	saidGoodbye_ = false;
 
 	int screenWidth, screenHeight;
 	graphicsManager->getScreenSize(screenWidth, screenHeight);
@@ -188,21 +209,24 @@ void PicoFirstClass::update(float elapsedTime)
 	expressionClock_->tick();
 	inactivityClock_->tick();
 
-	body_->update(elapsedTime);
-	tips_->update(elapsedTime);
+	for(int i = 0; i < 3; i++)
+	{
+		body_[i]->update(elapsedTime);
+		tips_[i]->update(elapsedTime);
+
+		// Update textures for the tips
+		tips_[i]->getTextureArrayClass()->getTexturesArray()[0] = expressions_.at(actualExpression_)->getTexture();
+		tips_[i]->getTextureArrayClass()->getTexturesArray()[1] = expressions_.at(newExpression_)->getTexture();
+
+		MultiTextureShader3DClass* multitextureShader = dynamic_cast<MultiTextureShader3DClass*>(tips_[i]->getShader3D());
+		multitextureShader->setPercentage(expressionPercentage_);
+	}
 	eyes_->update(elapsedTime);
 	
 	for(int i = 0; i < 4; i++)
 	{
 		hats_[i]->update(elapsedTime);
 	}
-
-	// Update textures for the tips
-	tips_->getTextureArrayClass()->getTexturesArray()[0] = expressions_.at(actualExpression_)->getTexture();
-	tips_->getTextureArrayClass()->getTexturesArray()[1] = expressions_.at(newExpression_)->getTexture();
-
-	MultiTextureShader3DClass* multitextureShader = dynamic_cast<MultiTextureShader3DClass*>(tips_->getShader3D());
-	multitextureShader->setPercentage(expressionPercentage_);
 
 	switch(picoState_)
 	{
@@ -446,7 +470,10 @@ void PicoFirstClass::update(float elapsedTime)
 							break;
 						case TEXTURE:
 							{
-								body_->getTextureArrayClass()->getTexturesArray()[0] = fallenFruits_.front()->getTextureEffect()->getTexture();
+								for(int i = 0; i < 3; i++)
+								{
+									body_[i]->getTextureArrayClass()->getTexturesArray()[0] = fallenFruits_.front()->getTextureEffect()->getTexture();
+								}
 							}
 							break;
 						case HAT:
@@ -473,9 +500,8 @@ void PicoFirstClass::update(float elapsedTime)
 							break;
 						case BODY:
 							{
-								scaling_.x = fallenFruits_.front()->getBodyEffect().x;
-								scaling_.y = fallenFruits_.front()->getBodyEffect().y;
-								scaling_.z = fallenFruits_.front()->getBodyEffect().z;
+								setBody(fallenFruits_.front()->getBodyEffect());
+								setTips(fallenFruits_.front()->getTipsEffect());
 							}
 							break;
 					}
@@ -497,6 +523,36 @@ void PicoFirstClass::update(float elapsedTime)
 				
 			}
 			break;
+		case WAITING_GOODBYE:
+			{
+				if(!saidGoodbye_ && inactivityClock_->getTime() > leavingTime_)
+				{
+					//changeAnimation("goodbye", 0.2f);
+					soundManager_->playGoodbyeFile();
+
+					saidGoodbye_ = true;
+					inactivityClock_->reset();
+				}
+				else if(saidGoodbye_ && inactivityClock_->getTime() > leavingTime_)
+				{
+					changeAnimation("idle", 0.2f);
+
+					saidGoodbye_ = false;
+					inactivityClock_->reset();
+				}
+			}
+			break;
+		case LEAVING:
+			{
+				walk(elapsedTime);
+			}
+			break;
+		default:
+			{
+				
+			}
+			break;
+
 	}
 
 	switch(faceState_)
@@ -569,7 +625,7 @@ void PicoFirstClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatr
 	XMStoreFloat4x4(&movingMatrix, XMMatrixTranslation(position_.x, position_.y, position_.z));
 	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&movingMatrix)));
 
-	body_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	body_[bodyToDraw_]->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
 	eyes_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
 	if(drawHat_)
 	{
@@ -580,25 +636,28 @@ void PicoFirstClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatr
 	tipsLight_->setDiffuseColor(tipsColor_.x*light->getDiffuseColor().x, tipsColor_.y*light->getDiffuseColor().y, tipsColor_.z*light->getDiffuseColor().z, 1.0f);
 	tipsLight_->setDirection(light->getDirection().x, light->getDirection().y, light->getDirection().z);
 
-	tips_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, tipsLight_);
+	tips_[tipsToDraw_]->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, tipsLight_);
 }
 
 void PicoFirstClass::destroy()
 {
-	// Release the model object
-	if(body_)
+	for(int i = 0; i < 3; i++)
 	{
-		body_->destroy();
-		delete body_;
-		body_ = 0;
-	}
+		// Release the model object
+		if(body_[i])
+		{
+			body_[i]->destroy();
+			delete body_[i];
+			body_[i] = 0;
+		}
 
-	// Release the model object
-	if(tips_)
-	{
-		tips_->destroy();
-		delete tips_;
-		tips_ = 0;
+		// Release the model object
+		if(tips_[i])
+		{
+			tips_[i]->destroy();
+			delete tips_[i];
+			tips_[i] = 0;
+		}
 	}
 
 	// Release the model object
@@ -639,13 +698,14 @@ void PicoFirstClass::goToPosition(Point position)
 	picoState_ = WALKING;
 }
 
-void PicoFirstClass::setToRest()
+void PicoFirstClass::setToRest(bool ereasePrevious)
 {
 	if(lookAtCamera(false))
 	{
-		changeAnimation("idle", 0.2f);
-
-		picoState_ = WAITING;
+		if(picoState_ != WAITING_GOODBYE)
+		{
+			picoState_ = WAITING;
+		}
 		inactivityClock_->reset();
 
 		pointing1_ = false;
@@ -658,8 +718,13 @@ void PicoFirstClass::setToRest()
 
 		pointed_ = false;
 
-		previousFruitEatenID_ = 0;
-		lastFruitEatenID_ = 0;
+		if(ereasePrevious)
+		{
+			changeAnimation("idle", 0.2f);
+
+			previousFruitEatenID_ = 0;
+			lastFruitEatenID_ = 0;
+		}
 
 		fallenFruits_.clear();
 	}
@@ -705,6 +770,29 @@ void PicoFirstClass::makePointing()
 	inactivityClock_->reset();
 }
 
+bool PicoFirstClass::isPointing()
+{
+	return pointing2_ && !pointed2_;
+}
+
+int PicoFirstClass::getLastEaten()
+{
+	return lastFruitEatenID_;
+}
+
+void PicoFirstClass::makeGoodbye()
+{
+	picoState_ = WAITING_GOODBYE;
+
+	saidGoodbye_ = false;
+}
+
+void PicoFirstClass::makeLeave()
+{
+	goToPosition(Point(-35.25f, 0.0f, -3.0f));
+	picoState_ = LEAVING;
+}
+
 void PicoFirstClass::setTipsColor(XMFLOAT4 color)
 {
 	tipsColor_ = color;
@@ -712,7 +800,10 @@ void PicoFirstClass::setTipsColor(XMFLOAT4 color)
 
 void PicoFirstClass::setBodyTexture(TextureClass* texture)
 {
-	body_->getTextureArrayClass()->getTexturesArray()[0] = texture->getTexture();
+	for(int i = 0; i < 3; i++)
+	{
+		body_[i]->getTextureArrayClass()->getTexturesArray()[0] = texture->getTexture();
+	}
 }
 
 void PicoFirstClass::setHat(Object3D* hat)
@@ -724,6 +815,28 @@ void PicoFirstClass::setHat(Object3D* hat)
 		if(hat->getModelName() == hats_[i]->getModelName())
 		{
 			hatToDraw_ = i;
+		}
+	}
+}
+
+void PicoFirstClass::setBody(Object3D* body)
+{
+	for(int i = 0; i < 3; i++)
+	{
+		if(body->getModelName() == body_[i]->getModelName())
+		{
+			bodyToDraw_ = i;
+		}
+	}
+}
+
+void PicoFirstClass::setTips(Object3D* tips)
+{
+	for(int i = 0; i < 3; i++)
+	{
+		if(tips->getModelName() == tips_[i]->getModelName())
+		{
+			tipsToDraw_ = i;
 		}
 	}
 }
@@ -830,14 +943,6 @@ bool PicoFirstClass::lookAtCamera(bool check)
 
 		return true;
 	}
-	/*if(normalizedLookAt.x > 0)
-	{
-		rotY_ += XM_PIDIV2;
-	}
-	else
-	{
-		rotY_ += XM_PIDIV2;
-	}*/
 }
 
 bool PicoFirstClass::checkPicoArrivedObjective()
@@ -921,12 +1026,17 @@ void PicoFirstClass::notify(BirdClass* notifier, bool arg)
 
 void PicoFirstClass::changeAnimation(std::string name, float time)
 {
-	AnimatedObject3D* animatedTemp = dynamic_cast<AnimatedObject3D*>(body_);
-	AnimatedCal3DModelClass* cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
-	cal3dTemp->setAnimationToPlay(name, time);
-	animatedTemp = dynamic_cast<AnimatedObject3D*>(tips_);
-	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
-	cal3dTemp->setAnimationToPlay(name, time);
+	AnimatedObject3D* animatedTemp;
+	AnimatedCal3DModelClass* cal3dTemp;
+	for(int i = 0; i < 3; i++)
+	{
+		animatedTemp = dynamic_cast<AnimatedObject3D*>(body_[i]);
+		cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+		cal3dTemp->setAnimationToPlay(name, time);
+		animatedTemp = dynamic_cast<AnimatedObject3D*>(tips_[i]);
+		cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+		cal3dTemp->setAnimationToPlay(name, time);
+	}
 	animatedTemp = dynamic_cast<AnimatedObject3D*>(eyes_);
 	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
 	cal3dTemp->setAnimationToPlay(name, time);
@@ -940,12 +1050,17 @@ void PicoFirstClass::changeAnimation(std::string name, float time)
 
 void PicoFirstClass::executeAnimation(std::string name, float time)
 {
-	AnimatedObject3D* animatedTemp = dynamic_cast<AnimatedObject3D*>(body_);
-	AnimatedCal3DModelClass* cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
-	cal3dTemp->setAnimationToExecute(name, time);
-	animatedTemp = dynamic_cast<AnimatedObject3D*>(tips_);
-	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
-	cal3dTemp->setAnimationToExecute(name, time);
+	AnimatedObject3D* animatedTemp;
+	AnimatedCal3DModelClass* cal3dTemp;
+	for(int i = 0; i < 3; i++)
+	{
+		animatedTemp = dynamic_cast<AnimatedObject3D*>(body_[i]);
+		cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+		cal3dTemp->setAnimationToExecute(name, time);
+		animatedTemp = dynamic_cast<AnimatedObject3D*>(tips_[i]);
+		cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+		cal3dTemp->setAnimationToExecute(name, time);
+	}
 	animatedTemp = dynamic_cast<AnimatedObject3D*>(eyes_);
 	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
 	cal3dTemp->setAnimationToExecute(name, time);

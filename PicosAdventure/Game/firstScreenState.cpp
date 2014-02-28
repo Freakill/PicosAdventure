@@ -161,6 +161,8 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 		MessageBoxA(NULL, "Could not initialize the SpaceShip.", "Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
+	spaceshipSoundTime_ = 7.0f;
+	spaceshipSoundPlayed_ = false;
 
 	debug_ = false;
 
@@ -206,6 +208,8 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 
 	soundManager_->playForest();
 
+	activatedSignaledFruit_ = false;
+
 	return true;
 }
 
@@ -224,6 +228,42 @@ void FirstScreenState::update(float elapsedTime)
 		}
 	
 		pico_->update(elapsedTime);
+
+		if(pico_->isPointing() && !activatedSignaledFruit_)
+		{
+			switch(pico_->getLastEaten())
+			{
+				case 1:
+					{
+						fruitsInGame_.at(1)->activateAlert(true);
+						activatedSignaledFruit_ = true;
+					}
+					break;
+				case 2:
+					{
+						fruitsInGame_.at(2)->activateAlert(true);
+						activatedSignaledFruit_ = true;
+					}
+					break;
+				case 3:
+					{
+						fruitsInGame_.at(1)->activateAlert(true);
+						activatedSignaledFruit_ = true;
+					}
+					break;
+				case 4:
+					{
+						fruitsInGame_.at(2)->activateAlert(true);
+						activatedSignaledFruit_ = true;
+					}
+					break;
+				default:
+					{
+
+					}
+					break;
+			}
+		}
 	}
 
 	switch(levelState_)
@@ -231,6 +271,16 @@ void FirstScreenState::update(float elapsedTime)
 		case INTRODUCTION:
 			{
 				spaceShip_->update(elapsedTime);
+
+				if(!spaceshipSoundPlayed_)
+				{
+					if(gameClock_->getTime() > spaceshipSoundTime_)
+					{
+						soundManager_->playSpaceshipFalling();
+						spaceshipSoundPlayed_ = true;
+					}
+				}
+
 				if(gameClock_->getTime() > introductionTime_)
 				{
 					changeLevel(FIRST_LEVEL);
@@ -384,10 +434,9 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 		case 80: //P
 		case 112: //p
 			{
-				clearPolaroids();
-				createPolaroids();
-				subLevelState_ = SELECT_POLAROID;
-				gameClock_->stop();
+				subLevelState_ = FADING;
+				soundManager_->playChangeLevel();
+				gameClock_->reset();
 			}
 			break;
 		case 13: // Enter
@@ -412,14 +461,26 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 		// Check if the left mouse is pressed to interested objects
 		case LEFT_BUTTON:
 			{
+				bool touchedFruits = false;
 				std::vector<FruitClass*>::iterator fruitIt;
 				for(fruitIt = fruitsInGame_.begin(); fruitIt != fruitsInGame_.end(); fruitIt++)
 				{
 					if((*fruitIt)->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
 					{
 						(*fruitIt)->makeItFall();
+						touchedFruits = true;
 					}
 				}
+
+				if(touchedFruits)
+				{
+					for(fruitIt = fruitsInGame_.begin(); fruitIt != fruitsInGame_.end(); fruitIt++)
+					{
+						(*fruitIt)->activateAlert(false);
+						activatedSignaledFruit_ = false;
+					}
+				}
+
 				if(subLevelState_ == PLAYING && pico_->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
 				{
 					pico_->makeHappy();
@@ -519,14 +580,19 @@ void FirstScreenState::notify(GUIButton* notifier, ButtonStruct arg)
 								}
 
 								changeLevel(ENDING);
+								pico_->makeGoodbye();
 							}
 							break;
 					}
 
-					pico_->setToRest();
 					if(levelState_ == SECOND_LEVEL)
 					{
 						pico_->makePointing();
+						pico_->setToRest(false);
+					}
+					else
+					{
+						pico_->setToRest(true);
 					}
 				}
 				break;
@@ -550,6 +616,7 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 				kinectext << "Kinect: " << kinectHandPos_.x << "x" << kinectHandPos_.y;
 				kinectHandText_->setText(kinectext.str(), graphicsManager_->getDeviceContext());
 
+				bool touchedFruits = false;
 				std::vector<FruitClass*>::iterator fruitIt;
 				for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
 				{
@@ -557,6 +624,16 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 					{
 						(*fruitIt)->shakeIt();
 						soundManager_->playLeaves();
+						touchedFruits = true;
+					}
+				}
+
+				if(touchedFruits)
+				{
+					for(fruitIt = fruitsInGame_.begin(); fruitIt != fruitsInGame_.end(); fruitIt++)
+					{
+						(*fruitIt)->activateAlert(false);
+						activatedSignaledFruit_ = false;
 					}
 				}
 
@@ -585,6 +662,11 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 				{
 					//MessageBoxA(NULL, "HOLA!", "Hola", MB_OK);
 					//pico_->sayHello();
+				}
+				if(levelState_ == ENDING)
+				{
+					//MessageBoxA(NULL, "HOLA!", "Hola", MB_OK);
+					pico_->makeLeave();
 				}
 			}
 		default:
@@ -908,17 +990,38 @@ bool FirstScreenState::loadFruits()
 
 				if(effectType == "body")
 				{
-					pugi::xml_node bodyNode = effectNode.child("scale");
-					XMFLOAT3 body = XMFLOAT3(bodyNode.attribute("x").as_float(), bodyNode.attribute("y").as_float(), bodyNode.attribute("z").as_float());
+					pugi::xml_node modelNode = effectNode.child("body");
+
+					std::string modelName = modelNode.text().as_string();
+
+					Object3D* tempbody = 0;
+					tempbody = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager_, modelName);
+					if(!tempbody)
+					{
+						MessageBoxA(NULL, "Could not load model!", "Visualizer - Fruit - Error", MB_ICONERROR | MB_OK);
+						continue;
+					}
+
+					modelNode = effectNode.child("tips");
+
+					modelName = modelNode.text().as_string();
+
+					Object3D* temptips = 0;
+					temptips = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager_, modelName);
+					if(!temptips)
+					{
+						MessageBoxA(NULL, "Could not load model!", "Visualizer - Fruit - Error", MB_ICONERROR | MB_OK);
+						continue;
+					}
 
 					fruit->setFruitEffectType(BODY);
-					fruit->setBodyEffect(body);
+					fruit->setBodyEffect(tempbody, temptips);
 				}
 
 				pugi::xml_node collisionNode = fruitNode.child("collision");
 
 				positionNode = collisionNode.child("position");
-				pos = Point(positionNode.attribute("x").as_float(), positionNode.attribute("y").as_float(), positionNode.attribute("z").as_float());
+				pos = Point(positionNode.attribute("x").as_float(), positionNode.attribute("y").as_float()+0.4, positionNode.attribute("z").as_float());
 
 				fruit->getCollisionSphere()->setRelativePosition(pos);
 
@@ -1101,7 +1204,7 @@ void FirstScreenState::changeLevel(LevelState level)
 	}
 	else
 	{
-		pico_->changeAnimation("DanceAss", 0.2f);
+		pico_->changeAnimation("DanceAss", 0.4f);
 		pico_->changeExpression("feliz");
 		soundManager_->playCelebratingFile();
 	}

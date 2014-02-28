@@ -78,7 +78,7 @@ bool FruitClass::setup(GraphicsManager *graphicsManager, SoundFirstClass* soundM
 
 	spawningTime_ = 2.0f;
 
-	fallTime_ = 0.5f;
+	fallTime_ = 0.15f;
 	shaken_ = false;
 	
 	rotX_ = rotX;
@@ -105,6 +105,16 @@ bool FruitClass::setup(GraphicsManager *graphicsManager, SoundFirstClass* soundM
 
 	hasFallen_ = false;
 
+	inAlertMode_ = false;
+	alertTime_ = 0.4f;
+	alertDisplay_ = true;
+	alertClock_ = new ClockClass();
+	if(!alertClock_)
+	{
+		return false;
+	}
+	alertClock_->reset();
+
 	soundManager_ = soundManager;
 
 	return true;
@@ -113,6 +123,16 @@ bool FruitClass::setup(GraphicsManager *graphicsManager, SoundFirstClass* soundM
 void FruitClass::update(float elapsedTime)
 {
 	collisionTest_->setPosition(position_);
+
+	alertClock_->tick();
+	if(inAlertMode_)
+	{
+		if(alertClock_->getTime() > alertTime_)
+		{
+			alertDisplay_ = !alertDisplay_;
+			alertClock_->reset();
+		}
+	}
 
 	switch(fruitState_)
 	{
@@ -214,7 +234,11 @@ void FruitClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, 
 	XMStoreFloat4x4(&movingMatrix, XMMatrixTranslation(position_.x, position_.y, position_.z));
 	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&movingMatrix)));
 
-	model_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	
+	if(!inAlertMode_ || alertDisplay_)
+	{
+		model_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	}
 }
 
 void FruitClass::destroy()
@@ -280,6 +304,8 @@ bool FruitClass::makeItFall()
 		velocity_.z = -0.3f;
 
 		soundManager_->playFruitFall();
+
+		inAlertMode_ = false;
 
 		fruitState_ = FALLING;
 		hasFallen_ = true;
@@ -402,18 +428,29 @@ Object3D* FruitClass::getHatEffect()
 	return hatEffect_;
 }
 
-void FruitClass::setBodyEffect(XMFLOAT3 body)
+void FruitClass::setBodyEffect(Object3D* body, Object3D* tips)
 {
 	bodyEffect_ = body;
+	tipsEffect_ = tips;
 }
 
-XMFLOAT3 FruitClass::getBodyEffect()
+Object3D* FruitClass::getBodyEffect()
 {
 	return bodyEffect_;
+}
+
+Object3D* FruitClass::getTipsEffect()
+{
+	return tipsEffect_;
 }
 
 bool FruitClass::hasFallen()
 {
 	return hasFallen_;
+}
+
+void FruitClass::activateAlert(bool active)
+{
+	inAlertMode_ = active;
 }
 
