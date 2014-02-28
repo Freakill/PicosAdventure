@@ -294,6 +294,15 @@ void PicoFirstClass::update(float elapsedTime)
 						soundManager_->playPointingFile();
 					}
 
+					if(lastFruitEatenID_ == 1 || previousFruitEatenID_ == 3)
+					{
+						LogClass::Instance()->addEntry("Pico_Points_1", levelState_, 2);
+					}
+					else
+					{
+						LogClass::Instance()->addEntry("Pico_Points_1", levelState_, 3);
+					}
+
 					// Bool variable to later check if we give him the pointed fruit
 					pointed_ = true;
 
@@ -325,6 +334,15 @@ void PicoFirstClass::update(float elapsedTime)
 						soundManager_->playPointingFile();
 					}
 
+					if(lastFruitEatenID_ == 1 || previousFruitEatenID_ == 3)
+					{
+						LogClass::Instance()->addEntry("Pico_Points_2", levelState_, 2);
+					}
+					else
+					{
+						LogClass::Instance()->addEntry("Pico_Points_2", levelState_, 3);
+					}
+
 					pointing2_ = true;
 					inactivityClock_->reset();
 				}
@@ -351,6 +369,15 @@ void PicoFirstClass::update(float elapsedTime)
 						changeAnimation("point_left", 0.4f);
 						changeExpression("normal");
 						soundManager_->playPointingFile();
+					}
+
+					if(lastFruitEatenID_ == 1 || previousFruitEatenID_ == 3)
+					{
+						LogClass::Instance()->addEntry("Pico_Points_3", levelState_, 2);
+					}
+					else
+					{
+						LogClass::Instance()->addEntry("Pico_Points_3", levelState_, 3);
 					}
 
 					pointing3_ = true;
@@ -685,6 +712,11 @@ void PicoFirstClass::destroy()
 		it->second->destroy();
 	}
 	expressions_.clear();
+}
+
+void PicoFirstClass::setLevelState(int level)
+{
+	levelState_ = level;
 }
 
 void PicoFirstClass::goToPosition(Point position)

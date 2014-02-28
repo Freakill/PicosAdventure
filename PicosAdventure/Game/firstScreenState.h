@@ -5,6 +5,7 @@
 
 #include "../Engine/Object3DFactory.h"
 
+#include "../Game/logClass.h"
 #include "../Game/soundFirstClass.h"
 
 #include "../Graphics/Cal3DModelClass.h"

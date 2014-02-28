@@ -162,6 +162,11 @@ void FruitClass::update(float elapsedTime)
 			{
 				if(shaken_)
 				{
+					if(shakenTime_ == 0)
+					{
+						LogClass::Instance()->addEntry("Fruit_Touch", gameLevel_, logicFruitID_);
+					}
+
 					shakenTime_ += elapsedTime;
 					shaken_ = false;
 					leafs_->update(elapsedTime*1000, true);
@@ -282,6 +287,11 @@ void FruitClass::setLogicID(int id)
 	logicFruitID_ = id;
 }
 
+void FruitClass::setLevel(int level)
+{
+	gameLevel_ = level;
+}
+
 void FruitClass::shakeIt()
 {
 	if(fruitState_ == IN_TREE)
@@ -304,6 +314,8 @@ bool FruitClass::makeItFall()
 		velocity_.z = -0.3f;
 
 		soundManager_->playFruitFall();
+
+		LogClass::Instance()->addEntry("Fruit_Fall", gameLevel_, logicFruitID_);
 
 		inAlertMode_ = false;
 

@@ -273,6 +273,8 @@ void BirdClass::scared()
 
 		fallenFruit_ = 0;
 
+		LogClass::Instance()->addEntry("Bird_Scared", 0, 0);
+
 		birdState_ = RUNNING_AWAY;
 		inAlertMode_ = false;
 	}

@@ -216,6 +216,9 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 void FirstScreenState::update(float elapsedTime)
 {	
 	gameClock_->tick();
+	
+	LogClass::Instance()->update();
+
 	firstAppleCollisionTest_->setPosition(Point(0.0f, 0.0f, 0.0f));
 
 	// Update fruits logic
@@ -236,24 +239,28 @@ void FirstScreenState::update(float elapsedTime)
 				case 1:
 					{
 						fruitsInGame_.at(1)->activateAlert(true);
+						LogClass::Instance()->addEntry("Fruit_Alert", levelState_, 1);
 						activatedSignaledFruit_ = true;
 					}
 					break;
 				case 2:
 					{
 						fruitsInGame_.at(2)->activateAlert(true);
+						LogClass::Instance()->addEntry("Fruit_Alert", levelState_, 2);
 						activatedSignaledFruit_ = true;
 					}
 					break;
 				case 3:
 					{
 						fruitsInGame_.at(1)->activateAlert(true);
+						LogClass::Instance()->addEntry("Fruit_Alert", levelState_, 3);
 						activatedSignaledFruit_ = true;
 					}
 					break;
 				case 4:
 					{
 						fruitsInGame_.at(2)->activateAlert(true);
+						LogClass::Instance()->addEntry("Fruit_Alert", levelState_, 4);
 						activatedSignaledFruit_ = true;
 					}
 					break;
@@ -385,6 +392,8 @@ void FirstScreenState::draw()
 
 void FirstScreenState::destroy()
 {
+	LogClass::Instance()->setEndTime();
+
 	// We delete the bird
 	if(bird_)
 	{
@@ -617,6 +626,7 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 				kinectHandText_->setText(kinectext.str(), graphicsManager_->getDeviceContext());
 
 				bool touchedFruits = false;
+				int touchedFruit = 0;
 				std::vector<FruitClass*>::iterator fruitIt;
 				for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
 				{
@@ -626,6 +636,7 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 						soundManager_->playLeaves();
 						touchedFruits = true;
 					}
+					touchedFruit++;
 				}
 
 				if(touchedFruits)
@@ -639,6 +650,7 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 
 				if(subLevelState_ == PLAYING && pico_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
 				{
+					LogClass::Instance()->addEntry("Pico_Head", levelState_, 0);
 					pico_->makeHappy();
 				}
 
@@ -660,12 +672,25 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 			{
 				if(subLevelState_ == PLAYING)
 				{
-					//MessageBoxA(NULL, "HOLA!", "Hola", MB_OK);
-					//pico_->sayHello();
+					bool touchedFruits = false;
+					std::vector<FruitClass*>::iterator fruitIt;
+					for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
+					{
+						if((*fruitIt)->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+						{
+							touchedFruits = true;
+						}
+					}
+
+					if(!touchedFruits)
+					{
+						LogClass::Instance()->addEntry("User_Hi", levelState_, 0);
+						pico_->sayHello();
+					}
 				}
 				if(levelState_ == ENDING)
 				{
-					//MessageBoxA(NULL, "HOLA!", "Hola", MB_OK);
+					LogClass::Instance()->addEntry("User_Bye", levelState_, 0);
 					pico_->makeLeave();
 				}
 			}
@@ -1048,6 +1073,7 @@ void FirstScreenState::addFruitsToGame()
 		{
 			// This ID will be used for Pico Logic
 			fruits_.at(i)->setLogicID(logicId);
+			fruits_.at(i)->setLevel(levelState_);
 
 			// When we set at the game the first apple
 			if(levelState_ == FIRST_LEVEL && logicId == 2)
@@ -1068,6 +1094,7 @@ void FirstScreenState::addFruitsToGame()
 		{
 			// This ID will be used for Pico Logic
 			fruits_.at(i)->setLogicID(logicId);
+			fruits_.at(i)->setLevel(levelState_);
 
 			fruitsInGame_.push_back(fruits_.at(i));
 			fruits_.at(i)->addListener(*pico_);
@@ -1189,6 +1216,8 @@ void FirstScreenState::changeLevel(LevelState level)
 {
 	// Clear the fruits and polaroids vectors for next level
 	clearFruitsInGame();
+
+	pico_->setLevelState(level);
 
 	// Reset light
 	light_->setAmbientColor(0.1f, 0.1f, 0.1f, 1.0f);

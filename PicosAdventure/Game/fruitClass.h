@@ -5,6 +5,7 @@
 #include "../Engine/particleSystem.h"
 #include "../Engine/sphereCollision.h"
 
+#include "../Game/logClass.h"
 #include "../Game/soundFirstClass.h"
 
 #include "../Graphics/graphicsManager.h"
@@ -51,6 +52,8 @@ class FruitClass : public Notifier<FruitClass, Point>
 
 		int getLogicID();
 		void setLogicID(int id);
+
+		void setLevel(int level);
 
 		void setPosition(Point newPosition);
 		Point getPosition();
@@ -101,6 +104,8 @@ class FruitClass : public Notifier<FruitClass, Point>
 
 		std::string name_;
 		int			logicFruitID_;
+
+		int			gameLevel_;
 
 		Point		initialPosition_;
 		Point		position_;

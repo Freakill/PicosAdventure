@@ -8,6 +8,7 @@
 #include "../Engine/Object3DFactory.h"
 #include "../Engine/sphereCollision.h"
 
+#include "../Game/logClass.h"
 #include "../Game/soundFirstClass.h"
 
 #include "../Graphics/graphicsManager.h"

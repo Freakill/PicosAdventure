@@ -112,6 +112,7 @@ xcopy /e /i /y "$(KINECT_TOOLKIT_DIR)\bin\KinectBackgroundRemoval180_32.dll" "$(
     <ClCompile Include="Game\birdClass.cpp" />
     <ClCompile Include="Game\firstScreenState.cpp" />
     <ClCompile Include="Game\fruitClass.cpp" />
+    <ClCompile Include="Game\logClass.cpp" />
     <ClCompile Include="Game\picoFirstClass.cpp" />
     <ClCompile Include="Game\pieceClass.cpp" />
     <ClCompile Include="Game\secondScreenState.cpp" />
@@ -161,6 +162,7 @@ xcopy /e /i /y "$(KINECT_TOOLKIT_DIR)\bin\KinectBackgroundRemoval180_32.dll" "$(
     <ClInclude Include="Game\birdClass.h" />
     <ClInclude Include="Game\firstScreenState.h" />
     <ClInclude Include="Game\fruitClass.h" />
+    <ClInclude Include="Game\logClass.h" />
     <ClInclude Include="Game\picoFirstClass.h" />
     <ClInclude Include="Game\pieceClass.h" />
     <ClInclude Include="Game\secondScreenState.h" />

@@ -222,6 +222,9 @@
     <ClCompile Include="Game\soundFirstClass.cpp">
       <Filter>Source Files\Game\FirstLevel</Filter>
     </ClCompile>
+    <ClCompile Include="Game\logClass.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\systemClass.h">
@@ -370,6 +373,9 @@
     </ClInclude>
     <ClInclude Include="Game\soundFirstClass.h">
       <Filter>Header Files\Game\FirstLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\logClass.h">
+      <Filter>Header Files\Game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

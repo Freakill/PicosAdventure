@@ -60,6 +60,8 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 		void draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug);
 		void destroy();
 
+		void setLevelState(int level);
+
 		void goToPosition(Point position);
 		void setToRest(bool ereasePrevious);
 
@@ -115,6 +117,8 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 		int			hatToDraw_;
 
 		SphereCollision* collisionTest_;
+
+		int			levelState_;
 
 		// Expressions
 		std::map<std::string, TextureClass*> expressions_;
