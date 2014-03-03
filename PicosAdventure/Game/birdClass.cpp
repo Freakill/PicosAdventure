@@ -98,6 +98,8 @@ bool BirdClass::setup(GraphicsManager* graphicsManager, SoundFirstClass* soundMa
 
 	soundManager_ = soundManager;
 
+	gameLevel_ = 0;
+
 	return true;
 }
 
@@ -158,9 +160,19 @@ void BirdClass::update(float elapsedTime)
 		case TEASING:
 			{
 				activateAlert_->tick();
-				if(activateAlert_->getTime() > activateTime_)
+				if(!inAlertMode_ && activateAlert_->getTime() > activateTime_)
 				{
 					inAlertMode_ = true;
+
+					LogClass::Instance()->addEntry("Bird_Visual_Aid", gameLevel_, 0);
+					activateAlert_->reset();
+				}
+				if(inAlertMode_ && activateAlert_->getTime() > activateTime_)
+				{
+					soundManager_->playOwl();
+
+					LogClass::Instance()->addEntry("Bird_Sound_Aid", gameLevel_, 0);
+					activateAlert_->reset();
 				}
 			}
 			break;
@@ -222,6 +234,11 @@ void BirdClass::destroy()
 		delete model_;
 		model_ = 0;
 	}
+}
+
+void BirdClass::setLevel(int level)
+{
+	gameLevel_ = level;
 }
 
 void BirdClass::setStealFood(bool steal)

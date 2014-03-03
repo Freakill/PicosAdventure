@@ -1,0 +1,664 @@
+#include "picoSecondClass.h"
+
+PicoSecondClass::PicoSecondClass()
+{
+	body_ = 0;
+	tips_ = 0;
+
+	eyes_ = 0;
+
+	hat_ = 0;
+
+	waitedTime_ = 0.0f;
+	eatingWaitTime_ = 0.0f;
+	celebratingWaitTime_ = 0.0f;
+
+	position_.x = 0.0f;
+	position_.y = 0.0f;
+	position_.z = 0.0f;
+
+	velocity_.x = 0.0f;
+	velocity_.y = 0.0f;
+	velocity_.z = 0.0f;
+
+	objective_.x = 0.0f;
+	objective_.y = 0.0f;
+	objective_.z = 0.0f;
+	
+	lookAt_.x = 0.0f;
+	lookAt_.y = 0.0f;
+	lookAt_.z = 0.0f;
+
+	scaling_.x = 1.0f;
+	scaling_.y = 1.0f;
+	scaling_.z = 1.0f;
+	
+	rotX_ = 0.0f;
+	rotY_ = 0.0f; 
+	newRotY_ = 0.0f;
+	rotZ_ = 0.0f;
+}
+
+PicoSecondClass::PicoSecondClass(const PicoSecondClass& other)
+{
+
+}
+
+PicoSecondClass::~PicoSecondClass()
+{
+
+}
+
+bool PicoSecondClass::setup(GraphicsManager* graphicsManager, CameraClass* camera)
+{
+	camera_ = camera;
+
+	body_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossCuerpo");
+	tips_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossExtremidades");
+	eyes_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossOjos");
+	hat_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "gorroFrutas");
+
+	// Set specific multitexture shader for tips and increment textures array
+	Shader3DClass* shaderTemp = Shader3DFactory::Instance()->CreateShader3D("MultiTextureShader3D", graphicsManager);
+	tips_->setShader3D(shaderTemp);
+
+	tips_->getTextureArrayClass()->setNumberTextures(2);
+
+	loadExpressions(graphicsManager);
+
+	collisionTest_ = new SphereCollision();
+	collisionTest_->setup(graphicsManager, Point(0.0f, 1.6f, 0.0f), 0.6f);
+
+	position_.x = 4.0f;
+	position_.y = 0.0f;
+	position_.z = -3.0f;
+
+	scaling_.x = 0.041f;
+	scaling_.y = 0.041f;
+	scaling_.z = 0.041f;
+
+	lookAtCamera(false);
+
+	tipsColor_ = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	tipsLight_ = new LightClass;
+	tipsLight_->setDiffuseColor(tipsColor_.x, tipsColor_.y, tipsColor_.z, 1.0f);
+
+	faceState_ = NORMAL;
+
+	expressionChangeTime_ = 0.75f;
+	expressionPercentage_ = 0.0f;
+	actualExpression_ = "normal";
+	newExpression_ = "normal";
+
+	MultiTextureShader3DClass* multitextureShader = dynamic_cast<MultiTextureShader3DClass*>(tips_->getShader3D());
+	multitextureShader->setPercentage(0.1);
+
+	// Setup clock at the end so it starts when we run
+	expressionClock_ = new ClockClass();
+	if(!expressionClock_)
+	{
+		return false;
+	}
+	expressionClock_->reset();
+
+	inactivityClock_ = new ClockClass();
+	if(!inactivityClock_)
+	{
+		return false;
+	}
+	inactivityClock_->reset();
+
+	eatingWaitTime_ = 2.0f;
+	celebratingWaitTime_ = 1.2f;
+
+	int screenWidth, screenHeight;
+	graphicsManager->getScreenSize(screenWidth, screenHeight);
+
+	info_ = new TextClass();
+	if(!info_)
+	{
+		return false;
+	}
+
+	// Initialize the text object.
+	if(!info_->setup(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), graphicsManager->getShader2D(), screenWidth, screenHeight, 20, 40, "Rot: "))
+	{
+		MessageBoxA(NULL, "Could not initialize the FPS text object.", "GUIFrame - Error", MB_OK);
+		return false;
+	}
+
+	setToRest();
+
+	return true;
+}
+
+void PicoSecondClass::update(float elapsedTime)
+{
+	expressionClock_->tick();
+	inactivityClock_->tick();
+
+	body_->update(elapsedTime);
+	tips_->update(elapsedTime);
+
+	// Update textures for the tips
+	tips_->getTextureArrayClass()->getTexturesArray()[0] = expressions_.at(actualExpression_)->getTexture();
+	tips_->getTextureArrayClass()->getTexturesArray()[1] = expressions_.at(newExpression_)->getTexture();
+
+	MultiTextureShader3DClass* multitextureShader = dynamic_cast<MultiTextureShader3DClass*>(tips_->getShader3D());
+	multitextureShader->setPercentage(expressionPercentage_);
+
+	eyes_->update(elapsedTime);
+	
+	hat_->update(elapsedTime);
+
+	switch(picoState_)
+	{
+		case WAITING:
+			{
+				
+			}
+			break;
+		case WALKING:
+			{
+				walk(elapsedTime);
+
+				if(checkPicoArrivedObjective())
+				{
+					
+				}
+			}
+			break;
+		case TURNING:
+			{
+				
+			}
+			break;
+		case CELEBRATING:
+			{
+				waitedTime_ += elapsedTime;
+
+				if(waitedTime_ > celebratingWaitTime_)
+				{
+					changeAnimation("idle", 0.2f);
+
+					waitedTime_ = 0.0f;
+
+					picoState_ = WAITING;
+					inactivityClock_->reset();
+				}
+			}
+			break;
+		case LEAVING:
+			{
+				walk(elapsedTime);
+			}
+			break;
+		default:
+			{
+				
+			}
+			break;
+
+	}
+
+	switch(faceState_)
+	{
+		case NORMAL:
+			{
+				expressionPercentage_ = 0.0f;
+			}
+			break;
+		case CHANGING:
+			{
+				expressionPercentage_ = expressionClock_->getTime()/expressionChangeTime_;
+				if(expressionClock_->getTime() > expressionChangeTime_)
+				{
+					faceState_ = CHANGED;
+				}
+			}
+			break;
+		case CHANGED:
+			{
+				expressionPercentage_ = 1.0f;
+				actualExpression_ = newExpression_;
+				faceState_ = NORMAL;
+			}
+			break;
+	}
+
+	collisionTest_->setPosition(position_);
+}
+
+void PicoSecondClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug)
+{
+	if(debug)
+	{
+		graphicsManager->turnOnWireframeRasterizer();
+		collisionTest_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+		graphicsManager->turnOnSolidRasterizer();
+
+		std::stringstream RotText;
+		RotText << "RotY: " << rotY_ << " NewRotY: " << newRotY_;
+		info_->setText(RotText.str(), graphicsManager->getDeviceContext());
+
+		XMFLOAT4X4 orthoMatrix;
+		graphicsManager->getOrthoMatrix(orthoMatrix);
+
+		graphicsManager->turnZBufferOff();
+		graphicsManager->turnOnAlphaBlending();
+			info_->draw(graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, orthoMatrix);
+		graphicsManager->turnOffAlphaBlending();
+		graphicsManager->turnZBufferOn();
+	}
+
+	XMFLOAT4X4 rotatingMatrixZ;
+	XMStoreFloat4x4(&rotatingMatrixZ, XMMatrixRotationZ(rotZ_));
+	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&rotatingMatrixZ)));
+
+	XMFLOAT4X4 rotatingMatrixY;
+	XMStoreFloat4x4(&rotatingMatrixY, XMMatrixRotationY(rotY_));
+	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&rotatingMatrixY)));
+
+	XMFLOAT4X4 rotatingMatrixX;
+	XMStoreFloat4x4(&rotatingMatrixX, XMMatrixRotationX(rotX_));
+	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&rotatingMatrixX)));
+
+	XMFLOAT4X4 scalingMatrix;
+	XMStoreFloat4x4(&scalingMatrix, XMMatrixScaling(scaling_.x, scaling_.y, scaling_.z));
+	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&scalingMatrix)));
+
+	XMFLOAT4X4 movingMatrix;
+	XMStoreFloat4x4(&movingMatrix, XMMatrixTranslation(position_.x, position_.y, position_.z));
+	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&movingMatrix)));
+
+	body_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	eyes_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	
+	hat_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+
+	tipsLight_->setAmbientColor(light->getAmbientColor().x, light->getAmbientColor().y, light->getAmbientColor().z, 1.0f);
+	tipsLight_->setDiffuseColor(tipsColor_.x*light->getDiffuseColor().x, tipsColor_.y*light->getDiffuseColor().y, tipsColor_.z*light->getDiffuseColor().z, 1.0f);
+	tipsLight_->setDirection(light->getDirection().x, light->getDirection().y, light->getDirection().z);
+
+	tips_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, tipsLight_);
+}
+
+void PicoSecondClass::destroy()
+{
+	// Release the model object
+	if(body_)
+	{
+		body_->destroy();
+		delete body_;
+		body_ = 0;
+	}
+
+	// Release the model object
+	if(tips_)
+	{
+		tips_->destroy();
+		delete tips_;
+		tips_ = 0;
+	}
+
+	// Release the model object
+	if(eyes_)
+	{
+		eyes_->destroy();
+		delete eyes_;
+		eyes_ = 0;
+	}
+
+	// Release the model object
+	if(hat_)
+	{
+		hat_->destroy();
+		delete hat_;
+		hat_ = 0;
+	}
+
+	std::map<std::string, TextureClass*>::iterator it;
+	for(it = expressions_.begin(); it != expressions_.end(); it++)
+	{
+		it->second->destroy();
+	}
+	expressions_.clear();
+}
+
+void PicoSecondClass::setLevelState(int level)
+{
+	levelState_ = level;
+}
+
+void PicoSecondClass::goToPosition(Point position)
+{
+	changeAnimation("walk", 0.4f);
+
+	objective_.x = position.x;
+	//objective_.y = position.y;
+	objective_.z = position.z;
+
+	picoState_ = WALKING;
+}
+
+void PicoSecondClass::setToRest()
+{
+	if(lookAtCamera(false))
+	{
+		picoState_ = WAITING;
+		inactivityClock_->reset();
+	}
+}
+
+void PicoSecondClass::makeHappy()
+{
+	if(picoState_ == WAITING)
+	{
+		changeExpression("feliz");
+	}
+}
+
+void PicoSecondClass::sayHello()
+{
+	if(picoState_ == WAITING)
+	{
+		executeAnimation("hola", 0.2f);
+	}
+}
+
+void PicoSecondClass::makePointing()
+{
+	if(position_.x < 0)
+	{
+		changeAnimation("point_right", 0.4f);
+		changeExpression("normal");
+	}
+	else
+	{
+		changeAnimation("point_left", 0.4f);
+		changeExpression("normal");
+	}
+
+	inactivityClock_->reset();
+}
+
+void PicoSecondClass::makeLeave()
+{
+	goToPosition(Point(-35.25f, 0.0f, -3.0f));
+	picoState_ = LEAVING;
+}
+
+Point PicoSecondClass::getPosition()
+{
+	return position_;
+}
+
+void PicoSecondClass::setTipsColor(XMFLOAT4 color)
+{
+	tipsColor_ = color;
+}
+
+void PicoSecondClass::setBodyTexture(TextureClass* texture)
+{
+	body_->getTextureArrayClass()->getTexturesArray()[0] = texture->getTexture();
+}
+
+void PicoSecondClass::setHat(Object3D* hat)
+{
+	hat_ = hat;
+}
+
+void PicoSecondClass::setBody(Object3D* body)
+{
+	body_ = body;
+}
+
+void PicoSecondClass::setTips(Object3D* tips)
+{
+	tips_ = tips;
+}
+
+SphereCollision* PicoSecondClass::getCollisionSphere()
+{
+	return collisionTest_;
+}
+
+float PicoSecondClass::approach(float goal, float current, float dt)
+{
+	float difference = goal - current;
+
+	if(difference > dt)
+		return current + dt;
+	if(difference < dt)
+		return current - dt;
+
+	return goal;
+}
+
+void PicoSecondClass::walk(float elapsedTime)
+{
+	velocity_.x = objective_.x - position_.x;
+	velocity_.y = objective_.y - position_.y;
+	velocity_.z = objective_.z - position_.z;
+
+	Vector normalizedVelocity = velocity_.normalize();
+	velocity_ = normalizedVelocity * 1.8f;
+
+	float newRotY_ = acos(normalizedVelocity.z);
+	if(normalizedVelocity.x < 0)
+	{
+		newRotY_ += 3.141592f;
+	}
+
+	if(rotY_ > newRotY_-0.1f && rotY_ < newRotY_+0.1f)
+	{
+		rotY_ = newRotY_;
+
+		position_.x += velocity_.x*elapsedTime;
+		position_.y += velocity_.y*elapsedTime;
+		position_.z += velocity_.z*elapsedTime;
+	}
+	else
+	{
+		if(rotY_ < newRotY_)
+		{
+			rotY_ += 0.04f;
+		}
+		if(rotY_ > newRotY_)
+		{
+			rotY_ -= 0.04f;
+		}
+	}
+}
+
+bool PicoSecondClass::lookAtCamera(bool check)
+{
+	Point cameraPos = Point(camera_->getPosition().x, camera_->getPosition().y, camera_->getPosition().z);
+
+	lookAt_.x = cameraPos.x-position_.x;
+	lookAt_.y = cameraPos.y-position_.y;
+	lookAt_.z = cameraPos.z-position_.z;
+
+	Vector normalizedLookAt = lookAt_.normalize();
+
+	newRotY_ = acos(normalizedLookAt.x);//3.141592f-1.570796f/4; 
+
+	if(normalizedLookAt.x > 0)
+	{
+		newRotY_ += XM_PIDIV2;
+	}
+	else
+	{
+		newRotY_ += XM_PIDIV2;
+	}
+
+	if(check)
+	{
+		if(rotY_ > newRotY_-0.1f && rotY_ < newRotY_+0.1f)
+		{
+			rotY_ = newRotY_;
+
+			return true;
+		}
+		else
+		{
+			if(rotY_ < newRotY_)
+			{
+				rotY_ += 0.04f;
+			}
+			if(rotY_ > newRotY_)
+			{
+				rotY_ -= 0.04f;
+			}
+		}
+
+		return false;
+	}
+	else
+	{
+		rotY_ = newRotY_;
+
+		return true;
+	}
+}
+
+bool PicoSecondClass::checkPicoArrivedObjective()
+{
+	if(position_.x < objective_.x+0.05 && position_.x > objective_.x-0.05 && position_.z < objective_.z+0.05 && position_.z > objective_.z-0.05)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void PicoSecondClass::notify(InputManager* notifier, InputStruct arg)
+{
+	switch(arg.keyPressed){
+		default:
+			{
+				
+			}
+			break;
+	}
+}
+
+void PicoSecondClass::notify(PieceClass* notifier, Point arg)
+{
+	
+}
+
+void PicoSecondClass::changeAnimation(std::string name, float time)
+{
+	AnimatedObject3D* animatedTemp;
+	AnimatedCal3DModelClass* cal3dTemp;
+	
+	animatedTemp = dynamic_cast<AnimatedObject3D*>(body_);
+	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+	cal3dTemp->setAnimationToPlay(name, time);
+	animatedTemp = dynamic_cast<AnimatedObject3D*>(tips_);
+	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+	cal3dTemp->setAnimationToPlay(name, time);
+	animatedTemp = dynamic_cast<AnimatedObject3D*>(eyes_);
+	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+	cal3dTemp->setAnimationToPlay(name, time);
+	animatedTemp = dynamic_cast<AnimatedObject3D*>(hat_);
+	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+	cal3dTemp->setAnimationToPlay(name, time);
+}
+
+void PicoSecondClass::executeAnimation(std::string name, float time)
+{
+	AnimatedObject3D* animatedTemp;
+	AnimatedCal3DModelClass* cal3dTemp;
+
+	animatedTemp = dynamic_cast<AnimatedObject3D*>(body_);
+	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+	cal3dTemp->setAnimationToExecute(name, time);
+	animatedTemp = dynamic_cast<AnimatedObject3D*>(tips_);
+	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+	cal3dTemp->setAnimationToExecute(name, time);
+	animatedTemp = dynamic_cast<AnimatedObject3D*>(eyes_);
+	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+	cal3dTemp->setAnimationToExecute(name, time);
+	animatedTemp = dynamic_cast<AnimatedObject3D*>(hat_);
+	cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
+	cal3dTemp->setAnimationToExecute(name, time);
+}
+
+void PicoSecondClass::changeExpression(std::string newExpression)
+{
+	if(faceState_ != CHANGING && picoState_ != WALKING)
+	{
+		newExpression_ = newExpression;
+		faceState_ = CHANGING;
+		expressionClock_->reset();
+	}
+}
+
+void PicoSecondClass::loadExpressions(GraphicsManager* graphicsManager)
+{
+	TextureClass* temp1 = new TextureClass;
+	std::string filePath = "./Data/models/miniBossExtremidades/d-e-normal.dds";
+	bool result = temp1->setup(graphicsManager->getDevice(), filePath);
+	if(!result)
+	{
+		MessageBoxA(NULL, "Could not load the normal expression textures!", "Pico - Error", MB_ICONERROR | MB_OK);
+	}
+	expressions_.insert(std::pair<std::string, TextureClass*>("normal", temp1));
+
+	TextureClass* temp2 = new TextureClass;
+	filePath = "./Data/models/miniBossExtremidades/d-e-feliz.dds";
+	result = temp2->setup(graphicsManager->getDevice(), filePath);
+	if(!result)
+	{
+		MessageBoxA(NULL, "Could not load the feliz expression textures!", "Pico - Error", MB_ICONERROR | MB_OK);
+	}
+	expressions_.insert(std::pair<std::string, TextureClass*>("feliz", temp2));
+
+	TextureClass* temp3 = new TextureClass;
+	filePath = "./Data/models/miniBossExtremidades/d-e-sorpresa.dds";
+	result = temp3->setup(graphicsManager->getDevice(), filePath);
+	if(!result)
+	{
+		MessageBoxA(NULL, "Could not load the sorpresa expression textures!", "Pico - Error", MB_ICONERROR | MB_OK);
+	}
+	expressions_.insert(std::pair<std::string, TextureClass*>("sorpresa", temp3));
+
+	TextureClass* temp4 = new TextureClass;
+	filePath = "./Data/models/miniBossExtremidades/d-e-triste.dds";
+	result = temp4->setup(graphicsManager->getDevice(), filePath);
+	if(!result)
+	{
+		MessageBoxA(NULL, "Could not load the triste expression textures!", "Pico - Error", MB_ICONERROR | MB_OK);
+	}
+	expressions_.insert(std::pair<std::string, TextureClass*>("triste", temp4));
+
+	TextureClass* temp5 = new TextureClass;
+	filePath = "./Data/models/miniBossExtremidades/d-e-sorpresa2.dds";
+	result = temp5->setup(graphicsManager->getDevice(), filePath);
+	if(!result)
+	{
+		MessageBoxA(NULL, "Could not load the sorpresa2 expression textures!", "Pico - Error", MB_ICONERROR | MB_OK);
+	}
+	expressions_.insert(std::pair<std::string, TextureClass*>("sorpresa2", temp5));
+
+	TextureClass* temp6 = new TextureClass;
+	filePath = "./Data/models/miniBossExtremidades/d-e-superfeliz.dds";
+	result = temp6->setup(graphicsManager->getDevice(), filePath);
+	if(!result)
+	{
+		MessageBoxA(NULL, "Could not load the superfeliz expression textures!", "Pico - Error", MB_ICONERROR | MB_OK);
+	}
+	expressions_.insert(std::pair<std::string, TextureClass*>("superfeliz", temp6));
+
+	TextureClass* temp7 = new TextureClass;
+	filePath = "./Data/models/miniBossExtremidades/d-e-cabreo.dds";
+	result = temp7->setup(graphicsManager->getDevice(), filePath);
+	if(!result)
+	{
+		MessageBoxA(NULL, "Could not load the enfadado expression textures!", "Pico - Error", MB_ICONERROR | MB_OK);
+	}
+	expressions_.insert(std::pair<std::string, TextureClass*>("enfadado", temp7));
+}

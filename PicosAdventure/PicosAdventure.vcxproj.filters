@@ -79,6 +79,12 @@
     <Filter Include="Source Files\Game\FirstLevel">
       <UniqueIdentifier>{75dc3d33-ce0e-4cc9-b482-a74fec23ac6e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\SecondLevel">
+      <UniqueIdentifier>{9f479985-4de8-4e63-a6aa-0e15483c3206}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\SecondLevel">
+      <UniqueIdentifier>{20a5927d-8f8c-413b-bd6d-df411c0ab5fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -198,12 +204,6 @@
     <ClCompile Include="Graphics\pointlightDiffuseShader3D.cpp">
       <Filter>Source Files\Graphics\Shaders</Filter>
     </ClCompile>
-    <ClCompile Include="Game\secondScreenState.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Game\pieceClass.cpp">
-      <Filter>Source Files\Game</Filter>
-    </ClCompile>
     <ClCompile Include="Game\birdClass.cpp">
       <Filter>Source Files\Game\FirstLevel</Filter>
     </ClCompile>
@@ -224,6 +224,15 @@
     </ClCompile>
     <ClCompile Include="Game\logClass.cpp">
       <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\secondScreenState.cpp">
+      <Filter>Source Files\Game\SecondLevel</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\pieceClass.cpp">
+      <Filter>Source Files\Game\SecondLevel</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\picoSecondClass.cpp">
+      <Filter>Source Files\Game\SecondLevel</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -338,9 +347,6 @@
     <ClInclude Include="Graphics\multitextureShader3D.h">
       <Filter>Header Files\Graphics\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="Game\secondScreenState.h">
-      <Filter>Header Files\Game</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\colorShader3D.h">
       <Filter>Header Files\Graphics\Shaders</Filter>
     </ClInclude>
@@ -352,9 +358,6 @@
     </ClInclude>
     <ClInclude Include="Graphics\pointlightDiffuseShader3D.h">
       <Filter>Header Files\Graphics\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\pieceClass.h">
-      <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="Game\birdClass.h">
       <Filter>Header Files\Game\FirstLevel</Filter>
@@ -376,6 +379,15 @@
     </ClInclude>
     <ClInclude Include="Game\logClass.h">
       <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\pieceClass.h">
+      <Filter>Header Files\Game\SecondLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\secondScreenState.h">
+      <Filter>Header Files\Game\SecondLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\picoSecondClass.h">
+      <Filter>Header Files\Game\SecondLevel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

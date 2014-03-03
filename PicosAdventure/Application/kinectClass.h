@@ -26,9 +26,10 @@ class ApplicationManager;
 enum messageType
 	{
 		GREETINGS_KINECT,
-		HANDS_POSITION_ROT,
-		HOLD_HANDS,
-	
+		TORSO_POSITION,
+		LEFT_HAND_POSITION_ROT,
+		RIGHT_HAND_POSITION_ROT,
+		HOLD_HANDS
 	};
 
 struct KinectStruct
@@ -46,7 +47,7 @@ struct Player
 		Vector4 leftHand, rightHand;
 		Vector4 leftShoulder, rightShoulder;
 		Vector4 rightElbow, leftElbow;
-		double hipCenter;
+		Vector4 hipCenter;
 	};
 
 class KinectClass : public Notifier<KinectClass, KinectStruct>

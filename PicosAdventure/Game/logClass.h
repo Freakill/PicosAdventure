@@ -19,6 +19,7 @@ class LogClass
 		LogClass(const LogClass &);
 		~LogClass();
 
+		void setup(std::string name);
 		void update();
 
 		void setStartTime();

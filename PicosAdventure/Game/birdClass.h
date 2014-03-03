@@ -44,6 +44,8 @@ class BirdClass : public Listener<FruitClass, Point>, public Listener<PicoFirstC
 		void draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug);
 		void destroy();
 
+		void setLevel(int level);
+
 		void setStealFood(bool steal);
 		bool getStealFood();
 
@@ -65,6 +67,8 @@ class BirdClass : public Listener<FruitClass, Point>, public Listener<PicoFirstC
 		SphereCollision* collisionTest_;
 
 		SoundFirstClass* soundManager_;
+
+		int			gameLevel_;
 
 		BirdState	birdState_;
 		bool		stealFood_;

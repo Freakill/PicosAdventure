@@ -480,6 +480,8 @@ HRESULT KinectClass::ProcessSkeleton()
 
 		Point elbowRightScreenCoord = SkeletonToScreen(players[0].rightElbow, 320, 240);
 
+		Point torsoScreenCord = SkeletonToScreen(players[0].hipCenter, 320, 240);
+
 		Vector armDirection;
 		armDirection.x = handRightScreenCoord.x - elbowRightScreenCoord.x;
 		armDirection.y = handRightScreenCoord.y - elbowRightScreenCoord.y;
@@ -495,15 +497,17 @@ HRESULT KinectClass::ProcessSkeleton()
 			rotZ_ = -(atan(armDirection.y/armDirection.x)-XM_2PI/4)-XM_2PI/2;
 		}
 
-		KinectStruct kinectStruct = {HANDS_POSITION_ROT, handRightScreenCoord, elbowRightScreenCoord, Point(0,0,0), rotZ_};
-		KinectStruct kinectStruct2 = {HANDS_POSITION_ROT, handLeftScreenCoord, elbowRightScreenCoord, Point(0,0,0), rotZ_};
+		KinectStruct kinectTorso = {TORSO_POSITION, torsoScreenCord, Point(0, 0, 0), Point(0,0,0), 0};
+		KinectStruct kinectStruct = {RIGHT_HAND_POSITION_ROT, handRightScreenCoord, elbowRightScreenCoord, Point(0,0,0), rotZ_};
+		KinectStruct kinectStruct2 = {LEFT_HAND_POSITION_ROT, handLeftScreenCoord, elbowRightScreenCoord, Point(0,0,0), rotZ_};
+		notifyListeners(kinectTorso);
 		notifyListeners(kinectStruct);
 		notifyListeners(kinectStruct2);
 	}
 
 	//There are two players, compute distance between closest hands and define active region.
 	if(numPlayer==2){
-		if(players[0].hipCenter > players[1].hipCenter){
+		if(players[0].hipCenter.x > players[1].hipCenter.x){
 
 			Point leftHandPoint = Point( players[0].leftHand.x, players[0].leftHand.y, players[0].leftHand.z);
 			Point rightHandPoint = Point(players[1].rightHand.x,players[1].rightHand.y,players[1].rightHand.z);
@@ -580,7 +584,10 @@ void KinectClass::detectSekeltonsJoints(NUI_SKELETON_FRAME myFrame)
 			players[numPlayer].rightElbow.z =  myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].z;
 			players[numPlayer].rightElbow.w =  myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].w;
 
-			players[numPlayer].hipCenter = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER].x;
+			players[numPlayer].hipCenter.x = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER].x;
+			players[numPlayer].hipCenter.y = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER].y;
+			players[numPlayer].hipCenter.z = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER].z;
+			players[numPlayer].hipCenter.w = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER].w;
 
 			numPlayer++;
 		}

@@ -16,7 +16,7 @@
 
 #include "../Utils/clockClass.h"
 
-#include "picoFirstClass.h"
+#include "picoSecondClass.h"
 #include "pieceClass.h"
 
 #include <mmsystem.h>
@@ -49,6 +49,8 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 		virtual void update(float elapsedTime);
 		virtual void draw();
 		virtual void destroy();
+
+		void updatePicoScreenposition(XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix);
 
 		virtual void notify(InputManager* notifier, InputStruct arg);
 		void notify(KinectClass* notifier, KinectStruct arg);
@@ -93,6 +95,9 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 
 		Object3D*					spaceShipWireframe_;
 		std::vector<PieceClass*>	pieces_;
+
+		PicoSecondClass*			pico_;
+		Point						picoScreenPos_;
 
 		// Pointlights
 		XMFLOAT4					lightPos_[2];

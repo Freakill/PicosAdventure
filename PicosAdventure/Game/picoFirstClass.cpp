@@ -158,9 +158,9 @@ bool PicoFirstClass::setup(GraphicsManager* graphicsManager, CameraClass* camera
 	eatingWaitTime_ = 2.0f;
 	celebratingWaitTime_ = 1.2f;
 	inactivityTime1_ = 10.0f;
-	inactivityTime2_ = 15.0f;
-	inactivityTime3_ = 20.0f;
-	pointingTime_ = 12.0f;
+	inactivityTime2_ = 10.0f;
+	inactivityTime3_ = 10.0f;
+	pointingTime_ = 10.0f;
 
 	pointing1_ = false;
 	pointing2_ = false;
@@ -358,41 +358,12 @@ void PicoFirstClass::update(float elapsedTime)
 
 				if(!pointing3_ && pointing2_ && pointing1_ && pointed2_ && inactivityClock_->getTime() > inactivityTime3_)
 				{
-					if(position_.x < 0)
-					{
-						changeAnimation("point_right", 0.4f);
-						changeExpression("normal");
-						soundManager_->playPointingFile();
-					}
-					else
-					{
-						changeAnimation("point_left", 0.4f);
-						changeExpression("normal");
-						soundManager_->playPointingFile();
-					}
-
-					if(lastFruitEatenID_ == 1 || previousFruitEatenID_ == 3)
-					{
-						LogClass::Instance()->addEntry("Pico_Points_3", levelState_, 2);
-					}
-					else
-					{
-						LogClass::Instance()->addEntry("Pico_Points_3", levelState_, 3);
-					}
+					LogClass::Instance()->addEntry("Fruit_Sound_Aid", levelState_, 3);
+					soundManager_->playOwl();
 
 					pointing3_ = true;
-					inactivityClock_->reset();
 				}
 
-				if(pointing1_ && pointing2_ && pointing3_ && inactivityClock_->getTime() > pointingTime_)
-				{
-					changeAnimation("idle", 0.2f);
-					changeExpression("normal");
-
-					pointing3_ = false;
-					pointed3_ = true;
-					inactivityClock_->reset();
-				}
 
 				if(fallenFruits_.size() > 0)
 				{
@@ -554,7 +525,7 @@ void PicoFirstClass::update(float elapsedTime)
 			{
 				if(!saidGoodbye_ && inactivityClock_->getTime() > leavingTime_)
 				{
-					//changeAnimation("goodbye", 0.2f);
+					executeAnimation("hola", 0.2f);
 					soundManager_->playGoodbyeFile();
 
 					saidGoodbye_ = true;
@@ -775,7 +746,7 @@ void PicoFirstClass::sayHello()
 {
 	if(picoState_ == WAITING)
 	{
-		//changeExpression("feliz");
+		executeAnimation("hola", 0.2f);
 		soundManager_->playHiFile();
 	}
 }
@@ -823,6 +794,11 @@ void PicoFirstClass::makeLeave()
 {
 	goToPosition(Point(-35.25f, 0.0f, -3.0f));
 	picoState_ = LEAVING;
+}
+
+Point PicoFirstClass::getPosition()
+{
+	return position_;
 }
 
 void PicoFirstClass::setTipsColor(XMFLOAT4 color)
@@ -1041,6 +1017,7 @@ void PicoFirstClass::notify(BirdClass* notifier, bool arg)
 	if(picoState_ == WALKING && !arg)
 	{
 		changeAnimation("negation", 0.2f);
+		changeExpression("enfadado");
 
 		lookAtCamera(false);
 
@@ -1051,6 +1028,8 @@ void PicoFirstClass::notify(BirdClass* notifier, bool arg)
 	{
 		Point fallenFruitPos = fallenFruits_.front()->getPosition();
 		fallenFruitPos.z += behindFruit_;
+
+		changeExpression("normal");
 
 		goToPosition(fallenFruitPos);
 	}
@@ -1157,7 +1136,7 @@ void PicoFirstClass::loadExpressions(GraphicsManager* graphicsManager)
 	result = temp5->setup(graphicsManager->getDevice(), filePath);
 	if(!result)
 	{
-		MessageBoxA(NULL, "Could not load the triste expression textures!", "Pico - Error", MB_ICONERROR | MB_OK);
+		MessageBoxA(NULL, "Could not load the sorpresa2 expression textures!", "Pico - Error", MB_ICONERROR | MB_OK);
 	}
 	expressions_.insert(std::pair<std::string, TextureClass*>("sorpresa2", temp5));
 
@@ -1166,7 +1145,16 @@ void PicoFirstClass::loadExpressions(GraphicsManager* graphicsManager)
 	result = temp6->setup(graphicsManager->getDevice(), filePath);
 	if(!result)
 	{
-		MessageBoxA(NULL, "Could not load the triste expression textures!", "Pico - Error", MB_ICONERROR | MB_OK);
+		MessageBoxA(NULL, "Could not load the superfeliz expression textures!", "Pico - Error", MB_ICONERROR | MB_OK);
 	}
 	expressions_.insert(std::pair<std::string, TextureClass*>("superfeliz", temp6));
+
+	TextureClass* temp7 = new TextureClass;
+	filePath = "./Data/models/miniBossExtremidades/d-e-cabreo.dds";
+	result = temp7->setup(graphicsManager->getDevice(), filePath);
+	if(!result)
+	{
+		MessageBoxA(NULL, "Could not load the enfadado expression textures!", "Pico - Error", MB_ICONERROR | MB_OK);
+	}
+	expressions_.insert(std::pair<std::string, TextureClass*>("enfadado", temp7));
 }

@@ -56,7 +56,7 @@ bool ApplicationManager::setup(HWND windowsHandler, InputManager* inputManager, 
 		return false;
 	}
 
-	if(!changeState(FirstScreenState::Instance()))
+	if(!changeState(SecondScreenState::Instance()))
 	{
 		return false;
 	}

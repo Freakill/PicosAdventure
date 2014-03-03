@@ -68,6 +68,7 @@ class SoundFirstClass
 		bool playSelection();
 		bool playSpaceshipFalling();
 		bool playHappySong();
+		bool playOwl();
 
 	private:
 		bool setupDirectSound(HWND);
@@ -106,6 +107,7 @@ class SoundFirstClass
 		IDirectSoundBuffer8* selectionBuffer_;
 		IDirectSoundBuffer8* spaceshipFallingBuffer_;
 		IDirectSoundBuffer8* happySongBuffer_;
+		IDirectSoundBuffer8* owlBuffer_;
 };
 
 #endif //_SOUND_FIRST_CLASS_H_

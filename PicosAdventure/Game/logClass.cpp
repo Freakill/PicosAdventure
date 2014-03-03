@@ -4,8 +4,22 @@ LogClass LogClass::logClass_;
 
 LogClass::LogClass()
 {
+}
+
+LogClass::LogClass(const LogClass &)
+{
+
+}
+
+LogClass::~LogClass()
+{
+
+}
+
+void LogClass::setup(std::string name)
+{
 	std::stringstream logFileName;
-	logFileName << "./Data/logfile/first_level_log " <<  getYear() << "-" << getMonth() << "-" << getDay() << " " << getHours() << "-" << getMinutes() << ".csv";
+	logFileName << "./Data/logfile/ " << name <<  getYear() << "-" << getMonth() << "-" << getDay() << " " << getHours() << "-" << getMinutes() << ".csv";
 	logFile_.open(logFileName.str());
 
 	std::stringstream fileHeader;
@@ -21,16 +35,6 @@ LogClass::LogClass()
 	overallGameClock_->tick();
 
 	setStartTime();
-}
-
-LogClass::LogClass(const LogClass &)
-{
-
-}
-
-LogClass::~LogClass()
-{
-
 }
 
 void LogClass::update()

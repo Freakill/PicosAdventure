@@ -39,6 +39,7 @@ SoundFirstClass::SoundFirstClass()
 	selectionBuffer_ = 0;
 	spaceshipFallingBuffer_ = 0;
 	happySongBuffer_ = 0;
+	owlBuffer_ = 0;
 }
 
 
@@ -258,6 +259,13 @@ bool SoundFirstClass::setup(HWND hwnd, std::string fileName)
 		return false;
 	}
 
+	result = loadWaveFile("./Data/sounds/owl.wav", &owlBuffer_);
+	if(!result)
+	{
+		MessageBoxA(NULL, "25", "SoundFirstClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+
 	return true;
 }
 
@@ -298,6 +306,7 @@ void SoundFirstClass::destroy()
 	destroyWaveFile(&selectionBuffer_);
 	destroyWaveFile(&spaceshipFallingBuffer_);
 	destroyWaveFile(&happySongBuffer_);
+	destroyWaveFile(&owlBuffer_);
 
 	// Shutdown the Direct Sound API.
 	destroyDirectSound();
@@ -1265,6 +1274,39 @@ bool SoundFirstClass::playHappySong()
 
 		// Play the contents of the secondary sound buffer.
 		result = happySongBuffer_->Play(0, 0, 0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool SoundFirstClass::playOwl()
+{
+	HRESULT result;
+
+	DWORD status;
+	owlBuffer_->GetStatus(&status);
+	if(!(status && DSBSTATUS_PLAYING))
+	{
+		// Set position at the beginning of the sound buffer.
+		result = owlBuffer_->SetCurrentPosition(0);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Set volume of the buffer to 100%.
+		result = owlBuffer_->SetVolume(DSBVOLUME_MAX);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Play the contents of the secondary sound buffer.
+		result = owlBuffer_->Play(0, 0, 0);
 		if(FAILED(result))
 		{
 			return false;

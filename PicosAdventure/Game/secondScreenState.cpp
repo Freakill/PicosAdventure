@@ -16,6 +16,7 @@ SecondScreenState::SecondScreenState()
 	gameClock_ = 0;
 
 	spaceShipWireframe_ = 0;
+	pico_ = 0;
 
 	background_ = 0;
 }
@@ -97,7 +98,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 
 	// Load spaceship
 	spaceShipWireframe_ = Object3DFactory::Instance()->CreateObject3D("StaticObject3D", graphicsManager_, "nave");
-	spaceShipWireframe_->setPosition(Point(-2.0f, 0.0f, -3.25f));
+	spaceShipWireframe_->setPosition(Point(-4.0f, 0.0f, -3.25f));
 	spaceShipWireframe_->setScale(Vector(0.0110476f, 0.0110476f, 0.0110476f));
 	spaceShipWireframe_->setRotationX(0);
 	spaceShipWireframe_->setRotationY(0);
@@ -108,7 +109,22 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	PointlightDiffuseShader3DClass* pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>(spaceShipWireframe_->getShader3D());
 	pointlightShader->setPositions(lightPos_[0], lightPos_[1]);
 
+	// Load spaceship pieces to collect
 	loadPieces();
+
+	// Create Pico
+	pico_ = new PicoSecondClass();
+	if(!pico_)
+	{
+		return false;
+	}
+
+	if(!pico_->setup(graphicsManager_, camera_))
+	{
+		MessageBoxA(NULL, "Could not initialize Pico :(.", "Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+	inputManager->addListener(*pico_);
 
 	// Set the level state to the first iteration and load fruits accordingly
 	levelState_ = INTRODUCTION;
@@ -175,6 +191,8 @@ void SecondScreenState::update(float elapsedTime)
 	PointlightDiffuseShader3DClass* pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>(spaceShipWireframe_->getShader3D());
 	pointlightShader->setPositions(lightPos_[0], lightPos_[1]);
 
+	pico_->update(elapsedTime);
+
 	switch(levelState_)
 	{
 		default:
@@ -203,6 +221,9 @@ void SecondScreenState::draw()
 	graphicsManager_->getProjectionMatrix(projectionMatrix);
 	graphicsManager_->getOrthoMatrix(orthoMatrix);
 
+	// Despite not being a drawing method, we call it here to reuse matrices
+	updatePicoScreenposition(worldMatrix, viewMatrix, projectionMatrix);
+
 	graphicsManager_->turnZBufferOff();
 		background_->draw(graphicsManager_->getDeviceContext(), backgrounPosition_.x, backgrounPosition_.y, worldMatrix, viewMatrix, orthoMatrix, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 	graphicsManager_->turnZBufferOn();
@@ -224,6 +245,9 @@ void SecondScreenState::draw()
 	{
 		(*pieceIt)->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
 	}
+
+	// Draw pico
+	pico_->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
 
 	if(debug_)
 	{
@@ -263,6 +287,24 @@ void SecondScreenState::destroy()
 	{
 		(*pieceIt)->destroy();
 	}
+}
+
+void SecondScreenState::updatePicoScreenposition(XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix)
+{
+	XMFLOAT4 picoPos;
+	Point picoPoint = pico_->getPosition();
+	picoPos.x = picoPoint.x;
+	picoPos.y = picoPoint.y;
+	picoPos.z = picoPoint.z;
+	picoPos.w = 1.0f;
+
+	XMFLOAT4 resultPos;
+	XMStoreFloat4(&resultPos, XMVector4Transform(XMLoadFloat4(&picoPos), XMLoadFloat4x4(&worldMatrix)));
+	XMStoreFloat4(&resultPos, XMVector4Transform(XMLoadFloat4(&resultPos), XMLoadFloat4x4(&viewMatrix)));
+	XMStoreFloat4(&resultPos, XMVector4Transform(XMLoadFloat4(&resultPos), XMLoadFloat4x4(&projectionMatrix)));
+
+	picoScreenPos_.x = resultPos.x;
+	picoScreenPos_.y = resultPos.y;
 }
 
 void SecondScreenState::notify(InputManager* notifier, InputStruct arg)

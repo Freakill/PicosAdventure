@@ -38,6 +38,8 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 
 	graphicsManager_->getScreenSize(screenWidth_, screenHeight_);
 
+	LogClass::Instance()->setup("first_level_log");
+
 	// Create the camera object.
 	camera_ = new CameraClass();
 	if(!camera_)
@@ -126,6 +128,9 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	}
 	inputManager->addListener(*pico_);
 
+	picoHeadTouchedRight_ = false;
+	picoHeadTouchedLeft_ = false;
+
 	// Load the fruits
 	loadFruits();
 
@@ -203,6 +208,15 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	}
 	gameClock_->reset();
 
+	savePositionsClock_ = new ClockClass();
+	if(!savePositionsClock_)
+	{
+		return false;
+	}
+	savePositionsClock_->reset();
+
+	timeToSavePositions_ = 1.0f;
+
 	kinectManager->addListener(*this);
 	inputManager->addListener(*this);
 
@@ -216,6 +230,7 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 void FirstScreenState::update(float elapsedTime)
 {	
 	gameClock_->tick();
+	savePositionsClock_->tick();
 	
 	LogClass::Instance()->update();
 
@@ -239,28 +254,28 @@ void FirstScreenState::update(float elapsedTime)
 				case 1:
 					{
 						fruitsInGame_.at(1)->activateAlert(true);
-						LogClass::Instance()->addEntry("Fruit_Alert", levelState_, 1);
+						LogClass::Instance()->addEntry("Fruit_Visual_Aid", levelState_, 1);
 						activatedSignaledFruit_ = true;
 					}
 					break;
 				case 2:
 					{
 						fruitsInGame_.at(2)->activateAlert(true);
-						LogClass::Instance()->addEntry("Fruit_Alert", levelState_, 2);
+						LogClass::Instance()->addEntry("Fruit_Visual_Aid", levelState_, 2);
 						activatedSignaledFruit_ = true;
 					}
 					break;
 				case 3:
 					{
 						fruitsInGame_.at(1)->activateAlert(true);
-						LogClass::Instance()->addEntry("Fruit_Alert", levelState_, 3);
+						LogClass::Instance()->addEntry("Fruit_Visual_Aid", levelState_, 3);
 						activatedSignaledFruit_ = true;
 					}
 					break;
 				case 4:
 					{
 						fruitsInGame_.at(2)->activateAlert(true);
-						LogClass::Instance()->addEntry("Fruit_Alert", levelState_, 4);
+						LogClass::Instance()->addEntry("Fruit_Visual_Aid", levelState_, 4);
 						activatedSignaledFruit_ = true;
 					}
 					break;
@@ -325,6 +340,13 @@ void FirstScreenState::update(float elapsedTime)
 		polaroidGUI_->update(elapsedTime);
 	}
 
+	if(savePositionsClock_->getTime() > timeToSavePositions_)
+	{
+		LogClass::Instance()->addEntry("Pico_Position", picoScreenPos_.x, picoScreenPos_.y);
+		LogClass::Instance()->addEntry("User_Position", kinectTorsoPos_.x, kinectTorsoPos_.y);
+		savePositionsClock_->reset();
+	}
+
 	std::stringstream FPSText;
 	FPSText << "FPS: " << 1/elapsedTime;
 	FPS_->setText(FPSText.str(), graphicsManager_->getDeviceContext());
@@ -339,6 +361,21 @@ void FirstScreenState::draw()
 	graphicsManager_->getWorldMatrix(worldMatrix);
 	graphicsManager_->getProjectionMatrix(projectionMatrix);
 	graphicsManager_->getOrthoMatrix(orthoMatrix);
+
+	XMFLOAT4 picoPos;
+	Point picoPoint = pico_->getPosition();
+	picoPos.x = picoPoint.x;
+	picoPos.y = picoPoint.y;
+	picoPos.z = picoPoint.z;
+	picoPos.w = 1.0f;
+
+	XMFLOAT4 resultPos;
+	XMStoreFloat4(&resultPos, XMVector4Transform(XMLoadFloat4(&picoPos), XMLoadFloat4x4(&worldMatrix)));
+	XMStoreFloat4(&resultPos, XMVector4Transform(XMLoadFloat4(&resultPos), XMLoadFloat4x4(&viewMatrix)));
+	XMStoreFloat4(&resultPos, XMVector4Transform(XMLoadFloat4(&resultPos), XMLoadFloat4x4(&projectionMatrix)));
+
+	kinectTorsoPos_.x = resultPos.x;
+	kinectTorsoPos_.y = resultPos.y;
 
 	graphicsManager_->turnZBufferOff();
 		background_->draw(graphicsManager_->getDeviceContext(), backgrounPosition_.x, backgrounPosition_.y, worldMatrix, viewMatrix, orthoMatrix, light_->getDiffuseColor());
@@ -446,16 +483,26 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 				subLevelState_ = FADING;
 				soundManager_->playChangeLevel();
 				gameClock_->reset();
+				LogClass::Instance()->addEntry("Polaroids_Forced", levelState_, 0);
 			}
 			break;
 		case 13: // Enter
 			{
 				bird_->setStealFood(!bird_->getStealFood());
+				if(bird_->getStealFood())
+				{
+					LogClass::Instance()->addEntry("Activated_Bird", levelState_, 0);
+				}
+				else
+				{
+					LogClass::Instance()->addEntry("Desactivated_Bird", levelState_, 0);
+				}
 			}
 			break;
 		case 32: // Space
 			{
 				bird_->scared();
+				LogClass::Instance()->addEntry("Bird_Scared_Keyboard", levelState_, 0);
 			}
 			break;
 		default:
@@ -476,6 +523,7 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 				{
 					if((*fruitIt)->getCollisionSphere()->testIntersection(camera_, arg.mouseInfo.x, arg.mouseInfo.y))
 					{
+						LogClass::Instance()->addEntry("Fruit_Mouse_Clicked", 0, 0);
 						(*fruitIt)->makeItFall();
 						touchedFruits = true;
 					}
@@ -617,7 +665,13 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 {
 	switch(arg.type)
 	{
-		case(HANDS_POSITION_ROT):
+		case(TORSO_POSITION):
+			{
+				kinectTorsoPos_ = Point(arg.handPos.x*screenWidth_/320, arg.handPos.y*screenHeight_/240);
+			}
+			break;
+		case(RIGHT_HAND_POSITION_ROT):
+		case(LEFT_HAND_POSITION_ROT):
 			{
 				kinectHandPos_ = Point(arg.handPos.x*screenWidth_/320, arg.handPos.y*screenHeight_/240);
 
@@ -648,10 +702,38 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 					}
 				}
 
-				if(subLevelState_ == PLAYING && pico_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+
+				if(arg.type == RIGHT_HAND_POSITION_ROT)
 				{
-					LogClass::Instance()->addEntry("Pico_Head", levelState_, 0);
-					pico_->makeHappy();
+					if(subLevelState_ == PLAYING && pico_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+					{
+						if(!picoHeadTouchedRight_)
+						{
+							LogClass::Instance()->addEntry("Pico_Head", levelState_, 0);
+							pico_->makeHappy();
+						}
+						picoHeadTouchedRight_ = true;
+					}
+					else
+					{
+						picoHeadTouchedRight_ = false;
+					}
+				}
+				else
+				{
+					if(subLevelState_ == PLAYING && pico_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
+					{
+						if(!picoHeadTouchedLeft_)
+						{
+							LogClass::Instance()->addEntry("Pico_Head", levelState_, 0);
+							pico_->makeHappy();
+						}
+						picoHeadTouchedLeft_ = true;
+					}
+					else
+					{
+						picoHeadTouchedLeft_ = false;
+					}
 				}
 
 				if(bird_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))

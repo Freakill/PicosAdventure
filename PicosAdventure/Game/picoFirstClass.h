@@ -81,6 +81,8 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 		void executeAnimation(std::string name, float time);
 		void changeExpression(std::string newExpression);
 
+		Point getPosition();
+
 		void setTipsColor(XMFLOAT4 color);
 		void setBodyTexture(TextureClass* texture);
 		void setHat(Object3D* hat);

@@ -95,9 +95,14 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 		float						playingTime_;
 		float						fadeTime_;
 
+		Point						kinectTorsoPos_;
 		Point						kinectHandPos_;
 		ImageClass*					kinectHand_;
 		TextClass*					kinectHandText_;
+
+		// Save positions
+		ClockClass*					savePositionsClock_;
+		float						timeToSavePositions_;
 
 		// Scenario structure
 		ImageClass*					background_;
@@ -112,6 +117,9 @@ class FirstScreenState: public ApplicationState, public Listener<GUIButton, Butt
 
 		// Characters!
 		PicoFirstClass*				pico_;
+		bool						picoHeadTouchedRight_;
+		bool						picoHeadTouchedLeft_;
+		Point						picoScreenPos_;
 
 		bool						activatedSignaledFruit_;
 
