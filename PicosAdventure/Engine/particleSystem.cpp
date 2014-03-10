@@ -18,11 +18,13 @@ ParticleSystem::~ParticleSystem()
 {
 
 }
-bool ParticleSystem::setup(GraphicsManager* graphicsManager, std::string textureFilename, Point initialPosition, float fallDistance)
+bool ParticleSystem::setup(GraphicsManager* graphicsManager, std::string textureFilename, Point initialPosition, float fallDistance, XMFLOAT4 color)
 {
 	bool result;
 
 	graphicsManager_ = graphicsManager;
+
+	particleColor_ = color;
 
 	// Load the texture that is used for the particles.
 	result = loadTexture(graphicsManager->getDevice(), textureFilename);
@@ -97,6 +99,13 @@ void ParticleSystem::destroy()
 	return;
 }
 
+void ParticleSystem::setPosition(Point position)
+{
+	particleInitialPosition_.x = position.x;
+	particleInitialPosition_.y = position.y;
+	particleInitialPosition_.z = position.z;
+}
+
 ID3D11ShaderResourceView* ParticleSystem::getTexture()
 {
 	return textureArray_->getTexturesArray()[0];
@@ -168,7 +177,7 @@ bool ParticleSystem::setupParticleSystem(Point initialPosition, float fallDistan
 	particleSize_ = 0.12f;
 
 	// Set the number of particles to emit per second.
-	particlesPerSecond_ = 75.0f;
+	particlesPerSecond_ = 30.0f;
 
 	// Set the maximum falling distance for particles
 	fallingDistance_ = fallDistance;
@@ -349,9 +358,9 @@ void ParticleSystem::emitParticles(float elapsedTime)
 
 		velocity = particleVelocity_ + (((float)rand()-(float)rand())/RAND_MAX) * particleVelocityVariation_;
 
-		red   = 0.2f;//(((float)rand()-(float)rand())/RAND_MAX) + 0.5f;
-		green = (((float)rand()-(float)rand())/RAND_MAX) + 0.5f;
-		blue  = 0.2f;//(((float)rand()-(float)rand())/RAND_MAX) + 0.5f;
+		red   = (((float)rand()-(float)rand())/RAND_MAX) + particleColor_.x;
+		green = (((float)rand()-(float)rand())/RAND_MAX) + particleColor_.y;
+		blue  = (((float)rand()-(float)rand())/RAND_MAX) + particleColor_.z;
 
 		// Now since the particles need to be rendered from back to front for blending we have to sort the particle array.
 		// We will sort using Z depth so we need to find where in the list the particle should be inserted.

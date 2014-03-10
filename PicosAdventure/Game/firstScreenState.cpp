@@ -161,11 +161,17 @@ bool FirstScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 		return false;
 	}
 
-	if(!spaceShip_->setup(graphicsManager_))
+	if(!spaceShip_->setup(graphicsManager_, NULL))
 	{
 		MessageBoxA(NULL, "Could not initialize the SpaceShip.", "Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
+	spaceShip_->setInitialPosition(Point(40.0f, 25.0f, -5.0f));
+	spaceShip_->setPosition(Point(40.0f, 25.0f, -5.0f));
+	spaceShip_->setScale(Vector(0.03f, 0.03f, 0.03f));
+	spaceShip_->setRotation(XM_PI/1.5f, XM_PI, XM_PI/8.0f);
+	spaceShip_->goToPosition(Point(-20.0f, 0.0f, 30.0f));
+
 	spaceshipSoundTime_ = 7.0f;
 	spaceshipSoundPlayed_ = false;
 
@@ -486,6 +492,20 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 				LogClass::Instance()->addEntry("Polaroids_Forced", levelState_, 0);
 			}
 			break;
+		case 83: //S
+		case 115: //s
+			{
+				if(levelState_ == ENDING)
+				{
+					LogClass::Instance()->addEntry("User_Bye", levelState_, 0);
+					pico_->makeLeave();
+				}
+				else
+				{
+					pico_->sayHello();
+				}
+			}
+			break;
 		case 13: // Enter
 			{
 				bird_->setStealFood(!bird_->getStealFood());
@@ -501,7 +521,7 @@ void FirstScreenState::notify(InputManager* notifier, InputStruct arg)
 			break;
 		case 32: // Space
 			{
-				bird_->scared();
+				bird_->scared(true, false);
 				LogClass::Instance()->addEntry("Bird_Scared_Keyboard", levelState_, 0);
 			}
 			break;
@@ -686,8 +706,11 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 				{
 					if((*fruitIt)->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
 					{
-						(*fruitIt)->shakeIt();
-						soundManager_->playLeaves();
+						if(!bird_->getIsTeasing())
+						{
+							(*fruitIt)->shakeIt();
+							soundManager_->playLeaves();
+						}
 						touchedFruits = true;
 					}
 					touchedFruit++;
@@ -738,7 +761,7 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 
 				if(bird_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
 				{
-					bird_->scared();
+					bird_->scared(false, true);
 				}
 
 				if(!firstFallen_ && subLevelState_ == PLAYING && levelState_ == FIRST_LEVEL && firstAppleCollisionTest_->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
@@ -754,7 +777,7 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 			{
 				if(subLevelState_ == PLAYING)
 				{
-					bool touchedFruits = false;
+					/*bool touchedFruits = false;
 					std::vector<FruitClass*>::iterator fruitIt;
 					for(fruitIt = fruits_.begin(); fruitIt != fruits_.end(); fruitIt++)
 					{
@@ -768,12 +791,12 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 					{
 						LogClass::Instance()->addEntry("User_Hi", levelState_, 0);
 						pico_->sayHello();
-					}
+					}*/
 				}
 				if(levelState_ == ENDING)
 				{
-					LogClass::Instance()->addEntry("User_Bye", levelState_, 0);
-					pico_->makeLeave();
+					/*LogClass::Instance()->addEntry("User_Bye", levelState_, 0);
+					pico_->makeLeave();*/
 				}
 			}
 		default:
@@ -1323,3 +1346,5 @@ void FirstScreenState::changeLevel(LevelState level)
 	// Reset clock
 	gameClock_->reset();
 }
+
+

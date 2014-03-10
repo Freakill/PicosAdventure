@@ -12,6 +12,7 @@ PicoSecondClass::PicoSecondClass()
 	waitedTime_ = 0.0f;
 	eatingWaitTime_ = 0.0f;
 	celebratingWaitTime_ = 0.0f;
+	workingTime_ = 0.0f;
 
 	position_.x = 0.0f;
 	position_.y = 0.0f;
@@ -49,21 +50,12 @@ PicoSecondClass::~PicoSecondClass()
 
 }
 
-bool PicoSecondClass::setup(GraphicsManager* graphicsManager, CameraClass* camera)
+bool PicoSecondClass::setup(GraphicsManager* graphicsManager, CameraClass* camera, SoundSecondClass* soundManager)
 {
 	camera_ = camera;
+	soundManager_ = soundManager;
 
-	body_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossCuerpo");
-	tips_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossExtremidades");
-	eyes_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossOjos");
-	hat_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "gorroFrutas");
-
-	// Set specific multitexture shader for tips and increment textures array
-	Shader3DClass* shaderTemp = Shader3DFactory::Instance()->CreateShader3D("MultiTextureShader3D", graphicsManager);
-	tips_->setShader3D(shaderTemp);
-
-	tips_->getTextureArrayClass()->setNumberTextures(2);
-
+	loadConfiguration(graphicsManager);
 	loadExpressions(graphicsManager);
 
 	collisionTest_ = new SphereCollision();
@@ -109,12 +101,23 @@ bool PicoSecondClass::setup(GraphicsManager* graphicsManager, CameraClass* camer
 	}
 	inactivityClock_->reset();
 
+	// We set the times to control behaviour flow
 	eatingWaitTime_ = 2.0f;
 	celebratingWaitTime_ = 1.2f;
+	workingTime_ = 4.0f;
+	inactivityTime_ = 10.0f;
+
+	pointingPieces_ = false;
 
 	int screenWidth, screenHeight;
 	graphicsManager->getScreenSize(screenWidth, screenHeight);
 
+	// Pieces
+	fallenPieces_.clear();
+	goingToPiece_ = false;
+	draggingPiece_ = false;
+
+	// Debug
 	info_ = new TextClass();
 	if(!info_)
 	{
@@ -128,7 +131,7 @@ bool PicoSecondClass::setup(GraphicsManager* graphicsManager, CameraClass* camer
 		return false;
 	}
 
-	setToRest();
+	makeRest(false);
 
 	return true;
 }
@@ -156,16 +159,80 @@ void PicoSecondClass::update(float elapsedTime)
 	{
 		case WAITING:
 			{
-				
+				// If when waiting a fruit falls (or there are fallen pieces waiting), we make Pico go for it :)
+				if(fallenPieces_.size() > 0)
+				{
+					changeExpression("sorpresa");
+					soundManager_->playSurprise();
+
+					Point positionFirstPiece = fallenPieces_.front()->getPosition();
+					positionFirstPiece.x += 0.7f;
+					goToPosition(positionFirstPiece);
+
+					goingToPiece_ = true;
+				}
+
+				if(inactivityClock_->getTime() > inactivityTime_)
+				{
+					if(!pointingPieces_)
+					{
+						changeAnimation("point_right", 0.4f);
+						changeExpression("normal");
+						soundManager_->playPointing();
+
+						pointingPieces_ = true;
+						inactivityClock_->reset();
+					}
+					else
+					{
+						changeAnimation("idle", 0.4f);
+						changeExpression("normal");
+
+						pointingPieces_ = false;
+						inactivityClock_->reset();
+					}
+				}
 			}
 			break;
 		case WALKING:
 			{
+				// Update walk position
 				walk(elapsedTime);
 
-				if(checkPicoArrivedObjective())
+				// If Pico is walking because he is dragging the piece to spaceship,
+				// we update piece position
+				if(draggingPiece_)
 				{
-					
+					Point newPiecePosition = getPosition();
+					newPiecePosition.x -= 0.7f;
+					fallenPieces_.front()->setPosition(newPiecePosition);
+				}
+
+				// If there are fallen pieces and pico has arrived to objective
+				if(fallenPieces_.size() > 0 && checkPicoArrivedObjective())
+				{
+					// We make him turn if he was going to a piece, and walk to the spaceship
+					if(goingToPiece_)
+					{
+						if(lookAtCamera(true))
+						{
+							makeRest(false);
+							
+							Point spaceShipWorkingPosition = spaceShipPosition_;
+							spaceShipWorkingPosition.x += 1.2f;
+							goToPosition(spaceShipWorkingPosition);
+							goingToPiece_ = false;
+							draggingPiece_ = true;
+						}
+					}
+					// We make him put piece in its place and work
+					else if(draggingPiece_)
+					{
+						fallenPieces_.front()->setFinalPosition();
+						draggingPiece_ = false;
+
+						makeWork();
+					}
 				}
 			}
 			break;
@@ -192,6 +259,27 @@ void PicoSecondClass::update(float elapsedTime)
 		case LEAVING:
 			{
 				walk(elapsedTime);
+			}
+			break;
+		case WORKING:
+			{
+				soundManager_->playFile("fixing", false);
+
+				if(inactivityClock_->getTime() > workingTime_)
+				{
+					// Force walking animation
+					changeAnimation("walk", 0.1f);
+
+					if(lookAtCamera(true))
+					{
+						// When we are finished, we take out the piece just mounted
+						fallenPieces_.pop_front();
+
+						changeAnimation("idle", 0.1f);
+						picoState_ = WAITING;
+						inactivityClock_->reset();
+					}
+				}
 			}
 			break;
 		default:
@@ -331,6 +419,36 @@ void PicoSecondClass::setLevelState(int level)
 	levelState_ = level;
 }
 
+Point PicoSecondClass::getPosition()
+{
+	return position_;
+}
+
+bool PicoSecondClass::checkPicoArrivedObjective()
+{
+	if(position_.x < objective_.x+0.05 && position_.x > objective_.x-0.05 && position_.z < objective_.z+0.05 && position_.z > objective_.z-0.05)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool PicoSecondClass::isPicoWaiting()
+{
+	if(picoState_ == WAITING)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void PicoSecondClass::setSpaceShipPosition(Point position)
+{
+	spaceShipPosition_ = position;
+}
+
 void PicoSecondClass::goToPosition(Point position)
 {
 	changeAnimation("walk", 0.4f);
@@ -342,11 +460,20 @@ void PicoSecondClass::goToPosition(Point position)
 	picoState_ = WALKING;
 }
 
-void PicoSecondClass::setToRest()
+void PicoSecondClass::makeCelebrate()
 {
-	if(lookAtCamera(false))
+	changeExpression("feliz");
+	executeAnimation("celebration", 0.2f);
+	soundManager_->playCelebrate();
+	inactivityClock_->reset();
+}
+
+void PicoSecondClass::makeGreeting()
+{
+	if(picoState_ == WAITING)
 	{
-		picoState_ = WAITING;
+		executeAnimation("hola", 0.2f);
+		soundManager_->playHi();
 		inactivityClock_->reset();
 	}
 }
@@ -356,15 +483,14 @@ void PicoSecondClass::makeHappy()
 	if(picoState_ == WAITING)
 	{
 		changeExpression("feliz");
+		inactivityClock_->reset();
 	}
 }
 
-void PicoSecondClass::sayHello()
+void PicoSecondClass::makeLeave()
 {
-	if(picoState_ == WAITING)
-	{
-		executeAnimation("hola", 0.2f);
-	}
+	goToPosition(Point(-35.25f, 0.0f, -3.0f));
+	picoState_ = LEAVING;
 }
 
 void PicoSecondClass::makePointing()
@@ -383,40 +509,29 @@ void PicoSecondClass::makePointing()
 	inactivityClock_->reset();
 }
 
-void PicoSecondClass::makeLeave()
+void PicoSecondClass::makeRest(bool lookCamera)
 {
-	goToPosition(Point(-35.25f, 0.0f, -3.0f));
-	picoState_ = LEAVING;
+	if(lookCamera)
+	{
+		if(lookAtCamera(false))
+		{
+			picoState_ = WAITING;
+			inactivityClock_->reset();
+		}
+	}
+	else
+	{
+		changeAnimation("idle", 0.2f);
+		picoState_ = WAITING;
+		inactivityClock_->reset();
+	}
 }
 
-Point PicoSecondClass::getPosition()
+void PicoSecondClass::makeWork()
 {
-	return position_;
-}
-
-void PicoSecondClass::setTipsColor(XMFLOAT4 color)
-{
-	tipsColor_ = color;
-}
-
-void PicoSecondClass::setBodyTexture(TextureClass* texture)
-{
-	body_->getTextureArrayClass()->getTexturesArray()[0] = texture->getTexture();
-}
-
-void PicoSecondClass::setHat(Object3D* hat)
-{
-	hat_ = hat;
-}
-
-void PicoSecondClass::setBody(Object3D* body)
-{
-	body_ = body;
-}
-
-void PicoSecondClass::setTips(Object3D* tips)
-{
-	tips_ = tips;
+	changeAnimation("eat", 0.4f);
+	inactivityClock_->reset();
+	picoState_ = WORKING;
 }
 
 SphereCollision* PicoSecondClass::getCollisionSphere()
@@ -443,7 +558,7 @@ void PicoSecondClass::walk(float elapsedTime)
 	velocity_.z = objective_.z - position_.z;
 
 	Vector normalizedVelocity = velocity_.normalize();
-	velocity_ = normalizedVelocity * 1.8f;
+	velocity_ = normalizedVelocity * 1.5f;
 
 	float newRotY_ = acos(normalizedVelocity.z);
 	if(normalizedVelocity.x < 0)
@@ -523,16 +638,6 @@ bool PicoSecondClass::lookAtCamera(bool check)
 	}
 }
 
-bool PicoSecondClass::checkPicoArrivedObjective()
-{
-	if(position_.x < objective_.x+0.05 && position_.x > objective_.x-0.05 && position_.z < objective_.z+0.05 && position_.z > objective_.z-0.05)
-	{
-		return true;
-	}
-
-	return false;
-}
-
 void PicoSecondClass::notify(InputManager* notifier, InputStruct arg)
 {
 	switch(arg.keyPressed){
@@ -546,7 +651,20 @@ void PicoSecondClass::notify(InputManager* notifier, InputStruct arg)
 
 void PicoSecondClass::notify(PieceClass* notifier, Point arg)
 {
-	
+	fallenPieces_.push_back(notifier);
+}
+
+void PicoSecondClass::setLightPositions(XMFLOAT4 pos1, XMFLOAT4 pos2)
+{
+	PointlightDiffuseShader3DClass* pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>(body_->getShader3D());
+	pointlightShader->setPositions(pos1, pos2);
+	pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>(eyes_->getShader3D());
+	pointlightShader->setPositions(pos1, pos2);
+	pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>(hat_->getShader3D());
+	pointlightShader->setPositions(pos1, pos2);
+
+	PointlightMultiTextureShader3DClass* pointlightMultitextureShader = dynamic_cast<PointlightMultiTextureShader3DClass*>(tips_->getShader3D());
+	pointlightMultitextureShader->setPositions(pos1, pos2);
 }
 
 void PicoSecondClass::changeAnimation(std::string name, float time)
@@ -661,4 +779,90 @@ void PicoSecondClass::loadExpressions(GraphicsManager* graphicsManager)
 		MessageBoxA(NULL, "Could not load the enfadado expression textures!", "Pico - Error", MB_ICONERROR | MB_OK);
 	}
 	expressions_.insert(std::pair<std::string, TextureClass*>("enfadado", temp7));
+}
+
+void PicoSecondClass::loadConfiguration(GraphicsManager* graphicsManager)
+{
+	std::stringstream root;
+	root << "./Data/configuration/level2/pico_configuration.xml";
+
+	//Loading animations XML file
+	pugi::xml_document picoDoc;
+	if(!picoDoc.load_file(root.str().c_str()))
+	{
+		std::stringstream error;
+		error << "Could not load pico .xml file!" << root.str();
+		MessageBoxA(NULL, error.str().c_str(), "PicoSecond - Error", MB_ICONERROR | MB_OK);
+	}
+
+	pugi::xml_node root_node;
+	// Get initial node
+	if(!(root_node = picoDoc.child("pico")))
+	{
+		MessageBoxA(NULL, "Could not find the Pico configuration root node.", "PicoSecond - Error", MB_ICONERROR | MB_OK);
+	}
+
+	// Parse body
+	pugi::xml_node bodyNode;
+	bodyNode = root_node.child("body");
+
+	pugi::xml_node bodyModel;
+	bodyModel = bodyNode.child("model");
+	pugi::xml_text bodyName = bodyModel.text();
+
+	body_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, bodyName.as_string());
+	//Shader3DClass* shaderTemp = Shader3DFactory::Instance()->CreateShader3D("PointlightDiffuseShader3D", graphicsManager);
+	//body_->setShader3D(shaderTemp);
+
+	pugi::xml_node bodyTexture;
+	bodyTexture = bodyNode.child("texture");
+	std::string textureName = bodyTexture.text().as_string();
+	std::string filePath = "./Data/models/miniBossCuerpo/" + textureName + ".dds";
+	TextureClass* temp;
+	temp = new TextureClass;
+	if(!temp)
+	{
+		MessageBoxA(NULL, "Could not create object for texture!", "PicoSecond - Error", MB_ICONERROR | MB_OK);
+	}
+	bool result = temp->setup(graphicsManager->getDevice(), filePath);
+	if(!result)
+	{
+		MessageBoxA(NULL, "Could not load texture!", "PicoSecond - Error", MB_ICONERROR | MB_OK);
+	}
+	body_->getTextureArrayClass()->getTexturesArray()[0] = temp->getTexture();
+
+	// Parse tips
+	pugi::xml_node tipsNode;
+	tipsNode = root_node.child("tips");
+
+	pugi::xml_node tipsModel;
+	tipsModel = tipsNode.child("model");
+	pugi::xml_text tipsName = tipsModel.text();
+
+	tips_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, tipsName.as_string());
+	// Set specific multitexture shader for tips and increment textures array
+	Shader3DClass* shaderTemp = Shader3DFactory::Instance()->CreateShader3D("MultiTextureShader3D", graphicsManager);
+	tips_->setShader3D(shaderTemp);
+
+	pugi::xml_node colorNode;
+	colorNode = tipsNode.child("color");
+	tipsColor_.x = colorNode.attribute("r").as_float();
+	tipsColor_.y = colorNode.attribute("g").as_float();
+	tipsColor_.z = colorNode.attribute("b").as_float();
+
+	eyes_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "miniBossOjos");
+	//shaderTemp = Shader3DFactory::Instance()->CreateShader3D("PointlightDiffuseShader3D", graphicsManager);
+	//eyes_->setShader3D(shaderTemp);
+	
+	// Parse hat
+	pugi::xml_node hatModel;
+	hatModel = root_node.child("hat");
+
+	pugi::xml_text hatName = hatModel.text();
+
+	hat_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, hatName.as_string());
+	//shaderTemp = Shader3DFactory::Instance()->CreateShader3D("PointlightDiffuseShader3D", graphicsManager);
+	//hat_->setShader3D(shaderTemp);
+
+	tips_->getTextureArrayClass()->setNumberTextures(2);
 }

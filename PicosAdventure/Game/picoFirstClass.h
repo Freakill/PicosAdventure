@@ -105,6 +105,8 @@ class PicoFirstClass : public Listener<InputManager, InputStruct>, public Listen
 		bool checkPicoArrivedObjective();
 		void eatFruit();
 
+		void savePicoConfiguration();
+
 		CameraClass* camera_;
 
 		// 3D Models

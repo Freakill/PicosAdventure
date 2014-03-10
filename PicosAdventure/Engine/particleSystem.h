@@ -27,10 +27,12 @@ class ParticleSystem
 		ParticleSystem(const ParticleSystem&);
 		~ParticleSystem();
 
-		bool setup(GraphicsManager* graphicsManager, std::string fileName, Point initialPosition, float fallDistance);
+		bool setup(GraphicsManager* graphicsManager, std::string fileName, Point initialPosition, float fallDistance, XMFLOAT4 color);
 		void update(float elapsedTime, float emit);
 		void draw(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light);
 		void destroy();
+
+		void setPosition(Point position);
 
 		ID3D11ShaderResourceView* getTexture();
 		int getIndexCount();
@@ -58,6 +60,7 @@ class ParticleSystem
 		float particleSize_, particlesPerSecond_;
 		int maxParticles_;
 		float fallingDistance_;
+		XMFLOAT4 particleColor_;
 
 		int currentParticleCount_;
 		float accumulatedTime_;

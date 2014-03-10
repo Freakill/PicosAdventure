@@ -3,6 +3,11 @@
 
 #include "../Application/applicationState.h"
 
+#include "../Game/logClass.h"
+#include "../Game/soundSecondClass.h"
+#include "../Game/spaceShipClass.h"
+#include "../Game/starClass.h"
+
 #include "../Graphics/Cal3DModelClass.h"
 #include "../Graphics/textureClass.h"
 #include "../Graphics/lightClass.h"
@@ -13,6 +18,7 @@
 #include "../GUI/GUIManager.h"
 
 #include "../Engine/Object3DFactory.h"
+#include "../Engine/particleSystem.h"
 
 #include "../Utils/clockClass.h"
 
@@ -27,17 +33,28 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 		{
 			INTRODUCTION,
 			MOUNTING = 1,
+			TRANSITION,
+			INTRO_COLLECTING,
 			COLLECTING,
 			ENDING
 		};
 
 	enum IntroLevel
 		{
+			GREETING,
 			TO_PIECE,
 			LIGHT_IT,
 			DRAG_IT,
 			WORK,
-			GIVE_POWER
+			GIVE_POWER,
+			POWER_GIVEN
+		};
+
+	enum StarsIntroLevel
+		{
+			FIRST_STAR,
+			FIRST_REACTION,
+			PICO_GUIDING
 		};
 
 	public:
@@ -50,13 +67,22 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 		virtual void draw();
 		virtual void destroy();
 
-		void updatePicoScreenposition(XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix);
-
 		virtual void notify(InputManager* notifier, InputStruct arg);
 		void notify(KinectClass* notifier, KinectStruct arg);
 
 	private:
 		static SecondScreenState secondScreenState_; //singleton
+
+		void updatePicoScreenposition(XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix);
+		void updateIntroduction(float elapsedTime);
+		void updateIntroCollecting(float elapsedTime);
+
+		void updatePieces(float elapsedTime);
+		void updateLightPositions();
+
+		void makeFirstStarFall();
+		void makeStarFall(int i);
+		void makeShipIgnite(int level);
 
 		void loadConfigurationFromXML();
 
@@ -64,12 +90,17 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 		void createScenarioObject(std::string scenario, std::string xmlName);
 
 		bool loadPieces();
+		bool loadStars();
+
+		bool powerToUser(float elapsedTime);
 
 		void changeLevel(LevelState level);
 
 		CameraClass*				camera_;
 		LightClass*					light_;
 		ClockClass*					gameClock_;
+		SoundSecondClass*			soundManager_;
+		KinectClass*				kinectClass_;
 
 		int							screenWidth_;
 		int							screenHeight_;
@@ -77,14 +108,29 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 		// Game state and control variables
 		LevelState					levelState_;
 		IntroLevel					introLevelState_;
+		StarsIntroLevel				starsIntroLevelState_;
 
 		float						playingTime_;
 		float						fadeTime_;
 
+		int							starLevel_;
+		bool						starsFalling_;
+		float						starFallTime_;
+		float						betweenStarsTime_;
+		Point						initialPositions_[3];
+		Point						finalPositions_[3];
+
+		bool						hasPicoGreeted_;
+
+		// Introduction control variables
+		ClockClass*					introClock_;
+		float						timeGreeting_;
+
 		// Kinect
-		Point						kinectHandPos_;
-		ImageClass*					kinectHand_;
-		TextClass*					kinectHandText_;
+		Point						kinectHandViewPos_[2];
+		Point						kinectHandWorldPos_[2];
+		Point						kinectHoldViewPos_;
+		Point						kinectHoldWorldPos_;
 
 		// Scenario structure
 		ImageClass*					background_;
@@ -93,18 +139,28 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 		std::vector<Object3D*>		scenario_;
 		float						terrainHeight_;
 
-		Object3D*					spaceShipWireframe_;
+		//Object3D*					spaceShipObject_;
+		SpaceShipClass*				spaceShip_;
 		std::vector<PieceClass*>	pieces_;
+		int							spaceShipLevel_;
 
 		PicoSecondClass*			pico_;
 		Point						picoScreenPos_;
+		LightClass*					picoLight_;
+
+		StarClass*					stars_[3];
+		float						timeToWaitFirstStar_;
 
 		// Pointlights
+		Object3D*					lightBody_;
 		XMFLOAT4					lightPos_[2];
+		ParticleSystem*				lightParticles_[2];
 
 		// Debug
 		bool						debug_;
 		TextClass*					FPS_;
+		TextClass*					kinectHands_;
+		TextClass*					lightPositions_;
 };
 
 #endif //_SECOND_SCREEN_STATE_H_

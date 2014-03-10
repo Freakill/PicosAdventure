@@ -101,7 +101,6 @@ void TextureArrayClass::destroy()
 	return;
 }
 
-
 ID3D11ShaderResourceView** TextureArrayClass::getTexturesArray()
 {
 	return textures_;

@@ -76,7 +76,7 @@ bool BirdClass::setup(GraphicsManager* graphicsManager, SoundFirstClass* soundMa
 	stealFood_ = false;
 
 	collisionTest_ = new SphereCollision();
-	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 1.3f);
+	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 1.0f);
 
 	activateAlert_ = new ClockClass();
 	if(!activateAlert_)
@@ -273,9 +273,9 @@ void BirdClass::goToPosition(Point position)
 	birdState_ = FLYING;
 }
 
-void BirdClass::scared()
+void BirdClass::scared(bool force, bool hand)
 {
-	if(birdState_ != HIDDEN && birdState_ != RUNNING_AWAY)
+	if(birdState_ == TEASING || (birdState_ == FLYING && !hand) || force)
 	{
 		notifyListeners(true);
 
@@ -295,6 +295,19 @@ void BirdClass::scared()
 		birdState_ = RUNNING_AWAY;
 		inAlertMode_ = false;
 	}
+}
+
+bool BirdClass::getIsTeasing()
+{
+	if(birdState_ == FLYING || birdState_ == TEASING || birdState_ == RUNNING_AWAY)
+	{
+		return true;
+	}
+	else if(birdState_ == HIDDEN || birdState_ == WAITING)
+	{
+
+	}
+	return false;
 }
 
 float BirdClass::approach(float goal, float current, float dt)
@@ -382,5 +395,5 @@ void BirdClass::notify(FruitClass* notifier, Point arg)
 
 void BirdClass::notify(PicoFirstClass* notifier, bool arg)
 {
-	scared();
+	scared(false, false);
 }

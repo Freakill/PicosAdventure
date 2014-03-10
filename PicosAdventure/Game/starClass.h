@@ -1,5 +1,5 @@
-#ifndef _PIECE_CLASS_H_
-#define _PIECE_CLASS_H_
+#ifndef _STAR_CLASS_H_
+#define _STAR_CLASS_H_
 
 #include "../Engine/Object3DFactory.h"
 #include "../Engine/particleSystem.h"
@@ -12,56 +12,44 @@
 #include "../Math/pointClass.h"
 #include "../Math/vectorClass.h"
 
-#include "../Utils/notifierClass.h"
-
 #include <math.h>
 
-class PieceClass : public Notifier<PieceClass, Point>
+class StarClass
 {
 	private:
-		enum PieceState
+		enum StarState
 			{
-				SPAWNING,
-				IN_TREE,
-				SHACKEN,
+				IN_SKY,
 				FALLING,
-				IN_FLOOR,
-				IN_SPACESHIP
+				IN_FLOOR
 			};
 
 	public:
-		PieceClass();
-		PieceClass(const PieceClass&);
-		~PieceClass();
+		StarClass();
+		StarClass(const StarClass&);
+		~StarClass();
 
-		bool setup(GraphicsManager* graphicsManager, SoundSecondClass* soundManager, std::string fileName, Point finalPos, Point position, float floorHeight, Vector scaling, float rotX, float rotY, float rotZ);
+		bool setup(GraphicsManager* graphicsManager, SoundSecondClass* soundManager, float floorHeight);
 		void update(float elapsedTime);
 		void draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug);
 		void destroy();
 
 		std::string getName();
 
-		void setFinalPosition();
-		void setPosition(Point newPosition);
+		void setInitialPosition(Point position);
+		void setFinalPosition(Point position);
+		void setPosition(Point position);
 		Point getPosition();
-		bool getInFinalPosition();
 
 		void setScale(Vector newScale);
 		Vector getScale();
 
-		void setRotationX(float rotX);
-		float getRotationX();
-		void setRotationY(float rotY);
-		float getRotationY();
-		void setRotationZ(float rotZ);
-		float getRotationZ();
-
 		SphereCollision* getCollisionSphere();
 
-		void lightIt();
 		void makeItFall();
-
+		bool isFalling();
 		bool hasFallen();
+		bool isInTheFloor();
 
 	private:
 		SoundSecondClass* soundManager_;
@@ -69,22 +57,13 @@ class PieceClass : public Notifier<PieceClass, Point>
 		Object3D*	model_;
 		SphereCollision* collisionTest_;
 
-		std::string name_;
-
+		Point		initialPosition_;
 		Point		finalPosition_;
 		Point		position_;
-		Vector		initialScaling_;
-		Vector		endScaling_;
 		Vector		scaling_; 
 		Vector		velocity_;
 
 		float		waitedTime_;
-		float		spawningTime_;
-
-		float		lightLevel_;
-		float		lightedTime_;
-		float		fallTime_;
-		bool		shaken_;
 
 		float		rotX_;
 		float		rotY_; 
@@ -94,8 +73,8 @@ class PieceClass : public Notifier<PieceClass, Point>
 
 		bool		hasFallen_;
 
-		PieceState	pieceState_;
+		StarState	starState_;
 
 };
 
-#endif //_FRUIT_CLASS_H_
+#endif //_STAR_CLASS_H_

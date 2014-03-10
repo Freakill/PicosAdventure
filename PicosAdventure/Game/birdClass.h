@@ -51,7 +51,9 @@ class BirdClass : public Listener<FruitClass, Point>, public Listener<PicoFirstC
 
 		void goToPosition(Point position);
 
-		void scared();
+		void scared(bool force, bool hand);
+
+		bool getIsTeasing();
 
 		SphereCollision* getCollisionSphere();
 

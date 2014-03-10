@@ -11,13 +11,8 @@
 /////////////
 // GLOBALS //
 /////////////
-Texture2D shaderTexture;
+Texture2D shaderTextures[2];
 SamplerState SampleType;
-
-cbuffer LightColorBuffer
-{
-    float4 lightColor[NUM_LIGHTS];
-};
 
 cbuffer LightBuffer
 {
@@ -25,6 +20,17 @@ cbuffer LightBuffer
     float4 diffuseColor;
     float3 lightDirection;
     float  lightPadding;
+};
+
+cbuffer ExpressionBuffer
+{
+	float  expressionPercentage;
+    float3 expressionPadding;
+};
+
+cbuffer LightColorBuffer
+{
+    float4 lightColor[NUM_LIGHTS];
 };
 
 //////////////
@@ -40,7 +46,6 @@ struct PixelInputType
     float3 lightPos2 : TEXCOORD2;
 };
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // Pixel Shader
 ////////////////////////////////////////////////////////////////////////////////
@@ -49,12 +54,20 @@ float4 PixelShader3D(PixelInputType input) : SV_TARGET
     float4 textureColor;
 	float  lightIntensity1, lightIntensity2;
 	float3 lightToPixelVec1, lightToPixelVec2;
-	float dist1, dist2;
+	float  dist1, dist2;
     float4 color, color1, color2;
-	
-	// Sample the texture pixel at this location.
-    textureColor = shaderTexture.Sample(SampleType, input.tex);
+	float4 blendColor;
 
+    // Get the pixel color from the first texture.
+    color1 = shaderTextures[0].Sample(SampleType, input.tex);
+
+    // Get the pixel color from the second texture.
+    color2 = shaderTextures[1].Sample(SampleType, input.tex);
+
+    // Blend the two pixels together and multiply by the gamma value.
+    blendColor = (color1*(1.0-expressionPercentage)) + (color2*expressionPercentage);//) * 2.0;
+	textureColor = saturate(blendColor);
+	
 	//Create the vector between light position and pixels position
 	lightToPixelVec1 = input.lightPos1 - input.worldPos;
 	lightToPixelVec2 = input.lightPos2 - input.worldPos;
@@ -84,6 +97,6 @@ float4 PixelShader3D(PixelInputType input) : SV_TARGET
 
     // Multiply the texture pixel by the combination of all four light colors to get the final result.
     color = saturate(color1 + color2);// * textureColor;
-	
+
     return color;
 }

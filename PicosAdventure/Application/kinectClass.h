@@ -27,9 +27,10 @@ enum messageType
 	{
 		GREETINGS_KINECT,
 		TORSO_POSITION,
-		LEFT_HAND_POSITION_ROT,
-		RIGHT_HAND_POSITION_ROT,
-		HOLD_HANDS
+		RIGHT_HAND_ROT,
+		LEFT_HAND_ROT,
+		HOLD_HANDS,
+		SKELETON_LOST
 	};
 
 struct KinectStruct
@@ -61,6 +62,8 @@ class KinectClass : public Notifier<KinectClass, KinectStruct>
 		void update();
 		void draw();
 		void destroy();
+
+		void setUserColor(XMFLOAT4 color);
 
 	private:
 		Point SkeletonToScreen(Vector4 skeletonPoint, int width, int height);
@@ -102,13 +105,18 @@ class KinectClass : public Notifier<KinectClass, KinectStruct>
 		
 		DWORD           trackedSkeleton_;
 
-		Player players[2];
-		int numPlayer;
+		XMFLOAT4		userColor_;
+
+		int numPlayer,lastNumPlayer;
 		bool risedHand; 
 		int countSwipe;
 		int lastHandPosition,handPosition;
 		double handsDist;
+
+		Player players[2];
 		KinectStruct kinectStruct;
+
+		ClockClass* greetingsClock_;
 };
 
 #endif

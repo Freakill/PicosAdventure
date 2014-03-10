@@ -1,8 +1,12 @@
+<?xml version="1.0"?>
 <pico>
-	<body> miniBossCuerpo </body>
-	<tips> 
-		<model> miniBossExtremidades </model>
-		<color r="1.0" g="1.0" b="1.0"/>
+	<body>
+		<model>miniBossCuerpo</model>
+		<texture>d-cuerpoarmadura</texture>
+	</body>
+	<tips>
+		<model>miniBossExtremidades</model>
+		<color r="1" g="0.5" b="0" />
 	</tips>
-	<hat> gorroFrutas </hat>
+	<hat>gorroPirata</hat>
 </pico>

@@ -37,31 +37,27 @@ SpaceShipClass::~SpaceShipClass()
 {
 }
 
-bool SpaceShipClass::setup(GraphicsManager* graphicsManager)
+bool SpaceShipClass::setup(GraphicsManager* graphicsManager, SoundSecondClass* soundManager)
 {
+	soundManager_ = soundManager;
+
 	model_ = Object3DFactory::Instance()->CreateObject3D("AnimatedObject3D", graphicsManager, "nave");
 
 	AnimatedObject3D* animatedTemp = dynamic_cast<AnimatedObject3D*>(model_);
 	AnimatedCal3DModelClass* cal3dTemp = dynamic_cast<AnimatedCal3DModelClass*>(animatedTemp->getModel());
 	cal3dTemp->setAnimationToPlay("nave", 0.4f);
 
-	initialPosition_.x = 40.0f;
-	initialPosition_.y = 25.0f;
-	initialPosition_.z = -5.0f;
+	spaceShipParticles_ = new ParticleSystem;
+	if(!spaceShipParticles_)
+	{
+		MessageBoxA(NULL, "Could not create light1 particles instance", "SecondScreen - Error", MB_ICONERROR | MB_OK);
+	}
+	if(spaceShipParticles_ && !spaceShipParticles_->setup(graphicsManager, "star", getPosition(), 2.8, XMFLOAT4(1.00f, 1.00f, 0.0f, 1.0f)))
+	{
+		MessageBoxA(NULL, "Could not setup light1 particles object", "SecondScreen - Error", MB_ICONERROR | MB_OK);
+	}
 
-	position_.x = initialPosition_.x;
-	position_.y = initialPosition_.y;
-	position_.z = initialPosition_.z;
-
-	scaling_.x = 0.03f;
-	scaling_.y = 0.03f;
-	scaling_.z = 0.03f;
-	
-	rotX_ = XM_PI/1.5;
-	rotY_ = XM_PI; 
-	rotZ_ = XM_PI/8;
-
-	goToPosition(Point(-20.0f, 0.0f, 30.0f));
+	spaceShipState_ = WAITING;
 
 	return true;
 }
@@ -70,12 +66,40 @@ void SpaceShipClass::update(float elapsedTime)
 {
 	model_->update(elapsedTime);
 
-	//if(checkArrivedObjective())
-	//{
-		fly(elapsedTime);
-	//}
+	switch(spaceShipState_)
+	{
+		case WAITING:
+			{
 
+			}
+			break;
+		case LAUNCHING:
+			{
+				position_.y += velocity_.y*elapsedTime;
 
+				velocity_.y -= 2.0f*elapsedTime;
+
+				if(position_.y < floorHeight_)
+				{
+					soundManager_->playFile("piece_fall", false);
+
+					position_.y = floorHeight_;
+
+					spaceShipState_ = WAITING;
+				}
+			}
+			break;
+		case FLYING:
+			{
+				fly(elapsedTime);
+			}
+			break;
+		default:
+			{
+
+			}
+			break;
+	}
 }
 
 void SpaceShipClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug)
@@ -119,6 +143,67 @@ void SpaceShipClass::goToPosition(Point position)
 	objective_.x = position.x;
 	objective_.y = position.y;
 	objective_.z = position.z;
+
+	spaceShipState_ = FLYING;
+}
+
+void SpaceShipClass::makeLaunch(int level)
+{
+	if(spaceShipState_ == WAITING)
+	{
+		std::stringstream sound;
+		sound << "fuel" << level;
+		//soundManager_->playFile(sound.str(), false);
+
+		velocity_.x = 0.0f;
+		velocity_.y = level*3.0f;
+		velocity_.z = 0.0f;
+
+		spaceShipState_ = LAUNCHING;
+	}
+}
+
+Object3D* SpaceShipClass::getObject()
+{
+	return model_;
+}
+
+void SpaceShipClass::setInitialPosition(Point pos)
+{
+	initialPosition_.x = pos.x;
+	initialPosition_.y = pos.y;
+	initialPosition_.z = pos.z;
+}
+
+void SpaceShipClass::setPosition(Point pos)
+{
+	position_.x = pos.x;
+	position_.y = pos.y;
+	position_.z = pos.z;
+}
+
+Point SpaceShipClass::getPosition()
+{
+	return position_;
+}
+
+void SpaceShipClass::setScale(Vector scale)
+{
+	scaling_.x = scale.x;
+	scaling_.y = scale.y;
+	scaling_.z = scale.z;
+}
+
+void SpaceShipClass::setRotation(float x, float y, float z)
+{
+	rotX_ = x;
+	rotY_ = y;
+	rotZ_ = z;
+}
+
+void SpaceShipClass::setFloorHeight(float floor)
+{
+	floorHeight_ = floor;
 }
 
 void SpaceShipClass::fly(float elapsedTime)

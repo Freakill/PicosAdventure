@@ -29,6 +29,7 @@ class TextureArrayClass
 
 	private:
 		ID3D11ShaderResourceView* textures_[3];
+		std::string				  name_[3];
 		int						  numberTextures_;
 };
 

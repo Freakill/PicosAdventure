@@ -1,4 +1,3 @@
 <configuration>
-	<play_time> 20 </play_time>
-	<fade_time> 5 </fade_time>
+	<greeting_time> 5 </greeting_time>
 </configuration>

@@ -1,29 +1,32 @@
-#include "pointlightDiffuseShader3D.h"
+#include "pointlightMultitextureShader3D.h"
 
 #include "graphicsManager.h"
 
-PointlightDiffuseShader3DClass::PointlightDiffuseShader3DClass():Shader3DClass()
+PointlightMultiTextureShader3DClass::PointlightMultiTextureShader3DClass():Shader3DClass()
 {
+	mixingBuffer_ = 0;
+	mixingPercentage_ = 0;
+
 	lightColorBuffer_ = 0;
 	lightPositionBuffer_ = 0;
 }
 
-PointlightDiffuseShader3DClass::PointlightDiffuseShader3DClass(const PointlightDiffuseShader3DClass&)
+PointlightMultiTextureShader3DClass::PointlightMultiTextureShader3DClass(const PointlightMultiTextureShader3DClass&)
 {
 
 }
 
-PointlightDiffuseShader3DClass::~PointlightDiffuseShader3DClass()
+PointlightMultiTextureShader3DClass::~PointlightMultiTextureShader3DClass()
 {
 
 }
 
-bool PointlightDiffuseShader3DClass::setup(ID3D11Device* device)
+bool PointlightMultiTextureShader3DClass::setup(ID3D11Device* device)
 {
 	bool result;
 
 	// Initialize the vertex and pixel shaders.
-	result = setupShader(device, L"./Data/shaders/vertex_shader_pointlights_3d.vs", L"./Data/shaders/pixel_shader_pointlights_3d.ps");
+	result = setupShader(device, L"./Data/shaders/vertex_shader_multitexture_pointlights_3d.vs", L"./Data/shaders/pixel_shader_multitexture_pointlights_3d.ps");
 	if(!result)
 	{
 		return false;
@@ -32,13 +35,23 @@ bool PointlightDiffuseShader3DClass::setup(ID3D11Device* device)
 	return true;
 }
 
-void PointlightDiffuseShader3DClass::setPositions(XMFLOAT4 pos1, XMFLOAT4 pos2)
+float PointlightMultiTextureShader3DClass::getPercentage()
+{
+	return mixingPercentage_;
+}
+
+void PointlightMultiTextureShader3DClass::setPercentage(float percentage)
+{
+	mixingPercentage_ = percentage;
+}
+
+void PointlightMultiTextureShader3DClass::setPositions(XMFLOAT4 pos1, XMFLOAT4 pos2)
 {
 	lightPos1_ = pos1;
 	lightPos2_ = pos2;
 }
 
-bool PointlightDiffuseShader3DClass::setupShader(ID3D11Device* device, WCHAR* vsFilename, WCHAR* psFilename)
+bool PointlightMultiTextureShader3DClass::setupShader(ID3D11Device* device, WCHAR* vsFilename, WCHAR* psFilename)
 {
 	HRESULT result;
 	ID3D10Blob* errorMessage;
@@ -49,6 +62,7 @@ bool PointlightDiffuseShader3DClass::setupShader(ID3D11Device* device, WCHAR* vs
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
 	D3D11_BUFFER_DESC lightBufferDesc;
+	D3D11_BUFFER_DESC mixingBufferDesc;
 	D3D11_BUFFER_DESC lightColorBufferDesc;
 	D3D11_BUFFER_DESC lightPositionBufferDesc;
 
@@ -239,18 +253,35 @@ bool PointlightDiffuseShader3DClass::setupShader(ID3D11Device* device, WCHAR* vs
 		return false;
 	}
 
+	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
+	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
+	mixingBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	mixingBufferDesc.ByteWidth = sizeof(MixingBufferType);
+	mixingBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	mixingBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	mixingBufferDesc.MiscFlags = 0;
+	mixingBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device->CreateBuffer(&mixingBufferDesc, NULL, &mixingBuffer_);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
 	return true;
 }
 
-bool PointlightDiffuseShader3DClass::setShaderParameters(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, 
+bool PointlightMultiTextureShader3DClass::setShaderParameters(ID3D11DeviceContext* deviceContext, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, 
 					                    XMFLOAT4X4 projectionMatrix, ID3D11ShaderResourceView** textureArray, LightClass* light)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
 	LightBufferType* dataPtr2;
-	LightPositionBufferType* dataPtr3;
-	LightColorBufferType* dataPtr4;
+	MixingBufferType* dataPtr3;
+	LightPositionBufferType* dataPtr4;
+	LightColorBufferType* dataPtr5;
 	unsigned int bufferNumber;
 
 	// Transpose the matrices to prepare them for the shader.
@@ -283,7 +314,7 @@ bool PointlightDiffuseShader3DClass::setShaderParameters(ID3D11DeviceContext* de
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &matrixBuffer_);
 
 	// Set shader texture resource in the pixel shader.
-	deviceContext->PSSetShaderResources(0, 1, textureArray);
+	deviceContext->PSSetShaderResources(0, 2, textureArray);
 
 	// Lock the light constant buffer so it can be written to.
 	result = deviceContext->Map(lightBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -305,10 +336,33 @@ bool PointlightDiffuseShader3DClass::setShaderParameters(ID3D11DeviceContext* de
 	deviceContext->Unmap(lightBuffer_, 0);
 
 	// Set the position of the light constant buffer in the pixel shader.
-	bufferNumber = 1;
+	bufferNumber = 0;
 
 	// Finally set the light constant buffer in the pixel shader with the updated values.
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &lightBuffer_);
+
+	// Lock the light constant buffer so it can be written to.
+	result = deviceContext->Map(mixingBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr3 = (MixingBufferType*)mappedResource.pData;
+
+	// Copy the lighting variables into the constant buffer.
+	dataPtr3->percentage = mixingPercentage_;
+	dataPtr3->padding = XMFLOAT3(0, 0, 0);
+
+	// Unlock the constant buffer.
+	deviceContext->Unmap(mixingBuffer_, 0);
+
+	// Set the position of the light constant buffer in the pixel shader.
+	bufferNumber = 1;
+
+	// Finally set the light constant buffer in the pixel shader with the updated values.
+	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &mixingBuffer_);
 
 	// Lock the light position constant buffer so it can be written to.
 	result = deviceContext->Map(lightPositionBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -318,11 +372,11 @@ bool PointlightDiffuseShader3DClass::setShaderParameters(ID3D11DeviceContext* de
 	}
 
 	// Get a pointer to the data in the constant buffer.
-	dataPtr3 = (LightPositionBufferType*)mappedResource.pData;
+	dataPtr4 = (LightPositionBufferType*)mappedResource.pData;
 
 	// Copy the light position variables into the constant buffer.
-	dataPtr3->lightPosition[0] = lightPos1_;
-	dataPtr3->lightPosition[1] = lightPos2_;
+	dataPtr4->lightPosition[0] = lightPos1_;
+	dataPtr4->lightPosition[1] = lightPos2_;
 
 	// Unlock the constant buffer.
 	deviceContext->Unmap(lightPositionBuffer_, 0);
@@ -341,17 +395,17 @@ bool PointlightDiffuseShader3DClass::setShaderParameters(ID3D11DeviceContext* de
 	}
 
 	// Get a pointer to the data in the constant buffer.
-	dataPtr4 = (LightColorBufferType*)mappedResource.pData;
+	dataPtr5 = (LightColorBufferType*)mappedResource.pData;
 
 	// Copy the light color variables into the constant buffer.
-	dataPtr4->diffuseColor[0] = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	dataPtr4->diffuseColor[1] = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	dataPtr5->diffuseColor[0] = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	dataPtr5->diffuseColor[1] = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	// Unlock the constant buffer.
 	deviceContext->Unmap(lightColorBuffer_, 0);
 
 	// Set the position of the constant buffer in the pixel shader.
-	bufferNumber = 0;
+	bufferNumber = 2;
 
 	// Finally set the constant buffer in the pixel shader with the updated values.
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &lightColorBuffer_);
@@ -359,14 +413,14 @@ bool PointlightDiffuseShader3DClass::setShaderParameters(ID3D11DeviceContext* de
 	return true;
 }
 
-Shader3DClass* __stdcall PointlightDiffuseShader3DClass::Create(GraphicsManager* graphicsManager)
+Shader3DClass* __stdcall PointlightMultiTextureShader3DClass::Create(GraphicsManager* graphicsManager)
 {
-	PointlightDiffuseShader3DClass* pointlightDiffuseShader3DTemp = new PointlightDiffuseShader3DClass;
+	PointlightMultiTextureShader3DClass* pointlightMultitextureShader3DTemp = new PointlightMultiTextureShader3DClass;
 
-	if(!pointlightDiffuseShader3DTemp->setup(graphicsManager->getDevice()))
+	if(!pointlightMultitextureShader3DTemp->setup(graphicsManager->getDevice()))
 	{
 		return NULL;
 	}
 
-	return pointlightDiffuseShader3DTemp;
+	return pointlightMultitextureShader3DTemp;
 }

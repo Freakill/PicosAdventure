@@ -50,6 +50,8 @@ PicoFirstClass::PicoFirstClass()
 	newRotY_ = 0.0f;
 	rotZ_ = 0.0f;
 
+	hatToDraw_ = 0;
+
 	previousFruitEatenID_ = 0;
 	lastFruitEatenID_ = 0;
 }
@@ -423,11 +425,13 @@ void PicoFirstClass::update(float elapsedTime)
 						{
 							celebratingWaitTime_ = 0.7f;
 							changeAnimation("DanceAss", 0.4f);
+							soundManager_->playHappySong();
 						}
 						else if((previousFruitEatenID_ == 2 || previousFruitEatenID_ == 4) && lastFruitEatenID_ == 3)
 						{
 							celebratingWaitTime_ = 0.7f;
 							changeAnimation("DanceAss", 0.4f);
+							soundManager_->playHappySong();
 						}
 						else
 						{
@@ -639,6 +643,8 @@ void PicoFirstClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatr
 
 void PicoFirstClass::destroy()
 {
+	savePicoConfiguration();
+
 	for(int i = 0; i < 3; i++)
 	{
 		// Release the model object
@@ -1157,4 +1163,38 @@ void PicoFirstClass::loadExpressions(GraphicsManager* graphicsManager)
 		MessageBoxA(NULL, "Could not load the enfadado expression textures!", "Pico - Error", MB_ICONERROR | MB_OK);
 	}
 	expressions_.insert(std::pair<std::string, TextureClass*>("enfadado", temp7));
+}
+
+void PicoFirstClass::savePicoConfiguration()
+{
+	pugi::xml_document doc;
+
+	// add node with some name
+	pugi::xml_node node = doc.append_child("pico");
+
+	// add body node
+	pugi::xml_node body = node.append_child("body");
+	pugi::xml_node bodyModel = body.append_child("model");
+	bodyModel.append_child(pugi::node_pcdata).set_value(body_[bodyToDraw_]->getModelName().c_str());
+	pugi::xml_node bodyTexture = body.append_child("texture");
+	bodyTexture.append_child(pugi::node_pcdata).set_value("hola");
+
+	// add tips node
+	pugi::xml_node tips = node.append_child("tips");
+	pugi::xml_node tipsModel = tips.append_child("model");
+	tipsModel.append_child(pugi::node_pcdata).set_value(tips_[tipsToDraw_]->getModelName().c_str());
+	pugi::xml_node tipsColor = tips.append_child("color");
+	tipsColor.append_attribute("r") = tipsColor_.x;
+	tipsColor.append_attribute("g") = tipsColor_.y;
+	tipsColor.append_attribute("b") = tipsColor_.z;
+
+	// add hat node
+	pugi::xml_node hatModel = node.append_child("hat");
+	hatModel.append_child(pugi::node_pcdata).set_value(hats_[hatToDraw_]->getModelName().c_str());
+
+	// Generate fileName
+	std::string fileName = "Data/configuration/level1/pico_configuration.xml";
+
+	// save document to file
+	std::cout << "Saving result: " << doc.save_file(fileName.c_str()) << std::endl;
 }

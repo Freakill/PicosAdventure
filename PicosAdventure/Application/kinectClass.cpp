@@ -214,6 +214,8 @@ bool KinectClass::setup(HWND windowHandler, IDXGISwapChain* swapChain)
         return false;
     }
 
+	userColor_  = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.5f);
+
 	return true;
 }
 
@@ -324,6 +326,11 @@ void KinectClass::destroy()
         nuiSensor_ = 0;
     }
 
+}
+
+void KinectClass::setUserColor(XMFLOAT4 color)
+{
+	userColor_ = color;
 }
 
 HRESULT KinectClass::ProcessDepth()
@@ -498,8 +505,8 @@ HRESULT KinectClass::ProcessSkeleton()
 		}
 
 		KinectStruct kinectTorso = {TORSO_POSITION, torsoScreenCord, Point(0, 0, 0), Point(0,0,0), 0};
-		KinectStruct kinectStruct = {RIGHT_HAND_POSITION_ROT, handRightScreenCoord, elbowRightScreenCoord, Point(0,0,0), rotZ_};
-		KinectStruct kinectStruct2 = {LEFT_HAND_POSITION_ROT, handLeftScreenCoord, elbowRightScreenCoord, Point(0,0,0), rotZ_};
+		KinectStruct kinectStruct = {RIGHT_HAND_ROT, handRightScreenCoord, elbowRightScreenCoord, Point(0,0,0), rotZ_};
+		KinectStruct kinectStruct2 = {LEFT_HAND_ROT, handLeftScreenCoord, elbowRightScreenCoord, Point(0,0,0), rotZ_};
 		notifyListeners(kinectTorso);
 		notifyListeners(kinectStruct);
 		notifyListeners(kinectStruct2);
@@ -662,10 +669,10 @@ HRESULT KinectClass::ComposeImage()
 		}
 		else
 		{
-			outputRGBX_[i*4] = pBackgroundRemovedColor[i*4];
-			outputRGBX_[i*4+1] = pBackgroundRemovedColor[i*4+1];
-			outputRGBX_[i*4+2] = pBackgroundRemovedColor[i*4+2];
-			outputRGBX_[i*4+3] = 128;
+			outputRGBX_[i*4] = pBackgroundRemovedColor[i*4]*userColor_.x;
+			outputRGBX_[i*4+1] = pBackgroundRemovedColor[i*4+1]*userColor_.y;
+			outputRGBX_[i*4+2] = pBackgroundRemovedColor[i*4+2]*userColor_.z;
+			outputRGBX_[i*4+3] = 256*userColor_.w;
 		}
     }
 

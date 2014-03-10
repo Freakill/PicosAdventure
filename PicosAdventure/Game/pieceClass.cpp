@@ -4,9 +4,9 @@ PieceClass::PieceClass()
 {
 	model_ = 0;
 
-	initialPosition_.x = 0.0f;
-	initialPosition_.y = 0.0f;
-	initialPosition_.z = 0.0f;
+	finalPosition_.x = 0.0f;
+	finalPosition_.y = 0.0f;
+	finalPosition_.z = 0.0f;
 
 	position_.x = 0.0f;
 	position_.y = 0.0f;
@@ -43,15 +43,17 @@ PieceClass::~PieceClass()
 {
 }
 
-bool PieceClass::setup(GraphicsManager *graphicsManager, std::string fileName, Point position, float floorHeight, Vector scaling, float rotX, float rotY, float rotZ)
+bool PieceClass::setup(GraphicsManager *graphicsManager, SoundSecondClass* soundManager, std::string fileName, Point finalPos, Point position, float floorHeight, Vector scaling, float rotX, float rotY, float rotZ)
 {
 	model_ = Object3DFactory::Instance()->CreateObject3D("StaticObject3D", graphicsManager, fileName);
 
+	soundManager_ = soundManager;
+
 	name_ = fileName;
 
-	initialPosition_.x = position.x;
-	initialPosition_.y = position.y;
-	initialPosition_.z = position.z;
+	finalPosition_.x = finalPos.x;
+	finalPosition_.y = finalPos.y;
+	finalPosition_.z = finalPos.z;
 
 	position_.x = position.x;
 	position_.y = position.y;
@@ -124,22 +126,26 @@ void PieceClass::update(float elapsedTime)
 			{
 				if(shaken_)
 				{
-					lightedTime_ += elapsedTime;
+					lightedTime_ += elapsedTime/2;
 					shaken_ = false;
 					return;
 				}
 				else
 				{
-					lightedTime_ -= 0.008;
+					lightedTime_ -= 0.002;
 					if(lightedTime_ < 0.0)
 					{
 						lightedTime_ = 0.0f;
 					}
 				}
+
+				lightLevel_ = lightedTime_/fallTime_;
 			}
 			break;
 		case FALLING:
 			{
+				lightLevel_ = 1.0f;
+
 				position_.x += velocity_.x*elapsedTime;
 				position_.y += velocity_.y*elapsedTime;
 				position_.z += velocity_.z*elapsedTime;
@@ -154,9 +160,13 @@ void PieceClass::update(float elapsedTime)
 			break;
 		case IN_FLOOR:
 			{
-				
+				lightLevel_ = 1.0f;
 			}
 			break;
+		case IN_SPACESHIP:
+			{
+				lightLevel_ = 1.0f;
+			}
 	}
 }
 
@@ -192,7 +202,6 @@ void PieceClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, 
 	LightClass tempLight;
 	tempLight.setAmbientColor(light->getAmbientColor().x, light->getAmbientColor().y, light->getAmbientColor().z, light->getAmbientColor().w);
 	tempLight.setDirection(light->getDirection().x, light->getDirection().y, light->getDirection().z);
-	lightLevel_ = lightedTime_/fallTime_;
 	tempLight.setDiffuseColor(lightLevel_, lightLevel_, lightLevel_, 1.0f);
 
 	model_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, &tempLight);
@@ -239,6 +248,8 @@ void PieceClass::makeItFall()
 {
 	if(pieceState_ == IN_TREE)
 	{
+		soundManager_->playFile("piece_spaceship", false);
+
 		velocity_.x = 0.0f;
 		velocity_.y = -1.6f;
 		velocity_.z = 0.0f;
@@ -248,6 +259,14 @@ void PieceClass::makeItFall()
 	}
 }
 
+void PieceClass::setFinalPosition()
+{
+	position_.x = finalPosition_.x;
+	position_.y = finalPosition_.y;
+	position_.z = finalPosition_.z;
+
+	pieceState_ = IN_SPACESHIP;
+}
 
 void PieceClass::setPosition(Point position)
 {
@@ -259,6 +278,16 @@ void PieceClass::setPosition(Point position)
 Point PieceClass::getPosition()
 {
 	return position_;
+}
+
+bool PieceClass::getInFinalPosition()
+{
+	if(position_.x == finalPosition_.x && position_.y == finalPosition_.y && position_.z == finalPosition_.z)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 void PieceClass::setScale(Vector scale)
