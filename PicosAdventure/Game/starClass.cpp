@@ -54,7 +54,7 @@ bool StarClass::setup(GraphicsManager *graphicsManager, SoundSecondClass* soundM
 	floorHeight_ = floorHeight;
 
 	collisionTest_ = new SphereCollision();
-	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 0.5f);
+	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 1.2f);
 
 	hasFallen_ = false;
 	good_ = false;

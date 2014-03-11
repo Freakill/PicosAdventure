@@ -71,7 +71,7 @@ bool PicoSecondClass::setup(GraphicsManager* graphicsManager, CameraClass* camer
 
 	lookAtCamera(false);
 
-	tipsColor_ = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	//tipsColor_ = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	tipsLight_ = new LightClass;
 	tipsLight_->setDiffuseColor(tipsColor_.x, tipsColor_.y, tipsColor_.z, 1.0f);
@@ -104,7 +104,7 @@ bool PicoSecondClass::setup(GraphicsManager* graphicsManager, CameraClass* camer
 	// We set the times to control behaviour flow
 	eatingWaitTime_ = 2.0f;
 	celebratingWaitTime_ = 1.2f;
-	workingTime_ = 4.0f;
+	workingTime_ = 3.75f;
 	inactivityTime_ = 10.0f;
 
 	pointingPieces_ = false;

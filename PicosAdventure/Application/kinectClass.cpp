@@ -506,7 +506,7 @@ HRESULT KinectClass::ProcessSkeleton()
 			
 			KinectStruct kinectStruct = {HOLD_HANDS,players[0].leftHandScreenCoord,players[0].leftShoulderScreenCoord,players[1].rightShoulderScreenCoord,TRUE};
 			//Check distance between hands 
-			if (handsDist < 0.1)
+			if (handsDist < 0.3)
 			{
 				kinectStruct.boolean = TRUE;
 			}

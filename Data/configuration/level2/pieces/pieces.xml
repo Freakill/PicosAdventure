@@ -8,7 +8,7 @@
 		<rotation x="0" y="0" z="0" />
 		<collision>
 			<position x="0.0" y="0.2" z="0.0" />
-			<radius> 0.4 </radius>
+			<radius> 0.59 </radius>
 		</collision>
 	</piece>
 	<piece>
@@ -19,7 +19,7 @@
 		<rotation x="0" y="0" z="0" />
 		<collision>
 			<position x="0.0" y="0.2" z="0.0" />
-			<radius> 0.4 </radius>
+			<radius> 0.59 </radius>
 		</collision>
 	</piece>
 	<piece>
@@ -30,7 +30,7 @@
 		<rotation x="0" y="0" z="0" />
 		<collision>
 			<position x="0.0" y="0.2" z="0.0" />
-			<radius> 0.4 </radius>
+			<radius> 0.59 </radius>
 		</collision>
 	</piece>
 	<piece>
@@ -41,7 +41,7 @@
 		<rotation x="0" y="0" z="0" />
 		<collision>
 			<position x="0.0" y="0.2" z="0.0" />
-			<radius> 0.4 </radius>
+			<radius> 0.59 </radius>
 		</collision>
 	</piece>
 	<piece>
@@ -52,7 +52,7 @@
 		<rotation x="0" y="0" z="0" />
 		<collision>
 			<position x="0.0" y="0.2" z="0.0" />
-			<radius> 0.4 </radius>
+			<radius> 0.59 </radius>
 		</collision>
 	</piece>
 	<piece>
@@ -63,7 +63,7 @@
 		<rotation x="0" y="0" z="0" />
 		<collision>
 			<position x="0.0" y="0.2" z="0.0" />
-			<radius> 0.4 </radius>
+			<radius> 0.59 </radius>
 		</collision>
 	</piece>
 	<piece>
@@ -74,7 +74,7 @@
 		<rotation x="0" y="0" z="0" />
 		<collision>
 			<position x="0.0" y="0.2" z="0.0" />
-			<radius> 0.4 </radius>
+			<radius> 0.59 </radius>
 		</collision>
 	</piece>
 	<piece>
@@ -85,7 +85,7 @@
 		<rotation x="0" y="5.10509" z="0" />
 		<collision>
 			<position x="0.0" y="0.2" z="0.0" />
-			<radius> 0.4 </radius>
+			<radius> 0.59 </radius>
 		</collision>
 	</piece>
 	<piece>
@@ -96,7 +96,7 @@
 		<rotation x="0" y="0" z="0" />
 		<collision>
 			<position x="0.0" y="0.2" z="0.0" />
-			<radius> 0.4 </radius>
+			<radius> 0.59 </radius>
 		</collision>
 	</piece>
 	<piece>
@@ -107,7 +107,7 @@
 		<rotation x="0" y="0" z="0" />
 		<collision>
 			<position x="0.0" y="0.2" z="0.0" />
-			<radius> 0.4 </radius>
+			<radius> 0.59 </radius>
 		</collision>
 	</piece>
 </pieces>

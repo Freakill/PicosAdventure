@@ -233,7 +233,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	starFallTime_ = 8.0f;
 	betweenStarsTime_ = 10.0f;
 
-	initialPositions_[0].x = -2.3f;
+	initialPositions_[0].x = -2.1f;
 	initialPositions_[0].y = 8.2f;
 	initialPositions_[0].z = -3.0f;
 
@@ -241,11 +241,11 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	initialPositions_[1].y = 8.2f;
 	initialPositions_[1].z = -3.0f;
 
-	initialPositions_[2].x = 2.3f;
+	initialPositions_[2].x = 2.1f;
 	initialPositions_[2].y = 8.2f;
 	initialPositions_[2].z = -3.0f;
 
-	finalPositions_[0].x = -2.3f;
+	finalPositions_[0].x = -2.1f;
 	finalPositions_[0].y = terrainHeight_;
 	finalPositions_[0].z = -3.5f;
 
@@ -253,7 +253,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	finalPositions_[1].y = terrainHeight_;
 	finalPositions_[1].z = -3.5f;
 
-	finalPositions_[2].x = 2.3f;
+	finalPositions_[2].x = 2.1f;
 	finalPositions_[2].y = terrainHeight_;
 	finalPositions_[2].z = -3.5f;
 
@@ -338,6 +338,19 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 
 	// Change kinect settings to make user being drawn darker
 	kinectClass_ = kinectManager;
+
+	kinectHand_ = new ImageClass;
+	if(!kinectHand_)
+	{
+		MessageBoxA(NULL, "Could not initialize the kinectHand_ image instance.", "SecondScreen - Error", MB_OK);
+		return false;
+	}
+
+	if(!kinectHand_->setup(graphicsManager_->getDevice(), graphicsManager_->getShader2D(), screenWidth_, screenHeight_, "sky_background", 30, 30))
+	{
+		MessageBoxA(NULL, "Could not setup the kinectHand_ image.", "SecondScreen - Error", MB_OK);
+		return false;
+	}
 
 	kinectClass_->setUserColor(XMFLOAT4(0.25f, 0.25f, 0.35f, 0.5f));
 
@@ -644,6 +657,9 @@ void SecondScreenState::draw()
 			FPS_->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, orthoMatrix);
 			kinectHands_->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, orthoMatrix);
 			lightPositions_->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, orthoMatrix);
+			kinectHand_->draw(graphicsManager_->getDeviceContext(), ((screenWidth_/2)*-1)+kinectHandViewPos_[0].x, ((screenHeight_/2))-kinectHandViewPos_[0].y, worldMatrix, viewMatrix, orthoMatrix, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+			kinectHand_->draw(graphicsManager_->getDeviceContext(), ((screenWidth_/2)*-1)+kinectHandViewPos_[1].x, ((screenHeight_/2))-kinectHandViewPos_[1].y, worldMatrix, viewMatrix, orthoMatrix, XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
+			kinectHand_->draw(graphicsManager_->getDeviceContext(), ((screenWidth_/2)*-1)+kinectHoldViewPos_.x, ((screenHeight_/2))-kinectHoldViewPos_.y, worldMatrix, viewMatrix, orthoMatrix, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 		graphicsManager_->turnOffAlphaBlending();
 		graphicsManager_->turnZBufferOn();
 	}
@@ -905,7 +921,7 @@ void SecondScreenState::updateParticlesPositions()
 
 void SecondScreenState::makeFirstStarFall()
 {
-	stars_[0]->setInitialPosition(Point(5.75f, 8.2f, -1.0f));
+	stars_[0]->setInitialPosition(Point(-2.5f, 8.2f, -1.0f));
 	stars_[0]->setFinalPosition(spaceShip_->getPosition());
 	stars_[0]->makeItFall(true);
 }

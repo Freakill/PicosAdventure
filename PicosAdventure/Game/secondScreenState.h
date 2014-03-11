@@ -139,6 +139,7 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 		Point						kinectHandWorldPos_[2];
 		Point						kinectHoldViewPos_;
 		Point						kinectHoldWorldPos_;
+		ImageClass*					kinectHand_;
 
 		// Scenario structure
 		ImageClass*					background_;
