@@ -91,7 +91,7 @@ void StarClass::update(float elapsedTime)
 				velocity_.z = finalPosition_.z - initialPosition_.z;
 
 				Vector normalizedVelocity = velocity_.normalize();
-				velocity_ = normalizedVelocity * 3.5f;
+				velocity_ = normalizedVelocity * 2.0f;
 
 				position_.x += velocity_.x*elapsedTime;
 				position_.y += velocity_.y*elapsedTime;

@@ -132,7 +132,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 
 	// Lights
 	lightPos_[0] = XMFLOAT4(-3.5f, 2.0f, -4.0f, 0.0f);
-	lightPos_[1] = XMFLOAT4(-30.5f, 20.0f, -40.0f, 0.0f);
+	lightPos_[1] = XMFLOAT4(-30.5f, 20.0f, -4.0f, 0.0f);
 
 	lightBody_ = Object3DFactory::Instance()->CreateObject3D("StaticObject3D", graphicsManager_, "sphere");
 	lightBody_->setPosition(Point(-4.0f, 0.0f, -3.25f));
@@ -233,7 +233,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	starFallTime_ = 8.0f;
 	betweenStarsTime_ = 10.0f;
 
-	initialPositions_[0].x = -2.8f;
+	initialPositions_[0].x = -2.3f;
 	initialPositions_[0].y = 8.2f;
 	initialPositions_[0].z = -3.0f;
 
@@ -241,11 +241,11 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	initialPositions_[1].y = 8.2f;
 	initialPositions_[1].z = -3.0f;
 
-	initialPositions_[2].x = 2.8f;
+	initialPositions_[2].x = 2.3f;
 	initialPositions_[2].y = 8.2f;
 	initialPositions_[2].z = -3.0f;
 
-	finalPositions_[0].x = -2.8f;
+	finalPositions_[0].x = -2.3f;
 	finalPositions_[0].y = terrainHeight_;
 	finalPositions_[0].z = -3.5f;
 
@@ -253,7 +253,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	finalPositions_[1].y = terrainHeight_;
 	finalPositions_[1].z = -3.5f;
 
-	finalPositions_[2].x = 2.8f;
+	finalPositions_[2].x = 2.3f;
 	finalPositions_[2].y = terrainHeight_;
 	finalPositions_[2].z = -3.5f;
 
@@ -579,7 +579,6 @@ void SecondScreenState::draw()
 		case MOUNTING:
 			{
 				graphicsManager_->turnOnWireframeRasterizer();
-					//spaceShipObject_->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light_);
 					spaceShip_->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, picoLight_, debug_);
 				graphicsManager_->turnOnSolidRasterizer();
 
@@ -1069,8 +1068,8 @@ void SecondScreenState::notify(InputManager* notifier, InputStruct arg)
 			break;
 		case RIGHT_BUTTON:
 			{
-				lightPos_[1].x = ((arg.mouseInfo.x/screenWidth_)*8)-4;
-				lightPos_[1].y = (1-(arg.mouseInfo.y/screenHeight_))*5;
+				//lightPos_[1].x = ((arg.mouseInfo.x/screenWidth_)*8)-4;
+				//lightPos_[1].y = (1-(arg.mouseInfo.y/screenHeight_))*5;
 			}
 			break;
 		default:
