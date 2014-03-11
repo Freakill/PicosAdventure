@@ -468,6 +468,15 @@ void PicoSecondClass::makeCelebrate()
 	inactivityClock_->reset();
 }
 
+void PicoSecondClass::makeDanceAss()
+{
+	changeExpression("feliz");
+	executeAnimation("DanceAss", 0.2f);
+
+	soundManager_->playCelebrate();
+	inactivityClock_->reset();
+}
+
 void PicoSecondClass::makeGreeting()
 {
 	if(picoState_ == WAITING)
@@ -491,6 +500,14 @@ void PicoSecondClass::makeLeave()
 {
 	goToPosition(Point(-35.25f, 0.0f, -3.0f));
 	picoState_ = LEAVING;
+}
+
+void PicoSecondClass::makeNo()
+{
+	changeExpression("enfadado");
+	executeAnimation("negation", 0.2f);
+	
+	inactivityClock_->reset();
 }
 
 void PicoSecondClass::makePointing()

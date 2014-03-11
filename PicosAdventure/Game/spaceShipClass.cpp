@@ -27,6 +27,22 @@ SpaceShipClass::SpaceShipClass()
 	rotX_ = 0.0f;
 	rotY_ = 0.0f; 
 	rotZ_ = 0.0f;
+
+	enlargedInitialPosition_.x = 0.0f;
+	enlargedInitialPosition_.y = 0.0f;
+	enlargedInitialPosition_.z = 0.0f;
+
+	enlargedInitialScale_.x = 1.0f;
+	enlargedInitialScale_.y = 1.0f;
+	enlargedInitialScale_.z = 1.0f;
+
+	enlargedFinalPosition_.x = 0.0f;
+	enlargedFinalPosition_.y = 0.0f;
+	enlargedFinalPosition_.z = 0.0f;
+
+	enlargedFinalScale_.x = 2.0f;
+	enlargedFinalScale_.y = 2.0f;
+	enlargedFinalScale_.z = 2.0f;
 }
 
 SpaceShipClass::SpaceShipClass(const SpaceShipClass& other)
@@ -52,10 +68,12 @@ bool SpaceShipClass::setup(GraphicsManager* graphicsManager, SoundSecondClass* s
 	{
 		MessageBoxA(NULL, "Could not create light1 particles instance", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
-	if(spaceShipParticles_ && !spaceShipParticles_->setup(graphicsManager, "star", getPosition(), 2.8, XMFLOAT4(1.00f, 1.00f, 0.0f, 1.0f)))
+	if(spaceShipParticles_ && !spaceShipParticles_->setup(graphicsManager, "star", getPosition(), 1.5, 200, 200, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)))
 	{
 		MessageBoxA(NULL, "Could not setup light1 particles object", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
+
+	enlargingTime_ = 6.0f;
 
 	spaceShipState_ = WAITING;
 
@@ -75,6 +93,9 @@ void SpaceShipClass::update(float elapsedTime)
 			break;
 		case LAUNCHING:
 			{
+				spaceShipParticles_->setPosition(Point(position_.x, position_.y+0.1, position_.z));
+				spaceShipParticles_->update(elapsedTime*1000, true);
+
 				position_.y += velocity_.y*elapsedTime;
 
 				velocity_.y -= 2.0f*elapsedTime;
@@ -91,9 +112,53 @@ void SpaceShipClass::update(float elapsedTime)
 			break;
 		case FLYING:
 			{
+				spaceShipParticles_->setPosition(Point(position_.x, position_.y+0.1, position_.z));
+				spaceShipParticles_->update(elapsedTime*1000, true);
+
 				fly(elapsedTime);
 			}
 			break;
+		case ENLARGING:
+			{
+				spaceShipParticles_->setPosition(Point(position_.x, position_.y+0.1, position_.z));
+				spaceShipParticles_->update(elapsedTime*1000, true);
+
+				enlargingElapsedTime_ += elapsedTime;
+
+				if(enlargingElapsedTime_ < enlargingTime_)
+				{
+					Point movement;
+					movement.x = enlargedFinalPosition_.x - enlargedInitialPosition_.x;
+					movement.y = enlargedFinalPosition_.y - enlargedInitialPosition_.y;
+					movement.z = enlargedFinalPosition_.z - enlargedInitialPosition_.z;
+
+					position_.x = enlargedInitialPosition_.x + movement.x * (enlargingElapsedTime_/enlargingTime_);
+					position_.y = enlargedInitialPosition_.y + movement.y * (enlargingElapsedTime_/enlargingTime_);
+					position_.z = enlargedInitialPosition_.z + movement.z * (enlargingElapsedTime_/enlargingTime_);
+
+					Vector scaling;
+					scaling.x = enlargedFinalScale_.x - enlargedInitialScale_.x;
+					scaling.y = enlargedFinalScale_.y - enlargedInitialScale_.y;
+					scaling.z = enlargedFinalScale_.z - enlargedInitialScale_.z;
+
+					scaling_.x = enlargedInitialScale_.x + scaling.x * (enlargingElapsedTime_/enlargingTime_);
+					scaling_.y = enlargedInitialScale_.y + scaling.y * (enlargingElapsedTime_/enlargingTime_);
+					scaling_.z = enlargedInitialScale_.z + scaling.z * (enlargingElapsedTime_/enlargingTime_);
+				}
+				else
+				{
+					position_ = enlargedFinalPosition_;
+					scaling_ = enlargedFinalScale_;
+
+					spaceShipState_ = PREPARED;
+				}
+			}
+			break;
+		case PREPARED:
+			{
+				spaceShipParticles_->setPosition(Point(position_.x, position_.y+0.1, position_.z));
+				spaceShipParticles_->update(elapsedTime*1000, true);
+			}
 		default:
 			{
 
@@ -104,6 +169,15 @@ void SpaceShipClass::update(float elapsedTime)
 
 void SpaceShipClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug)
 {
+	if(spaceShipState_ != WAITING)
+	{
+		graphicsManager->turnOnParticlesAlphaBlending();
+		graphicsManager->turnZBufferOff();
+			spaceShipParticles_->draw(graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+		graphicsManager->turnZBufferOn();
+		graphicsManager->turnOffAlphaBlending();
+	}
+
 	XMFLOAT4X4 rotatingMatrixZ;
 	XMStoreFloat4x4(&rotatingMatrixZ, XMMatrixRotationZ(rotZ_));
 	XMStoreFloat4x4(&worldMatrix, XMMatrixMultiply(XMLoadFloat4x4(&worldMatrix), XMLoadFloat4x4(&rotatingMatrixZ)));
@@ -153,14 +227,36 @@ void SpaceShipClass::makeLaunch(int level)
 	{
 		std::stringstream sound;
 		sound << "fuel" << level;
-		//soundManager_->playFile(sound.str(), false);
+		soundManager_->playFile(sound.str(), false);
 
 		velocity_.x = 0.0f;
-		velocity_.y = level*3.0f;
+		velocity_.y = level*1.0f;
 		velocity_.z = 0.0f;
 
 		spaceShipState_ = LAUNCHING;
 	}
+}
+
+void SpaceShipClass::makeBig(Point newPos, Vector newScale)
+{
+	enlargedInitialPosition_ = position_;
+	enlargedInitialScale_ = scaling_;
+	enlargedFinalPosition_ = newPos;
+	enlargedFinalScale_ = newScale;
+
+	enlargingElapsedTime_ = 0.0f;
+
+	spaceShipState_ = ENLARGING;
+}
+
+bool SpaceShipClass::isPrepared()
+{
+	if(spaceShipState_ == PREPARED)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 Object3D* SpaceShipClass::getObject()

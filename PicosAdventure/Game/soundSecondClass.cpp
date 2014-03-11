@@ -103,6 +103,24 @@ bool SoundSecondClass::setup(HWND hwnd)
 		return false;
 	}
 
+	result = loadFile("Tristeza_1", "Tristeza_1");
+	if(!result)
+	{
+		MessageBoxA(NULL, "Could not load Tristeza_1", "SoundSecondClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+	result = loadFile("Tristeza_2", "Tristeza_2");
+	if(!result)
+	{
+		MessageBoxA(NULL, "Could not load Tristeza_2", "SoundSecondClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+	result = loadFile("Tristeza_3", "Tristeza_3");
+	if(!result)
+	{
+		MessageBoxA(NULL, "Could not load Tristeza_3", "SoundSecondClass - Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
 
 	// FOREST
 	result = loadFile("background_music", "background_forest");
@@ -147,7 +165,7 @@ bool SoundSecondClass::setup(HWND hwnd)
 		return false;
 	}
 
-	/*result = loadFile("fuel1", "fuel1");
+	result = loadFile("fuel1", "fuel1");
 	if(!result)
 	{
 		MessageBoxA(NULL, "Could not load fuel1", "SoundSecondClass - Error", MB_ICONERROR | MB_OK);
@@ -176,7 +194,7 @@ bool SoundSecondClass::setup(HWND hwnd)
 	{
 		MessageBoxA(NULL, "Could not load fuel5", "SoundSecondClass - Error", MB_ICONERROR | MB_OK);
 		return false;
-	}*/
+	}
 
 	return true;
 }
@@ -309,6 +327,7 @@ bool SoundSecondClass::loadWaveFile(std::string filename, IDirectSoundBuffer8** 
 	error = fopen_s(&filePtr, filename.c_str(), "rb");
 	if(error != 0)
 	{
+		MessageBoxA(NULL, "1", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -316,6 +335,7 @@ bool SoundSecondClass::loadWaveFile(std::string filename, IDirectSoundBuffer8** 
 	count = fread(&waveFileHeader, sizeof(waveFileHeader), 1, filePtr);
 	if(count != 1)
 	{
+		MessageBoxA(NULL, "2", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -323,6 +343,7 @@ bool SoundSecondClass::loadWaveFile(std::string filename, IDirectSoundBuffer8** 
 	if((waveFileHeader.chunkId[0] != 'R') || (waveFileHeader.chunkId[1] != 'I') || 
 	   (waveFileHeader.chunkId[2] != 'F') || (waveFileHeader.chunkId[3] != 'F'))
 	{
+		MessageBoxA(NULL, "3", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -330,6 +351,7 @@ bool SoundSecondClass::loadWaveFile(std::string filename, IDirectSoundBuffer8** 
 	if((waveFileHeader.format[0] != 'W') || (waveFileHeader.format[1] != 'A') ||
 	   (waveFileHeader.format[2] != 'V') || (waveFileHeader.format[3] != 'E'))
 	{
+		MessageBoxA(NULL, "4", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -337,30 +359,35 @@ bool SoundSecondClass::loadWaveFile(std::string filename, IDirectSoundBuffer8** 
 	if((waveFileHeader.subChunkId[0] != 'f') || (waveFileHeader.subChunkId[1] != 'm') ||
 	   (waveFileHeader.subChunkId[2] != 't') || (waveFileHeader.subChunkId[3] != ' '))
 	{
+		MessageBoxA(NULL, "5", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
 	// Check that the audio format is WAVE_FORMAT_PCM.
 	if(waveFileHeader.audioFormat != WAVE_FORMAT_PCM)
 	{
+		MessageBoxA(NULL, "6", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
 	// Check that the wave file was recorded in stereo format.
 	if(waveFileHeader.numChannels != 2)
 	{
+		MessageBoxA(NULL, "7", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
 	// Check that the wave file was recorded at a sample rate of 44.1 KHz.
 	if(waveFileHeader.sampleRate != 44100)
 	{
+		MessageBoxA(NULL, "8", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
 	// Ensure that the wave file was recorded in 16 bit format.
 	if(waveFileHeader.bitsPerSample != 16)
 	{
+		MessageBoxA(NULL, "9", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -368,6 +395,7 @@ bool SoundSecondClass::loadWaveFile(std::string filename, IDirectSoundBuffer8** 
 	if((waveFileHeader.dataChunkId[0] != 'd') || (waveFileHeader.dataChunkId[1] != 'a') ||
 	   (waveFileHeader.dataChunkId[2] != 't') || (waveFileHeader.dataChunkId[3] != 'a'))
 	{
+		MessageBoxA(NULL, "10", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -392,6 +420,7 @@ bool SoundSecondClass::loadWaveFile(std::string filename, IDirectSoundBuffer8** 
 	result = m_DirectSound->CreateSoundBuffer(&bufferDesc, &tempBuffer, NULL);
 	if(FAILED(result))
 	{
+		MessageBoxA(NULL, "11", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -399,6 +428,7 @@ bool SoundSecondClass::loadWaveFile(std::string filename, IDirectSoundBuffer8** 
 	result = tempBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**)&*secondaryBuffer);
 	if(FAILED(result))
 	{
+		MessageBoxA(NULL, "12", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -413,6 +443,7 @@ bool SoundSecondClass::loadWaveFile(std::string filename, IDirectSoundBuffer8** 
 	waveData = new unsigned char[waveFileHeader.dataSize];
 	if(!waveData)
 	{
+		MessageBoxA(NULL, "13", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -420,6 +451,7 @@ bool SoundSecondClass::loadWaveFile(std::string filename, IDirectSoundBuffer8** 
 	count = fread(waveData, 1, waveFileHeader.dataSize, filePtr);
 	if(count != waveFileHeader.dataSize)
 	{
+		MessageBoxA(NULL, "14", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -427,6 +459,7 @@ bool SoundSecondClass::loadWaveFile(std::string filename, IDirectSoundBuffer8** 
 	error = fclose(filePtr);
 	if(error != 0)
 	{
+		MessageBoxA(NULL, "15", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -434,6 +467,7 @@ bool SoundSecondClass::loadWaveFile(std::string filename, IDirectSoundBuffer8** 
 	result = (*secondaryBuffer)->Lock(0, waveFileHeader.dataSize, (void**)&bufferPtr, (DWORD*)&bufferSize, NULL, 0, 0);
 	if(FAILED(result))
 	{
+		MessageBoxA(NULL, "16", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 
@@ -444,6 +478,7 @@ bool SoundSecondClass::loadWaveFile(std::string filename, IDirectSoundBuffer8** 
 	result = (*secondaryBuffer)->Unlock((void*)bufferPtr, bufferSize, NULL, 0);
 	if(FAILED(result))
 	{
+		MessageBoxA(NULL, "17", "SecondSound - Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
 	
@@ -572,6 +607,40 @@ bool SoundSecondClass::playPointing()
 		else
 		{
 			playFile("pointing_2", false);
+		}
+	}
+
+	return true;
+}
+
+bool SoundSecondClass::playSad()
+{
+	HRESULT result;
+	
+	if(!isPlaying("Tristeza_1") && !isPlaying("Tristeza_2") && !isPlaying("Tristeza_3"))
+	{
+		switch(rand() % 3)
+		{
+			case 0:
+				{
+					playFile("Tristeza_1", false);
+				}
+				break;
+			case 1:
+				{
+					playFile("Tristeza_2", false);
+				}
+				break;
+			case 2:
+				{
+					playFile("Tristeza_3", false);
+				}
+				break;
+			default:
+				{
+					playFile("Tristeza_1", false);
+				}
+				break;
 		}
 	}
 

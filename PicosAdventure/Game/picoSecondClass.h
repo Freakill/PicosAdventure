@@ -64,9 +64,11 @@ class PicoSecondClass : public Listener<InputManager, InputStruct>, public Liste
 
 		// Changing Pico public behaviour
 		void makeCelebrate();
+		void makeDanceAss();
 		void makeGreeting();
 		void makeHappy();
 		void makeLeave();
+		void makeNo();
 		void makePointing();
 		void makeRest(bool lookCamera);
 		void makeWork();

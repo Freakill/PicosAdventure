@@ -4,13 +4,13 @@ StarClass::StarClass()
 {
 	model_ = 0;
 
-	initialPosition_.x = 0.0f;
-	initialPosition_.y = 0.0f;
-	initialPosition_.z = 0.0f;
+	initialPosition_.x = 100.0f;
+	initialPosition_.y = 100.0f;
+	initialPosition_.z = 100.0f;
 
-	finalPosition_.x = 0.0f;
-	finalPosition_.y = 0.0f;
-	finalPosition_.z = 0.0f;
+	finalPosition_.x = 100.0f;
+	finalPosition_.y = 100.0f;
+	finalPosition_.z = 100.0f;
 
 	position_.x = 0.0f;
 	position_.y = 0.0f;
@@ -27,6 +27,8 @@ StarClass::StarClass()
 	rotX_ = 0.0f;
 	rotY_ = 0.0f; 
 	rotZ_ = 0.0f;
+
+	badlight_ = 0;
 }
 
 StarClass::StarClass(const StarClass& other)
@@ -43,9 +45,9 @@ bool StarClass::setup(GraphicsManager *graphicsManager, SoundSecondClass* soundM
 
 	soundManager_ = soundManager;
 
-	scaling_.x = 0.008f;
-	scaling_.y = 0.008f;
-	scaling_.z = 0.008f;
+	scaling_.x = 0.0065f;
+	scaling_.y = 0.0065f;
+	scaling_.z = 0.0065f;
 
 	starState_ = IN_SKY;
 
@@ -55,6 +57,18 @@ bool StarClass::setup(GraphicsManager *graphicsManager, SoundSecondClass* soundM
 	collisionTest_->setup(graphicsManager, Point(0.0f, 0.4f, 0.0f), 0.5f);
 
 	hasFallen_ = false;
+	good_ = false;
+
+	// Create the light object.
+	badlight_ = new LightClass;
+	if(!badlight_)
+	{
+		return false;
+	}
+
+	badlight_->setAmbientColor(0.0f, 0.0f, 0.0f, 1.0f);
+	badlight_->setDiffuseColor(0.9f, 0.1f, 0.1f, 1.0f);
+	badlight_->setDirection(0.0f, -1.0f, 1.0f);
 
 	return true;
 }
@@ -77,7 +91,7 @@ void StarClass::update(float elapsedTime)
 				velocity_.z = finalPosition_.z - initialPosition_.z;
 
 				Vector normalizedVelocity = velocity_.normalize();
-				velocity_ = normalizedVelocity * 4.0f;
+				velocity_ = normalizedVelocity * 3.5f;
 
 				position_.x += velocity_.x*elapsedTime;
 				position_.y += velocity_.y*elapsedTime;
@@ -92,7 +106,11 @@ void StarClass::update(float elapsedTime)
 			break;
 		case IN_FLOOR:
 			{
-				
+				position_.x = initialPosition_.x;
+				position_.y = initialPosition_.y;
+				position_.z = initialPosition_.z;
+
+				starState_ = IN_SKY;
 			}
 			break;
 		default:
@@ -133,7 +151,14 @@ void StarClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, X
 
 	if(starState_ != IN_FLOOR)
 	{
-		model_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+		if(!good_)
+		{
+			model_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, badlight_);
+		}
+		else
+		{
+			model_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+		}
 	}
 }
 
@@ -154,15 +179,23 @@ void StarClass::destroy()
 		delete collisionTest_;
 		collisionTest_ = 0;
 	}
+
+	if(badlight_)
+	{
+		delete badlight_;
+		badlight_ = 0;
+	}
 }
 
-void StarClass::makeItFall()
+void StarClass::makeItFall(bool good)
 {
-	if(starState_ == IN_SKY || starState_ == IN_FLOOR)
+	if(starState_ == IN_SKY)
 	{
 		position_.x = initialPosition_.x;
 		position_.y = initialPosition_.y;
 		position_.z = initialPosition_.z;
+
+		good_ = good;
 
 		soundManager_->playFile("falling_star", false);
 
@@ -194,6 +227,32 @@ bool StarClass::isInTheFloor()
 	}
 
 	return false;
+}
+
+bool StarClass::isInTheSky()
+{
+	if(starState_ == IN_SKY)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool StarClass::isGood()
+{
+	return good_;
+}
+
+void StarClass::reset()
+{
+	starState_ = IN_FLOOR;
+
+	position_.x = initialPosition_.x;
+	position_.y = initialPosition_.y;
+	position_.z = initialPosition_.z;
+
+	collisionTest_->setPosition(position_);
 }
 
 void StarClass::setInitialPosition(Point position)

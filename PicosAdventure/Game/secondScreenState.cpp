@@ -70,9 +70,21 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	}
 
 	// Initialize the light object.
-	light_->setAmbientColor(0.0f, 0.1f, 0.2f, 1.0f);
-	light_->setDiffuseColor(0.1f, 0.15f, 0.15f, 1.0f);
-	light_->setDirection(0.0f, -1.0f, 1.0f);
+	light_->setAmbientColor(0.6f, 0.6f, 0.6f, 1.0f);
+	light_->setDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	light_->setDirection(0.0f, -0.5f, 1.0f);
+
+	// Create the light object.
+	piecesLight_ = new LightClass;
+	if(!piecesLight_)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	piecesLight_->setAmbientColor(0.2f, 0.2f, 0.3f, 1.0f);
+	piecesLight_->setDiffuseColor(0.2f, 0.2f, 0.3f, 1.0f);
+	piecesLight_->setDirection(0.0f, -1.0f, 1.0f);
 
 	// SOUND
 	soundManager_ = new SoundSecondClass;
@@ -102,6 +114,19 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 		return false;
 	}
 
+	background2_ = new ImageClass;
+	if(!background2_)
+	{
+		MessageBoxA(NULL, "Could not initialize the background image instance.", "SecondScreen - Error", MB_OK);
+		return false;
+	}
+
+	if(!background2_->setup(graphicsManager_->getDevice(), graphicsManager_->getShader2D(), screenWidth_, screenHeight_, "sky_background", screenWidth_, screenHeight_))
+	{
+		MessageBoxA(NULL, "Could not setup the background image.", "SecondScreen - Error", MB_OK);
+		return false;
+	}
+
 	backgrounPosition_.x = (screenWidth_/2)*-1;
 	backgrounPosition_.y = (screenHeight_/2)+2;
 
@@ -118,7 +143,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	{
 		MessageBoxA(NULL, "Could not create light1 particles instance", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
-	if(lightParticles_[0] && !lightParticles_[0]->setup(graphicsManager, "star", Point(lightPos_[0].x, lightPos_[0].y, lightPos_[0].z) , 2.8, XMFLOAT4(1.00f, 1.00f, 0.0f, 1.0f)))
+	if(lightParticles_[0] && !lightParticles_[0]->setup(graphicsManager, "star", Point(lightPos_[0].x, lightPos_[0].y, lightPos_[0].z) , 2.8, 30, 60, XMFLOAT4(1.00f, 1.00f, 0.0f, 1.0f)))
 	{
 		MessageBoxA(NULL, "Could not setup light1 particles object", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
@@ -128,13 +153,13 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	{
 		MessageBoxA(NULL, "Could not create light1 particles instance", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
-	if(lightParticles_[1] && !lightParticles_[1]->setup(graphicsManager, "star", Point(lightPos_[1].x, lightPos_[1].y, lightPos_[1].z) , 2.8, XMFLOAT4(1.00f, 1.00f, 0.0f, 1.0f)))
+	if(lightParticles_[1] && !lightParticles_[1]->setup(graphicsManager, "star", Point(lightPos_[1].x, lightPos_[1].y, lightPos_[1].z) , 2.8, 30, 60, XMFLOAT4(1.00f, 1.00f, 0.0f, 1.0f)))
 	{
 		MessageBoxA(NULL, "Could not setup light1 particles object", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
 
 	// Load the first level scenario
-	loadScenario("level1");
+	loadScenario("level2");
 
 	// Get terrain height for posterior setup of different objects
 	terrainHeight_ = 0;
@@ -162,8 +187,8 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	spaceShip_->getObject()->setShader3D(shaderTemp);
 	PointlightDiffuseShader3DClass* pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>(spaceShip_->getObject()->getShader3D());
 	pointlightShader->setPositions(lightPos_[0], lightPos_[1]);
-	spaceShip_->setInitialPosition(Point(-4.0f, terrainHeight_, -3.25f));
-	spaceShip_->setPosition(Point(-4.0f, terrainHeight_, -3.25f));
+	spaceShip_->setInitialPosition(Point(-4.0f, terrainHeight_+0.001f, -3.25f));
+	spaceShip_->setPosition(Point(-4.0f, terrainHeight_+0.001f, -3.25f));
 	spaceShip_->setScale(Vector(0.0115476f, 0.0110476f, 0.0115476f));
 	spaceShip_->setRotation(0.0f, 0.0f, XM_PI/2);
 	spaceShip_->setFloorHeight(terrainHeight_);
@@ -201,40 +226,49 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 
 	// Stars
 	loadStars();
-	timeToWaitFirstStar_ = 10.0f;
+	timeToWaitFirstStar_ = 8.0f;
 
 	starLevel_ = 1;
 	starsFalling_ = false;
-	starFallTime_ = 10.0f;
-	betweenStarsTime_ = 15.0f;
+	starFallTime_ = 8.0f;
+	betweenStarsTime_ = 10.0f;
 
-	initialPositions_[0].x = -5.75f;
+	initialPositions_[0].x = -4.75f;
 	initialPositions_[0].y = 8.2f;
-	initialPositions_[0].z = -1.0f;
+	initialPositions_[0].z = -3.0f;
 
 	initialPositions_[1].x = 0.0f;
 	initialPositions_[1].y = 8.2f;
-	initialPositions_[1].z = -1.0f;
+	initialPositions_[1].z = -3.0f;
 
-	initialPositions_[2].x = 5.75f;
+	initialPositions_[2].x = 4.75f;
 	initialPositions_[2].y = 8.2f;
-	initialPositions_[2].z = -1.0f;
+	initialPositions_[2].z = -3.0f;
 
 	finalPositions_[0].x = -3.5f;
 	finalPositions_[0].y = terrainHeight_;
-	finalPositions_[0].z = -3.25f;
+	finalPositions_[0].z = -3.5f;
 
 	finalPositions_[1].x = 0.0f;
 	finalPositions_[1].y = terrainHeight_;
-	finalPositions_[1].z = -3.25f;
+	finalPositions_[1].z = -3.5f;
 
 	finalPositions_[2].x = 4.0f;
 	finalPositions_[2].y = terrainHeight_;
-	finalPositions_[2].z = -3.25f;
+	finalPositions_[2].z = -3.5f;
+
+	starTouched_ = false;
+
+	starTouchedClock_ = new ClockClass();
+	if(!starTouchedClock_)
+	{
+		return false;
+	}
+	starTouchedClock_->reset();
 
 	// Set the level state to the introduction, and it to greetings
 	levelState_ = INTRODUCTION;
-	introLevelState_ = GREETING;
+	introLevelState_ = TO_NIGHT;
 	starsIntroLevelState_ = FIRST_STAR;
 	// Setup Pico at the initial state
 	hasPicoGreeted_ = false;
@@ -305,7 +339,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	// Change kinect settings to make user being drawn darker
 	kinectClass_ = kinectManager;
 
-	kinectClass_->setUserColor(XMFLOAT4(0.35f, 0.35f, 0.5f, 0.5f));
+	kinectClass_->setUserColor(XMFLOAT4(0.25f, 0.25f, 0.35f, 0.5f));
 
 	return true;
 }
@@ -333,13 +367,10 @@ void SecondScreenState::update(float elapsedTime)
 				PointlightDiffuseShader3DClass* pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>(spaceShip_->getObject()->getShader3D());
 				pointlightShader->setPositions(lightPos_[0], lightPos_[1]);
 
-				if(!hasPicoGreeted_)
+				if(introLevelState_ != TO_NIGHT)
 				{
-					pico_->makeGreeting();
-					hasPicoGreeted_ = true;
+					updatePieces(elapsedTime);
 				}
-
-				updatePieces(elapsedTime);
 
 				updateIntroduction(elapsedTime);
 			}
@@ -372,8 +403,10 @@ void SecondScreenState::update(float elapsedTime)
 				{
 					// Make Pico celebrate it!
 					pico_->makeRest(false);
-					pico_->makeCelebrate();
+					pico_->makeDanceAss();
 					soundManager_->playFile("spaceship_finished", false);
+
+					LogClass::Instance()->addEntry("SPACESHIP_FINNISHED", 0, 0);
 
 					Shader3DClass *diffuseShader3DTemp = Shader3DFactory::Instance()->CreateShader3D("DiffuseShader3D", graphicsManager_);
 					spaceShip_->getObject()->setShader3D(diffuseShader3DTemp);
@@ -385,10 +418,12 @@ void SecondScreenState::update(float elapsedTime)
 			break;
 		case TRANSITION:
 			{
+				updateLightPositions();
+
 				if(gameClock_->getTime() > timeToWaitFirstStar_)
 				{
 					makeFirstStarFall();
-					pico_->makeRest(false);
+					pico_->makePointing();
 
 					levelState_ = INTRO_COLLECTING;
 				}
@@ -396,6 +431,8 @@ void SecondScreenState::update(float elapsedTime)
 			break;
 		case INTRO_COLLECTING:
 			{
+				updateLightPositions();
+
 				stars_[0]->update(elapsedTime);
 				spaceShip_->update(elapsedTime);
 
@@ -404,6 +441,10 @@ void SecondScreenState::update(float elapsedTime)
 			break;
 		case COLLECTING:
 			{
+				updateLightPositions();
+				starTouchedClock_->tick();
+				spaceShip_->update(elapsedTime);
+
 				for(int i = 0; i < 3; i++)
 				{
 					stars_[i]->update(elapsedTime);
@@ -413,10 +454,16 @@ void SecondScreenState::update(float elapsedTime)
 				{
 					if(gameClock_->getTime() > starFallTime_)
 					{
+						origins_.clear();
+						endings_.clear();
+
+						LogClass::Instance()->addEntry("MAKE_STARS_FALL", starLevel_, 0);
+
 						for(int i = 0; i < starLevel_; i++)
 						{
 							makeStarFall(i);
 						}
+
 						gameClock_->reset();
 					}
 				}
@@ -428,16 +475,39 @@ void SecondScreenState::update(float elapsedTime)
 						gameClock_->reset();
 					}
 				}
-				
-				if(spaceShipLevel_ >= 5)
+
+				if(starTouched_ && starTouchedClock_->getTime() > 8.0f)
 				{
-					levelState_ = ENDING;
+					spaceShip_->makeLaunch(spaceShipLevel_);
+					pico_->makeCelebrate();
+					spaceShipLevel_++;
+					starLevel_++;
+
+					if(starLevel_ > 3)
+					{
+						starLevel_ = 3;
+					}
+
+					starTouched_ = false;
+					starTouchedClock_->reset();
+
+					if(spaceShipLevel_ > 5)
+					{
+						spaceShip_->makeBig(Point(-4.5f, terrainHeight_+0.5f, -3.25f), Vector(0.03f, 0.03f, 0.03f));
+						levelState_ = ENDING;
+					}
 				}
 			}
 			break;
 		case ENDING:
 			{
-				
+				spaceShip_->update(elapsedTime);
+
+				if(spaceShip_->isPrepared())
+				{
+					pico_->goToPosition(Point(spaceShip_->getPosition().x-1.0f, terrainHeight_, spaceShip_->getPosition().z));
+					kinectClass_->setUserColor(XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f));
+				}
 			}
 			break;
 		default:
@@ -473,9 +543,20 @@ void SecondScreenState::draw()
 	// Despite not being a drawing method, we call it here to reuse matrices
 	updatePicoScreenposition(worldMatrix, viewMatrix, projectionMatrix);
 
-	graphicsManager_->turnZBufferOff();
-		background_->draw(graphicsManager_->getDeviceContext(), backgrounPosition_.x, backgrounPosition_.y, worldMatrix, viewMatrix, orthoMatrix, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
-	graphicsManager_->turnZBufferOn();
+	if(introLevelState_ == TO_NIGHT)
+	{
+		graphicsManager_->turnOnAlphaBlending();
+		graphicsManager_->turnZBufferOff();
+			background2_->draw(graphicsManager_->getDeviceContext(), backgrounPosition_.x, backgrounPosition_.y, worldMatrix, viewMatrix, orthoMatrix, light_->getAmbientColor());
+		graphicsManager_->turnZBufferOn();
+		graphicsManager_->turnOffAlphaBlending();
+	}
+	else
+	{
+		graphicsManager_->turnZBufferOff();
+			background_->draw(graphicsManager_->getDeviceContext(), backgrounPosition_.x, backgrounPosition_.y, worldMatrix, viewMatrix, orthoMatrix, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+		graphicsManager_->turnZBufferOn();
+	}
 
 	// We iterate over each loaded Object to call its draw function and draw the scenario
 	std::vector<Object3D*>::iterator objectsIt;
@@ -498,34 +579,46 @@ void SecondScreenState::draw()
 				std::vector<PieceClass*>::iterator pieceIt;
 				for(pieceIt = pieces_.begin(); pieceIt != pieces_.end(); pieceIt++)
 				{
-					(*pieceIt)->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
+					(*pieceIt)->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, piecesLight_, debug_);
 				}
 
 				if(introLevelState_ == GIVE_POWER)
 				{
 					lightBody_->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, picoLight_);
 				}
+
+				// Draw light Particles
+				graphicsManager_->turnOnParticlesAlphaBlending();
+				graphicsManager_->turnZBufferOff();
+					lightParticles_[0]->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, picoLight_);
+					lightParticles_[1]->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, picoLight_);
+				graphicsManager_->turnZBufferOn();
+				graphicsManager_->turnOffAlphaBlending();
+			}
+			break;
+		case TRANSITION:
+		case INTRO_COLLECTING:
+		case COLLECTING:
+			{
+				for(int i = 0; i < starLevel_; i++)
+				{
+					stars_[i]->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, picoLight_, debug_);
+				}
+
+				spaceShip_->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, picoLight_, debug_);
+			}
+			break;
+		case ENDING:
+			{
+				spaceShip_->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, picoLight_, debug_);
 			}
 			break;
 		default:
 			{
-				for(int i = 0; i < 3; i++)
-				{
-					stars_[i]->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, picoLight_, debug_);
-				}
-				//spaceShipObject_->draw(graphicsManager_->getDevice() ,graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, picoLight_);
-				spaceShip_->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, picoLight_, debug_);
+				
 			}
 			break;
 	}
-
-	// Draw light Particles
-	graphicsManager_->turnOnParticlesAlphaBlending();
-	graphicsManager_->turnZBufferOff();
-		lightParticles_[0]->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, picoLight_);
-		lightParticles_[1]->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, picoLight_);
-	graphicsManager_->turnZBufferOn();
-	graphicsManager_->turnOffAlphaBlending();
 
 	// Draw pico
 	pico_->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, picoLight_, debug_);
@@ -566,6 +659,16 @@ void SecondScreenState::destroy()
 		background_->destroy();
 		delete background_;
 		background_ = 0;
+	}
+
+	for(int i = 0; i < 3; i++)
+	{
+		if(stars_[i])
+		{
+			stars_[i]->destroy();
+			delete stars_[i];
+			stars_[i] = 0;
+		}
 	}
 
 	std::vector<Object3D*>::iterator objectsIt;
@@ -612,6 +715,29 @@ void SecondScreenState::updateIntroduction(float elapsedTime)
 
 	switch(introLevelState_)
 	{
+		case TO_NIGHT:
+			{
+				float lightToNight = 0.6f-0.55f*(introClock_->getTime()/timeToNight_);
+				light_->setAmbientColor(lightToNight, lightToNight, lightToNight, 1.0f);
+
+				pico_->makeRest(false);
+
+				// When greeting time has passed we make Pico go next to the piece with a little margin
+				if(introClock_->getTime() > timeToNight_)
+				{
+					light_->setAmbientColor(0.05f, 0.05f, 0.05f, 1.0f);
+
+					if(!hasPicoGreeted_)
+					{
+						pico_->makeGreeting();
+						hasPicoGreeted_ = true;
+					}
+
+					introLevelState_ = GREETING;
+					introClock_->reset();
+				}
+			}
+			break;
 		case GREETING:
 			{
 				// When greeting time has passed we make Pico go next to the piece with a little margin
@@ -704,20 +830,22 @@ void SecondScreenState::updateIntroCollecting(float elapsedTime)
 	{
 		case FIRST_STAR:
 			{
-				if(stars_[0]->isInTheFloor())
+				if(stars_[0]->isInTheFloor() || stars_[0]->isInTheSky())
 				{
 					//make the spaceship simulate some kind of reaction
 					spaceShip_->makeLaunch(1);
-					pico_->makeCelebrate();
+
 					starsIntroLevelState_ = FIRST_REACTION;
 				}
 			}
 			break;
 		case FIRST_REACTION:
 			{
-				if(stars_[0]->isInTheFloor())
+				if(stars_[0]->isInTheFloor() || stars_[0]->isInTheSky())
 				{
-					pico_->makePointing();
+					pico_->makeRest(false);
+					pico_->makeCelebrate();
+
 					starsIntroLevelState_ = PICO_GUIDING;
 				}
 			}
@@ -762,14 +890,71 @@ void SecondScreenState::makeFirstStarFall()
 {
 	stars_[0]->setInitialPosition(Point(5.75f, 8.2f, -1.0f));
 	stars_[0]->setFinalPosition(spaceShip_->getPosition());
-	stars_[0]->makeItFall();
+	stars_[0]->makeItFall(true);
 }
 
 void SecondScreenState::makeStarFall(int i)
 {
-	stars_[i]->setInitialPosition(initialPositions_[rand() % 3]);
-	stars_[i]->setFinalPosition(finalPositions_[rand() % 3]);
-	stars_[i]->makeItFall();
+	int init = rand() % 3;
+	bool keepSearching = true;
+	while(keepSearching)
+	{
+		bool notIn = true;
+		std::vector<int>::iterator originIt;
+		for(originIt = origins_.begin(); originIt != origins_.end(); originIt++)
+		{
+			if((*originIt) == init)
+			{
+				notIn = false;
+			}
+		}
+
+		if(notIn)
+		{
+			keepSearching = false;
+			origins_.push_back(init);
+		}
+		else
+		{
+			init = rand() % 3;
+		}
+	}
+	stars_[i]->setInitialPosition(initialPositions_[init]);
+
+	int end = rand() % 3;
+	keepSearching = true;
+	while(keepSearching)
+	{
+		bool notIn = true;
+		std::vector<int>::iterator endIt;
+		for(endIt = endings_.begin(); endIt != endings_.end(); endIt++)
+		{
+			if((*endIt) == end)
+			{
+				notIn = false;
+			}
+		}
+
+		if(notIn)
+		{
+			keepSearching = false;
+			endings_.push_back(end);
+		}
+		else
+		{
+			end = rand() % 3;
+		}
+	}
+	stars_[i]->setFinalPosition(finalPositions_[end]);
+
+	if(i == 0)
+	{
+		stars_[i]->makeItFall(true);
+	}
+	else
+	{
+		stars_[i]->makeItFall(false);
+	}
 }
 
 void SecondScreenState::makeShipIgnite(int level)
@@ -780,6 +965,60 @@ void SecondScreenState::makeShipIgnite(int level)
 void SecondScreenState::notify(InputManager* notifier, InputStruct arg)
 {
 	switch(arg.keyPressed){
+		case 49:
+			{
+				LogClass::Instance()->addEntry("KEYBOARD_FOUND_PIECE", 8, 0);
+				pieces_.at(8)->makeItFall();
+			}
+			break;
+		case 50:
+			{
+				LogClass::Instance()->addEntry("KEYBOARD_FOUND_PIECE", 4, 0);
+				pieces_.at(4)->makeItFall();
+			}
+			break;
+		case 51:
+			{
+				LogClass::Instance()->addEntry("KEYBOARD_FOUND_PIECE", 2, 0);
+				pieces_.at(2)->makeItFall();
+			}
+			break;
+		case 52:
+			{
+				LogClass::Instance()->addEntry("KEYBOARD_FOUND_PIECE", 7, 0);
+				pieces_.at(7)->makeItFall();
+			}
+			break;
+		case 53:
+			{
+				LogClass::Instance()->addEntry("KEYBOARD_FOUND_PIECE", 6, 0);
+				pieces_.at(6)->makeItFall();
+			}
+			break;
+		case 54:
+			{
+				LogClass::Instance()->addEntry("KEYBOARD_FOUND_PIECE", 3, 0);
+				pieces_.at(3)->makeItFall();
+			}
+			break;
+		case 55:
+			{
+				LogClass::Instance()->addEntry("KEYBOARD_FOUND_PIECE", 9, 0);
+				pieces_.at(9)->makeItFall();
+			}
+			break;
+		case 56:
+			{
+				LogClass::Instance()->addEntry("KEYBOARD_FOUND_PIECE", 1, 0);
+				pieces_.at(1)->makeItFall();
+			}
+			break;
+		case 57:
+			{
+				LogClass::Instance()->addEntry("KEYBOARD_FOUND_PIECE", 5, 0);
+				pieces_.at(5)->makeItFall();
+			}
+			break;
 		case 68: //D
 		case 100: //d
 			{
@@ -788,10 +1027,27 @@ void SecondScreenState::notify(InputManager* notifier, InputStruct arg)
 			break;
 		case 32: // Space
 			{
-				std::vector<PieceClass*>::iterator pieceIt;
-				for(pieceIt = pieces_.begin(); pieceIt != pieces_.end(); pieceIt++)
+				switch(levelState_ )
 				{
-					(*pieceIt)->setFinalPosition();
+					case MOUNTING:
+						{
+							LogClass::Instance()->addEntry("KEYBOARD_SPACESHIP_MOUNTED", 1, 0);
+
+							std::vector<PieceClass*>::iterator pieceIt;
+							for(pieceIt = pieces_.begin(); pieceIt != pieces_.end(); pieceIt++)
+							{
+								(*pieceIt)->setFinalPosition();
+							}
+						}
+						break;
+					case COLLECTING:
+						{
+							LogClass::Instance()->addEntry("KEYBOARD_GOOD_STAR_CATCHED", 1, 0);
+
+							stars_[0]->reset();
+							starTouched_ = true;
+						}
+						break;
 				}
 			}
 			break;
@@ -834,7 +1090,7 @@ void SecondScreenState::notify(InputManager* notifier, InputStruct arg)
 
 void SecondScreenState::notify(KinectClass* notifier, KinectStruct arg)
 {
-	if(arg.type == RIGHT_HAND_ROT)
+	if(arg.type == FIRST_RIGHT_HAND_ROT)
 	{
 		// Calculate viewport position
 		kinectHandViewPos_[0] = Point(arg.handPos.x*screenWidth_/320, arg.handPos.y*screenHeight_/240);
@@ -844,17 +1100,45 @@ void SecondScreenState::notify(KinectClass* notifier, KinectStruct arg)
 		kinectHandWorldPos_[0].y = (1-(kinectHandViewPos_[0].y/screenHeight_))*5;
 		kinectHandWorldPos_[0].z = 0;
 
-		std::vector<PieceClass*>::iterator pieceIt;
-		for(pieceIt = pieces_.begin(); pieceIt != pieces_.end(); pieceIt++)
+		if(levelState_ == MOUNTING)
 		{
-			if((*pieceIt)->getCollisionSphere()->testIntersection(camera_, kinectHandViewPos_[0].x, kinectHandViewPos_[0].y))
+			std::vector<PieceClass*>::iterator pieceIt;
+			for(pieceIt = pieces_.begin(); pieceIt != pieces_.end(); pieceIt++)
 			{
-				(*pieceIt)->lightIt();
+				if((*pieceIt)->getCollisionSphere()->testIntersection(camera_, kinectHandViewPos_[0].x, kinectHandViewPos_[0].y))
+				{
+					(*pieceIt)->lightIt();
+				}
+			}
+		}
+
+		if(levelState_ == COLLECTING)
+		{
+			for(int i = 0; i < starLevel_; i++)
+			{
+				if(stars_[i]->isFalling())
+				{
+					if(stars_[i]->getCollisionSphere()->testIntersection(camera_, kinectHandViewPos_[0].x, kinectHandViewPos_[0].y))
+					{
+						if(stars_[i]->isGood())
+						{
+							LogClass::Instance()->addEntry("GOOD_STAR_CATCHED", i+1, 0);
+							stars_[i]->reset();
+							starTouched_ = true;
+						}
+						else
+						{
+							LogClass::Instance()->addEntry("BAD_STAR_CATCHED", i+1, 0);
+							soundManager_->playSad();
+							pico_->makeNo();
+						}
+					}
+				}
 			}
 		}
 	}
 	
-	if(arg.type == LEFT_HAND_ROT)
+	if(arg.type == SECOND_RIGHT_HAND_ROT)
 	{
 		// Calculate viewport position
 		kinectHandViewPos_[1] = Point(arg.handPos.x*screenWidth_/320, arg.handPos.y*screenHeight_/240);
@@ -864,12 +1148,15 @@ void SecondScreenState::notify(KinectClass* notifier, KinectStruct arg)
 		kinectHandWorldPos_[1].y = (1-(kinectHandViewPos_[1].y/screenHeight_))*5;
 		kinectHandWorldPos_[1].z = 0;
 
-		std::vector<PieceClass*>::iterator pieceIt;
-		for(pieceIt = pieces_.begin(); pieceIt != pieces_.end(); pieceIt++)
+		if(levelState_ == MOUNTING)
 		{
-			if((*pieceIt)->getCollisionSphere()->testIntersection(camera_, kinectHandViewPos_[1].x, kinectHandViewPos_[1].y))
+			std::vector<PieceClass*>::iterator pieceIt;
+			for(pieceIt = pieces_.begin(); pieceIt != pieces_.end(); pieceIt++)
 			{
-				(*pieceIt)->lightIt();
+				if((*pieceIt)->getCollisionSphere()->testIntersection(camera_, kinectHandViewPos_[1].x, kinectHandViewPos_[1].y))
+				{
+					(*pieceIt)->lightIt();
+				}
 			}
 		}
 	}
@@ -883,19 +1170,23 @@ void SecondScreenState::notify(KinectClass* notifier, KinectStruct arg)
 		kinectHoldWorldPos_.y = (1-(kinectHoldViewPos_.y/screenHeight_))*5;
 		kinectHoldWorldPos_.z = 0;
 
-		for(int i = 0; i < 3; i++)
+		for(int i = 0; i < starLevel_; i++)
 		{
 			if(stars_[i]->isFalling())
 			{
 				if(stars_[i]->getCollisionSphere()->testIntersection(camera_, kinectHoldViewPos_.x, kinectHoldViewPos_.y))
 				{
-					spaceShip_->makeLaunch(spaceShipLevel_);
-					pico_->makeCelebrate();
-					spaceShipLevel_++;
-					starLevel_++;
-					if(starLevel_ > 3)
+					if(stars_[i]->isGood())
 					{
-						starLevel_ = 3;
+						LogClass::Instance()->addEntry("GOOD_STAR_CATCHED", i+1, 0);
+						stars_[i]->reset();
+						starTouched_ = true;
+					}
+					else
+					{
+						LogClass::Instance()->addEntry("BAD_STAR_CATCHED", i+1, 0);
+						soundManager_->playSad();
+						pico_->makeNo();
 					}
 				}
 			}
@@ -921,6 +1212,7 @@ void SecondScreenState::loadConfigurationFromXML()
 		MessageBoxA(NULL, "Could not load configuration node!", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
 
+	// Time Pico greeting
 	pugi::xml_node greetingNode;
 	if(!(greetingNode = rootNode.child("greeting_time")))
 	{
@@ -930,6 +1222,18 @@ void SecondScreenState::loadConfigurationFromXML()
 	else
 	{
 		timeGreeting_ = greetingNode.text().as_float();
+	}
+
+	// Time night fading
+	pugi::xml_node fadingNode;
+	if(!(fadingNode = rootNode.child("fading_time")))
+	{
+		MessageBoxA(NULL, "Could not load fading time node!", "SecondScreen - Error", MB_ICONERROR | MB_OK);
+		timeToNight_ = 5;
+	}
+	else
+	{
+		timeToNight_ = fadingNode.text().as_float();
 	}
 }
 
@@ -1043,6 +1347,7 @@ bool SecondScreenState::loadPieces()
 		return false;
 	}
 
+	int pieces = 0;
 	for(pugi::xml_node fruitNode = root_node.first_child(); fruitNode; fruitNode = fruitNode.next_sibling())
 	{
 		std::string node_name = fruitNode.name();
@@ -1079,7 +1384,7 @@ bool SecondScreenState::loadPieces()
 				return false;
 			}
 
-			if(!piece->setup(graphicsManager_, soundManager_, modelName.as_string(), finalPos, pos, terrainHeight_, scale, rotX, rotY, rotZ))
+			if(!piece->setup(graphicsManager_, soundManager_, modelName.as_string(), finalPos, pos, terrainHeight_, scale, rotX, rotY, rotZ, pieces))
 			{
 				MessageBoxA(NULL, "Could not initialize fruit.", "SecondScreen - Piece - Error", MB_ICONERROR | MB_OK);
 				return false;
@@ -1101,6 +1406,7 @@ bool SecondScreenState::loadPieces()
 			piece->addListener(*pico_);
 
 			pieces_.push_back(piece);
+			pieces++;
 		}
 	}
 

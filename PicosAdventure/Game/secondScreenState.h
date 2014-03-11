@@ -41,6 +41,7 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 
 	enum IntroLevel
 		{
+			TO_NIGHT,
 			GREETING,
 			TO_PIECE,
 			LIGHT_IT,
@@ -98,6 +99,7 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 
 		CameraClass*				camera_;
 		LightClass*					light_;
+		LightClass*					piecesLight_;
 		ClockClass*					gameClock_;
 		SoundSecondClass*			soundManager_;
 		KinectClass*				kinectClass_;
@@ -119,12 +121,17 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 		float						betweenStarsTime_;
 		Point						initialPositions_[3];
 		Point						finalPositions_[3];
+		bool						starTouched_;
+		ClockClass*					starTouchedClock_;
+		std::vector<int>			origins_;
+		std::vector<int>			endings_;
 
 		bool						hasPicoGreeted_;
 
 		// Introduction control variables
 		ClockClass*					introClock_;
 		float						timeGreeting_;
+		float						timeToNight_;
 
 		// Kinect
 		Point						kinectHandViewPos_[2];
@@ -134,6 +141,7 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 
 		// Scenario structure
 		ImageClass*					background_;
+		ImageClass*					background2_;
 		Point						backgrounPosition_;
 
 		std::vector<Object3D*>		scenario_;

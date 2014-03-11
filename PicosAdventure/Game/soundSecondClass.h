@@ -52,6 +52,7 @@ class SoundSecondClass
 		bool playCelebrate();
 		bool playHi();
 		bool playPointing();
+		bool playSad();
 		bool playSurprise();
 
 	private:

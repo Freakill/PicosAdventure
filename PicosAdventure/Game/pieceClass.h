@@ -5,6 +5,7 @@
 #include "../Engine/particleSystem.h"
 #include "../Engine/sphereCollision.h"
 
+#include "../Game/logClass.h"
 #include "../Game/soundSecondClass.h"
 
 #include "../Graphics/graphicsManager.h"
@@ -34,12 +35,13 @@ class PieceClass : public Notifier<PieceClass, Point>
 		PieceClass(const PieceClass&);
 		~PieceClass();
 
-		bool setup(GraphicsManager* graphicsManager, SoundSecondClass* soundManager, std::string fileName, Point finalPos, Point position, float floorHeight, Vector scaling, float rotX, float rotY, float rotZ);
+		bool setup(GraphicsManager* graphicsManager, SoundSecondClass* soundManager, std::string fileName, Point finalPos, Point position, float floorHeight, Vector scaling, float rotX, float rotY, float rotZ, int logicID);
 		void update(float elapsedTime);
 		void draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug);
 		void destroy();
 
 		std::string getName();
+		int  logicId_;
 
 		void setFinalPosition();
 		void setPosition(Point newPosition);

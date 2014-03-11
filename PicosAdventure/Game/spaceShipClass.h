@@ -15,7 +15,9 @@ enum SpaceShipState
 	{
 		WAITING,
 		LAUNCHING,
-		FLYING
+		FLYING,
+		ENLARGING,
+		PREPARED
 	};
 
 class SpaceShipClass
@@ -33,6 +35,9 @@ class SpaceShipClass
 		void goToPosition(Point position);
 
 		void makeLaunch(int level);
+		void makeBig(Point newPos, Vector newScale);
+
+		bool isPrepared();
 
 		// Getters and setters
 		Object3D* getObject();
@@ -67,6 +72,13 @@ class SpaceShipClass
 		float		rotX_;
 		float		rotY_; 
 		float		rotZ_;
+
+		Point		enlargedInitialPosition_;
+		Vector		enlargedInitialScale_;
+		Point		enlargedFinalPosition_;
+		Vector		enlargedFinalScale_;
+		float		enlargingTime_;
+		float		enlargingElapsedTime_;
 };
 
 #endif //_BIRD_CLASS_H_

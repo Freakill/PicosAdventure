@@ -26,10 +26,11 @@ class ApplicationManager;
 enum messageType
 	{
 		GREETINGS_KINECT,
-		TORSO_POSITION,
-		RIGHT_HAND_ROT,
+		FIRST_RIGHT_HAND_ROT,
+		SECOND_RIGHT_HAND_ROT,
 		LEFT_HAND_ROT,
 		HOLD_HANDS,
+		TORSO_POSITION,
 		SKELETON_LOST
 	};
 
@@ -47,8 +48,11 @@ struct Player
 	{
 		Vector4 leftHand, rightHand;
 		Vector4 leftShoulder, rightShoulder;
-		Vector4 rightElbow, leftElbow;
-		Vector4 hipCenter;
+		Vector4 rightElbow, hipCenter;
+		Point leftHandScreenCoord, rightHandScreenCoord;
+		Point rightElbowScreenCoord, torsoScreenCord;
+		Point rightShoulderScreenCoord, leftShoulderScreenCoord;
+		float rightHandRot;
 	};
 
 class KinectClass : public Notifier<KinectClass, KinectStruct>
@@ -68,6 +72,7 @@ class KinectClass : public Notifier<KinectClass, KinectStruct>
 	private:
 		Point SkeletonToScreen(Vector4 skeletonPoint, int width, int height);
 		void detectSekeltonsJoints(NUI_SKELETON_FRAME myFrame);
+		void jointsToScreen();
 
 		HRESULT			ProcessDepth();
 		HRESULT			ProcessColor();
@@ -107,16 +112,13 @@ class KinectClass : public Notifier<KinectClass, KinectStruct>
 
 		XMFLOAT4		userColor_;
 
+		Player players[2];
 		int numPlayer,lastNumPlayer;
 		bool risedHand; 
 		int countSwipe;
 		int lastHandPosition,handPosition;
 		double handsDist;
-
-		Player players[2];
 		KinectStruct kinectStruct;
-
-		ClockClass* greetingsClock_;
 };
 
 #endif

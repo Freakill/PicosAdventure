@@ -25,7 +25,7 @@ KinectClass::KinectClass()
 	lastHandPosition = 1;
 	handPosition = 1;
 	handsDist = 100;
-
+	lastNumPlayer= 0;
 	numPlayer=0;
 }
 
@@ -446,9 +446,16 @@ HRESULT KinectClass::ProcessSkeleton()
 
 	detectSekeltonsJoints(skeletonFrame);
 
+	if(numPlayer<lastNumPlayer){
+		KinectStruct kinectStruct = {SKELETON_LOST};
+	}
+
+	jointsToScreen();
+
 	//There is one player
 	if(numPlayer==1){
-		if(players[0].rightElbow.y < players[0].rightHand.y)
+		
+		/*if(players[0].rightElbow.y < players[0].rightHand.y)
 		{
 			//Hand is rised
 			risedHand = true;
@@ -480,33 +487,11 @@ HRESULT KinectClass::ProcessSkeleton()
 			countSwipe = 0;
 		}
 
-		lastHandPosition = handPosition;
+		lastHandPosition = handPosition;*/
 
-		Point handRightScreenCoord = SkeletonToScreen(players[0].rightHand, 320, 240);
-		Point handLeftScreenCoord = SkeletonToScreen(players[0].leftHand, 320, 240);
-
-		Point elbowRightScreenCoord = SkeletonToScreen(players[0].rightElbow, 320, 240);
-
-		Point torsoScreenCord = SkeletonToScreen(players[0].hipCenter, 320, 240);
-
-		Vector armDirection;
-		armDirection.x = handRightScreenCoord.x - elbowRightScreenCoord.x;
-		armDirection.y = handRightScreenCoord.y - elbowRightScreenCoord.y;
-		Vector normalizedArmdDirection = armDirection.normalize();
-
-		float rotZ_;
-		if(armDirection.x > 0)
-		{
-			rotZ_ = -(atan(armDirection.y/armDirection.x)-XM_2PI/4);
-		}
-		else
-		{
-			rotZ_ = -(atan(armDirection.y/armDirection.x)-XM_2PI/4)-XM_2PI/2;
-		}
-
-		KinectStruct kinectTorso = {TORSO_POSITION, torsoScreenCord, Point(0, 0, 0), Point(0,0,0), 0};
-		KinectStruct kinectStruct = {RIGHT_HAND_ROT, handRightScreenCoord, elbowRightScreenCoord, Point(0,0,0), rotZ_};
-		KinectStruct kinectStruct2 = {LEFT_HAND_ROT, handLeftScreenCoord, elbowRightScreenCoord, Point(0,0,0), rotZ_};
+		KinectStruct kinectTorso = {TORSO_POSITION, players[0].torsoScreenCord, Point(0, 0, 0), Point(0,0,0), 0};
+		KinectStruct kinectStruct = {FIRST_RIGHT_HAND_ROT, players[0].rightHandScreenCoord, players[0].rightElbowScreenCoord, Point(0,0,0), players[0].rightHandRot};
+		KinectStruct kinectStruct2 = {LEFT_HAND_ROT, players[0].leftHandScreenCoord, players[0].rightElbowScreenCoord, Point(0,0,0), players[0].rightHandRot};
 		notifyListeners(kinectTorso);
 		notifyListeners(kinectStruct);
 		notifyListeners(kinectStruct2);
@@ -516,16 +501,16 @@ HRESULT KinectClass::ProcessSkeleton()
 	if(numPlayer==2){
 		if(players[0].hipCenter.x > players[1].hipCenter.x){
 
-			Point leftHandPoint = Point( players[0].leftHand.x, players[0].leftHand.y, players[0].leftHand.z);
+			Point leftHandPoint = Point(players[0].leftHand.x, players[0].leftHand.y, players[0].leftHand.z);
 			Point rightHandPoint = Point(players[1].rightHand.x,players[1].rightHand.y,players[1].rightHand.z);
 
 			handsDist =leftHandPoint.dist(rightHandPoint);
+			
+			//Check distance between hands 
+			if (handsDist < 0.1) KinectStruct kinectStruct = {HOLD_HANDS,players[0].leftHandScreenCoord,players[0].leftShoulderScreenCoord,players[1].rightShoulderScreenCoord,TRUE};
+			else KinectStruct kinectStruct = {HOLD_HANDS,players[0].leftHandScreenCoord,players[0].leftShoulderScreenCoord,players[1].rightShoulderScreenCoord,FALSE};
+			notifyListeners(kinectStruct);
 
-			Point handScreenCoord =  SkeletonToScreen(players[0].leftHand, 320, 240);
-			Point leftShoulderScreenCoord = SkeletonToScreen(players[0].leftShoulder, 320, 240);
-			Point rightShoulderScreenCoord = SkeletonToScreen(players[1].rightShoulder, 320, 240);
-
-			KinectStruct kinectStruct = {HOLD_HANDS,handScreenCoord,leftShoulderScreenCoord,rightShoulderScreenCoord};
 		}
 		else
 		{
@@ -534,30 +519,53 @@ HRESULT KinectClass::ProcessSkeleton()
 
 			handsDist = leftHandPoint.dist(rightHandPoint);
 
-			Point handScreenCoord =  SkeletonToScreen(players[0].rightHand, 320, 240);
-			Point rightShoulderScreenCoord = SkeletonToScreen(players[0].rightShoulder, 320, 240);
-			Point leftShoulderScreenCoord = SkeletonToScreen(players[1].leftShoulder, 320, 240);
-
-			KinectStruct kinectStruct = {HOLD_HANDS,handScreenCoord,leftShoulderScreenCoord,rightShoulderScreenCoord};
+			if (handsDist < 0.1)KinectStruct kinectStruct = {HOLD_HANDS,players[0].rightHandScreenCoord,players[1].leftShoulderScreenCoord,players[0].rightShoulderScreenCoord,TRUE};
+			else KinectStruct kinectStruct = {HOLD_HANDS,players[0].rightHandScreenCoord,players[1].leftShoulderScreenCoord,players[0].rightShoulderScreenCoord,FALSE};
+			notifyListeners(kinectStruct);
 		}
+
+		//Send both right hands
+		KinectStruct kinectStruct1 ={FIRST_RIGHT_HAND_ROT, players[0].rightHandScreenCoord, players[0].rightElbowScreenCoord, Point(0,0,0), players[0].rightHandRot};
+		notifyListeners(kinectStruct1);
+
+		KinectStruct kinectStruct2 = {SECOND_RIGHT_HAND_ROT, players[1].rightHandScreenCoord, players[1].rightElbowScreenCoord, Point(0,0,0), players[1].rightHandRot};
+		notifyListeners(kinectStruct2);
 	}
-
-
-	if (handsDist < 0.1){
-		kinectStruct.boolean = TRUE;
-		//MessageBox(NULL, L"MANOS JUNTAS", L"Message", MB_OKCANCEL);
-	}
-
-	else
-		kinectStruct.boolean = FALSE;
-
-	notifyListeners(kinectStruct);
 
     return hr;
 }
 
+void KinectClass::jointsToScreen(){
+
+	for(int i=0; i < numPlayer; i++){
+	
+	players[i].rightHandScreenCoord = SkeletonToScreen(players[i].rightHand, 320, 240);
+	players[i].leftHandScreenCoord = SkeletonToScreen(players[i].leftHand, 320, 240);
+	players[i].rightShoulderScreenCoord = SkeletonToScreen(players[i].rightShoulder, 320, 240);
+	players[i].leftShoulderScreenCoord = SkeletonToScreen(players[i].leftShoulder, 320, 240);
+	players[i].torsoScreenCord = SkeletonToScreen(players[i].hipCenter, 320, 240);
+	players[i].rightElbowScreenCoord = SkeletonToScreen(players[i].rightElbow, 320, 240);
+
+	Vector armDirection;
+	armDirection.x = players[i].rightHandScreenCoord.x - players[i].rightElbowScreenCoord.x;
+	armDirection.y = players[i].rightHandScreenCoord.y - players[i].rightElbowScreenCoord.y;
+	Vector normalizedArmdDirection = armDirection.normalize();
+
+	if(armDirection.x > 0)
+		{
+			players[i].rightHandRot = -(atan(armDirection.y/armDirection.x)-XM_2PI/4);
+		}
+		else
+		{
+			players[i].rightHandRot = -(atan(armDirection.y/armDirection.x)-XM_2PI/4)-XM_2PI/2;
+		}
+
+	}
+}
+
 void KinectClass::detectSekeltonsJoints(NUI_SKELETON_FRAME myFrame)
 {
+	lastNumPlayer = numPlayer;
 	numPlayer = 0;
 
 	for (int i = 0; i < NUI_SKELETON_COUNT; i++){

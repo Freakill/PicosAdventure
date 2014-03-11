@@ -685,13 +685,13 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 {
 	switch(arg.type)
 	{
-		case(TORSO_POSITION):
+		/*case(TORSO_POSITION):
 			{
 				kinectTorsoPos_ = Point(arg.handPos.x*screenWidth_/320, arg.handPos.y*screenHeight_/240);
 			}
-			break;
-		case(RIGHT_HAND_POSITION_ROT):
-		case(LEFT_HAND_POSITION_ROT):
+			break;*/
+		case(FIRST_RIGHT_HAND_ROT):
+		case(LEFT_HAND_ROT):
 			{
 				kinectHandPos_ = Point(arg.handPos.x*screenWidth_/320, arg.handPos.y*screenHeight_/240);
 
@@ -726,7 +726,7 @@ void FirstScreenState::notify(KinectClass* notifier, KinectStruct arg)
 				}
 
 
-				if(arg.type == RIGHT_HAND_POSITION_ROT)
+				if(arg.type == FIRST_RIGHT_HAND_ROT)
 				{
 					if(subLevelState_ == PLAYING && pico_->getCollisionSphere()->testIntersection(camera_, kinectHandPos_.x, kinectHandPos_.y))
 					{

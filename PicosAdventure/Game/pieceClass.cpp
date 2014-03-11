@@ -43,13 +43,14 @@ PieceClass::~PieceClass()
 {
 }
 
-bool PieceClass::setup(GraphicsManager *graphicsManager, SoundSecondClass* soundManager, std::string fileName, Point finalPos, Point position, float floorHeight, Vector scaling, float rotX, float rotY, float rotZ)
+bool PieceClass::setup(GraphicsManager *graphicsManager, SoundSecondClass* soundManager, std::string fileName, Point finalPos, Point position, float floorHeight, Vector scaling, float rotX, float rotY, float rotZ, int logicID)
 {
 	model_ = Object3DFactory::Instance()->CreateObject3D("StaticObject3D", graphicsManager, fileName);
 
 	soundManager_ = soundManager;
 
 	name_ = fileName;
+	logicId_ = logicID;
 
 	finalPosition_.x = finalPos.x;
 	finalPosition_.y = finalPos.y;
@@ -239,6 +240,7 @@ void PieceClass::lightIt()
 
 		if(lightedTime_ > fallTime_)
 		{
+			LogClass::Instance()->addEntry("FOUND_PIECE", logicId_, 0);
 			makeItFall();
 		}
 	}

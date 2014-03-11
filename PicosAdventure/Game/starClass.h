@@ -46,22 +46,28 @@ class StarClass
 
 		SphereCollision* getCollisionSphere();
 
-		void makeItFall();
+		void makeItFall(bool good);
 		bool isFalling();
 		bool hasFallen();
 		bool isInTheFloor();
+		bool isInTheSky();
+		bool isGood();
+		void reset();
 
 	private:
 		SoundSecondClass* soundManager_;
 
 		Object3D*	model_;
 		SphereCollision* collisionTest_;
+		LightClass* badlight_;
 
 		Point		initialPosition_;
 		Point		finalPosition_;
 		Point		position_;
 		Vector		scaling_; 
 		Vector		velocity_;
+
+		bool		good_;
 
 		float		waitedTime_;
 
