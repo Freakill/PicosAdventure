@@ -46,6 +46,7 @@ struct KinectStruct
 
 struct Player
 	{
+		DWORD skeletonID;
 		Vector4 leftHand, rightHand;
 		Vector4 leftShoulder, rightShoulder;
 		Vector4 rightElbow, hipCenter;
@@ -88,7 +89,8 @@ class KinectClass : public Notifier<KinectClass, KinectStruct>
 
 		ID2D1Factory*   D2DFactory_;
 		ID2D1RenderTarget* renderTarget_;
-		ID2D1Bitmap*    bitmap_;
+		ID2D1Bitmap*    bitmap_[2];
+		bool			drawUser1_;
 
 		HANDLE			hEvents[4];
 		HANDLE          depthStreamHandle_;
@@ -106,9 +108,9 @@ class KinectClass : public Notifier<KinectClass, KinectStruct>
 		UINT            depthWidth_;
 		UINT            depthHeight_;
 
-		INuiBackgroundRemovedColorStream*  backgroundRemovalStream_;
+		INuiBackgroundRemovedColorStream*  backgroundRemovalStream_[2];
 		
-		DWORD           trackedSkeleton_;
+		DWORD           trackedSkeleton_[2];
 
 		XMFLOAT4		userColor_;
 

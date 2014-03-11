@@ -132,7 +132,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 
 	// Lights
 	lightPos_[0] = XMFLOAT4(-3.5f, 2.0f, -4.0f, 0.0f);
-	lightPos_[1] = XMFLOAT4(30.5f, 20.0f, -40.0f, 0.0f);
+	lightPos_[1] = XMFLOAT4(-30.5f, 20.0f, -40.0f, 0.0f);
 
 	lightBody_ = Object3DFactory::Instance()->CreateObject3D("StaticObject3D", graphicsManager_, "sphere");
 	lightBody_->setPosition(Point(-4.0f, 0.0f, -3.25f));
@@ -143,7 +143,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	{
 		MessageBoxA(NULL, "Could not create light1 particles instance", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
-	if(lightParticles_[0] && !lightParticles_[0]->setup(graphicsManager, "star", Point(lightPos_[0].x, lightPos_[0].y, lightPos_[0].z) , 2.8, 30, 60, XMFLOAT4(1.00f, 1.00f, 0.0f, 1.0f)))
+	if(lightParticles_[0] && !lightParticles_[0]->setup(graphicsManager, "star", Point(lightPos_[0].x, lightPos_[0].y, lightPos_[0].z) , 2.8, 30, 60, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)))
 	{
 		MessageBoxA(NULL, "Could not setup light1 particles object", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
@@ -153,7 +153,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	{
 		MessageBoxA(NULL, "Could not create light1 particles instance", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
-	if(lightParticles_[1] && !lightParticles_[1]->setup(graphicsManager, "star", Point(lightPos_[1].x, lightPos_[1].y, lightPos_[1].z) , 2.8, 30, 60, XMFLOAT4(1.00f, 1.00f, 0.0f, 1.0f)))
+	if(lightParticles_[1] && !lightParticles_[1]->setup(graphicsManager, "star", Point(lightPos_[1].x, lightPos_[1].y, lightPos_[1].z) , 2.8, 30, 60, XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f)))
 	{
 		MessageBoxA(NULL, "Could not setup light1 particles object", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
@@ -233,7 +233,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	starFallTime_ = 8.0f;
 	betweenStarsTime_ = 10.0f;
 
-	initialPositions_[0].x = -4.75f;
+	initialPositions_[0].x = -2.8f;
 	initialPositions_[0].y = 8.2f;
 	initialPositions_[0].z = -3.0f;
 
@@ -241,11 +241,11 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	initialPositions_[1].y = 8.2f;
 	initialPositions_[1].z = -3.0f;
 
-	initialPositions_[2].x = 4.75f;
+	initialPositions_[2].x = 2.8f;
 	initialPositions_[2].y = 8.2f;
 	initialPositions_[2].z = -3.0f;
 
-	finalPositions_[0].x = -3.5f;
+	finalPositions_[0].x = -2.8f;
 	finalPositions_[0].y = terrainHeight_;
 	finalPositions_[0].z = -3.5f;
 
@@ -253,7 +253,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	finalPositions_[1].y = terrainHeight_;
 	finalPositions_[1].z = -3.5f;
 
-	finalPositions_[2].x = 4.0f;
+	finalPositions_[2].x = 2.8f;
 	finalPositions_[2].y = terrainHeight_;
 	finalPositions_[2].z = -3.5f;
 
@@ -378,6 +378,7 @@ void SecondScreenState::update(float elapsedTime)
 		case MOUNTING:
 			{
 				updateLightPositions();
+				updateParticlesPositions();
 
 				PointlightDiffuseShader3DClass* pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>(spaceShip_->getObject()->getShader3D());
 				pointlightShader->setPositions(lightPos_[0], lightPos_[1]);
@@ -420,6 +421,8 @@ void SecondScreenState::update(float elapsedTime)
 			{
 				updateLightPositions();
 
+				//lightParticles_[0]->update(elapsedTime*1000, false);
+
 				if(gameClock_->getTime() > timeToWaitFirstStar_)
 				{
 					makeFirstStarFall();
@@ -433,6 +436,8 @@ void SecondScreenState::update(float elapsedTime)
 			{
 				updateLightPositions();
 
+				//lightParticles_[0]->update(elapsedTime*1000, false);
+
 				stars_[0]->update(elapsedTime);
 				spaceShip_->update(elapsedTime);
 
@@ -442,6 +447,9 @@ void SecondScreenState::update(float elapsedTime)
 		case COLLECTING:
 			{
 				updateLightPositions();
+				//lightParticles_[0]->setPosition(Point(kinectHoldWorldPos_.x, kinectHoldWorldPos_.y, kinectHoldWorldPos_.z));
+				//lightParticles_[0]->update(elapsedTime*1000, true);
+
 				starTouchedClock_->tick();
 				spaceShip_->update(elapsedTime);
 
@@ -459,10 +467,10 @@ void SecondScreenState::update(float elapsedTime)
 
 						LogClass::Instance()->addEntry("MAKE_STARS_FALL", starLevel_, 0);
 
-						for(int i = 0; i < starLevel_; i++)
-						{
-							makeStarFall(i);
-						}
+						//for(int i = 0; i < starLevel_; i++)
+						//{
+						makeStarFall(rand() % starLevel_);
+						//}
 
 						gameClock_->reset();
 					}
@@ -596,9 +604,16 @@ void SecondScreenState::draw()
 				graphicsManager_->turnOffAlphaBlending();
 			}
 			break;
+		case COLLECTING:
+			{
+				/*graphicsManager_->turnOnParticlesAlphaBlending();
+				graphicsManager_->turnZBufferOff();
+					lightParticles_[0]->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, picoLight_);
+				graphicsManager_->turnZBufferOn();
+				graphicsManager_->turnOffAlphaBlending();*/
+			}
 		case TRANSITION:
 		case INTRO_COLLECTING:
-		case COLLECTING:
 			{
 				for(int i = 0; i < starLevel_; i++)
 				{
@@ -881,7 +896,10 @@ void SecondScreenState::updateLightPositions()
 
 	lightPos_[1].x = kinectHandWorldPos_[1].x;
 	lightPos_[1].y = kinectHandWorldPos_[1].y;
+}
 
+void SecondScreenState::updateParticlesPositions()
+{
 	lightParticles_[0]->setPosition(Point(lightPos_[0].x, lightPos_[0].y, lightPos_[0].z));
 	lightParticles_[1]->setPosition(Point(lightPos_[1].x, lightPos_[1].y, lightPos_[1].z));
 }
@@ -895,7 +913,7 @@ void SecondScreenState::makeFirstStarFall()
 
 void SecondScreenState::makeStarFall(int i)
 {
-	int init = rand() % 3;
+	int pos = rand() % 3;
 	bool keepSearching = true;
 	while(keepSearching)
 	{
@@ -903,7 +921,7 @@ void SecondScreenState::makeStarFall(int i)
 		std::vector<int>::iterator originIt;
 		for(originIt = origins_.begin(); originIt != origins_.end(); originIt++)
 		{
-			if((*originIt) == init)
+			if((*originIt) == pos)
 			{
 				notIn = false;
 			}
@@ -912,40 +930,15 @@ void SecondScreenState::makeStarFall(int i)
 		if(notIn)
 		{
 			keepSearching = false;
-			origins_.push_back(init);
+			origins_.push_back(pos);
 		}
 		else
 		{
-			init = rand() % 3;
+			pos = rand() % 3;
 		}
 	}
-	stars_[i]->setInitialPosition(initialPositions_[init]);
-
-	int end = rand() % 3;
-	keepSearching = true;
-	while(keepSearching)
-	{
-		bool notIn = true;
-		std::vector<int>::iterator endIt;
-		for(endIt = endings_.begin(); endIt != endings_.end(); endIt++)
-		{
-			if((*endIt) == end)
-			{
-				notIn = false;
-			}
-		}
-
-		if(notIn)
-		{
-			keepSearching = false;
-			endings_.push_back(end);
-		}
-		else
-		{
-			end = rand() % 3;
-		}
-	}
-	stars_[i]->setFinalPosition(finalPositions_[end]);
+	stars_[i]->setInitialPosition(initialPositions_[pos]);
+	stars_[i]->setFinalPosition(finalPositions_[pos]);
 
 	if(i == 0)
 	{
@@ -1111,31 +1104,6 @@ void SecondScreenState::notify(KinectClass* notifier, KinectStruct arg)
 				}
 			}
 		}
-
-		if(levelState_ == COLLECTING)
-		{
-			for(int i = 0; i < starLevel_; i++)
-			{
-				if(stars_[i]->isFalling())
-				{
-					if(stars_[i]->getCollisionSphere()->testIntersection(camera_, kinectHandViewPos_[0].x, kinectHandViewPos_[0].y))
-					{
-						if(stars_[i]->isGood())
-						{
-							LogClass::Instance()->addEntry("GOOD_STAR_CATCHED", i+1, 0);
-							stars_[i]->reset();
-							starTouched_ = true;
-						}
-						else
-						{
-							LogClass::Instance()->addEntry("BAD_STAR_CATCHED", i+1, 0);
-							soundManager_->playSad();
-							pico_->makeNo();
-						}
-					}
-				}
-			}
-		}
 	}
 	
 	if(arg.type == SECOND_RIGHT_HAND_ROT)
@@ -1163,33 +1131,45 @@ void SecondScreenState::notify(KinectClass* notifier, KinectStruct arg)
 
 	if(levelState_ == COLLECTING && arg.type == HOLD_HANDS)
 	{
-		kinectHoldViewPos_ = Point(arg.handPos.x*screenWidth_/320, arg.handPos.y*screenHeight_/240);
-
-		// Calculate world position
-		kinectHoldWorldPos_.x = ((kinectHoldViewPos_.x/screenWidth_)*8)-4;
-		kinectHoldWorldPos_.y = (1-(kinectHoldViewPos_.y/screenHeight_))*5;
-		kinectHoldWorldPos_.z = 0;
-
-		for(int i = 0; i < starLevel_; i++)
+		if(arg.boolean == TRUE)
 		{
-			if(stars_[i]->isFalling())
+			kinectHoldViewPos_ = Point(arg.handPos.x*screenWidth_/320, arg.handPos.y*screenHeight_/240);
+
+			// Calculate world position
+			kinectHoldWorldPos_.x = ((kinectHoldViewPos_.x/screenWidth_)*8)-4;
+			kinectHoldWorldPos_.y = (1-(kinectHoldViewPos_.y/screenHeight_))*5;
+			kinectHoldWorldPos_.z = 0;
+
+			for(int i = 0; i < starLevel_; i++)
 			{
-				if(stars_[i]->getCollisionSphere()->testIntersection(camera_, kinectHoldViewPos_.x, kinectHoldViewPos_.y))
+				if(stars_[i]->isFalling())
 				{
-					if(stars_[i]->isGood())
+					if(stars_[i]->getCollisionSphere()->testIntersection(camera_, kinectHoldViewPos_.x, kinectHoldViewPos_.y))
 					{
-						LogClass::Instance()->addEntry("GOOD_STAR_CATCHED", i+1, 0);
-						stars_[i]->reset();
-						starTouched_ = true;
-					}
-					else
-					{
-						LogClass::Instance()->addEntry("BAD_STAR_CATCHED", i+1, 0);
-						soundManager_->playSad();
-						pico_->makeNo();
+						if(stars_[i]->isGood())
+						{
+							LogClass::Instance()->addEntry("GOOD_STAR_CATCHED", i+1, 0);
+							stars_[i]->reset();
+							starTouched_ = true;
+						}
+						else
+						{
+							LogClass::Instance()->addEntry("BAD_STAR_CATCHED", i+1, 0);
+							soundManager_->playSad();
+							pico_->makeNo();
+						}
 					}
 				}
 			}
+		}
+		else
+		{
+			kinectHoldViewPos_ = Point(-100/320, -100/240);
+
+			// Calculate world position
+			kinectHoldWorldPos_.x = ((kinectHoldViewPos_.x/screenWidth_)*8)-4;
+			kinectHoldWorldPos_.y = (1-(kinectHoldViewPos_.y/screenHeight_))*5;
+			kinectHoldWorldPos_.z = 0;
 		}
 	}
 }

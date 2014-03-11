@@ -80,6 +80,7 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 
 		void updatePieces(float elapsedTime);
 		void updateLightPositions();
+		void updateParticlesPositions();
 
 		void makeFirstStarFall();
 		void makeStarFall(int i);

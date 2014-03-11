@@ -57,7 +57,7 @@ bool SoundSecondClass::setup(HWND hwnd)
 		return false;
 	}
 
-	result = loadFile("fixing", "pico_fixing");
+	result = loadFile("fixing", "ShipConstruction");
 	if(!result)
 	{
 		MessageBoxA(NULL, "Could not load fixing", "SoundSecondClass - Error", MB_ICONERROR | MB_OK);
@@ -123,7 +123,7 @@ bool SoundSecondClass::setup(HWND hwnd)
 	}
 
 	// FOREST
-	result = loadFile("background_music", "background_forest");
+	result = loadFile("background_music", "Bosc-de-Nit");
 	if(!result)
 	{
 		MessageBoxA(NULL, "Could not load background_music", "SoundSecondClass - Error", MB_ICONERROR | MB_OK);

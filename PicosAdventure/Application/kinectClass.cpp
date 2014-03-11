@@ -13,12 +13,17 @@ KinectClass::KinectClass()
     colorStreamHandle_ = INVALID_HANDLE_VALUE;
     nearMode_ = false;
     nuiSensor_ = 0;
-    backgroundRemovalStream_ = 0;
-    trackedSkeleton_ = NUI_SKELETON_INVALID_TRACKING_ID;
+    backgroundRemovalStream_[0] = 0;
+	backgroundRemovalStream_[1] = 0;
+    trackedSkeleton_[0] = NUI_SKELETON_INVALID_TRACKING_ID;
+	trackedSkeleton_[1] = NUI_SKELETON_INVALID_TRACKING_ID;
 
 	D2DFactory_ = 0;
     renderTarget_ = 0;
-    bitmap_ = 0;
+    bitmap_[0] = 0;
+	bitmap_[1] = 0;
+
+	drawUser1_ = true;
 
 	risedHand = false;
 	countSwipe = 0;
@@ -161,13 +166,21 @@ bool KinectClass::setup(HWND windowHandler, IDXGISwapChain* swapChain)
 				return false;
 			}
 
-			hr = NuiCreateBackgroundRemovedColorStream(nuiSensor_, &backgroundRemovalStream_);
+			hr = NuiCreateBackgroundRemovedColorStream(nuiSensor_, &backgroundRemovalStream_[0]);
 			if (FAILED(hr))
 			{
 				return false;
 			}
 
-			hr = backgroundRemovalStream_->Enable(NUI_IMAGE_RESOLUTION_640x480, NUI_IMAGE_RESOLUTION_320x240, nextBackgroundRemovedFrameEvent_);
+			hr = backgroundRemovalStream_[0]->Enable(NUI_IMAGE_RESOLUTION_640x480, NUI_IMAGE_RESOLUTION_320x240, nextBackgroundRemovedFrameEvent_);
+
+			hr = NuiCreateBackgroundRemovedColorStream(nuiSensor_, &backgroundRemovalStream_[1]);
+			if (FAILED(hr))
+			{
+				return false;
+			}
+
+			hr = backgroundRemovalStream_[1]->Enable(NUI_IMAGE_RESOLUTION_640x480, NUI_IMAGE_RESOLUTION_320x240, nextBackgroundRemovedFrameEvent_);
 
         }
     }
@@ -201,7 +214,10 @@ bool KinectClass::setup(HWND windowHandler, IDXGISwapChain* swapChain)
     // Create a bitmap that we can copy image data into and then render to the target
     hr = renderTarget_->CreateBitmap(size, 
 									 D2D1::BitmapProperties(D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)),
-									 &bitmap_);
+									 &bitmap_[0]);
+	hr = renderTarget_->CreateBitmap(size, 
+									 D2D1::BitmapProperties(D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)),
+									 &bitmap_[1]);
 
     if(FAILED(hr))
     {
@@ -262,7 +278,8 @@ void KinectClass::draw()
 	D2D1_RECT_F rec = D2D1::RectF(0, 0, screenSize.width, screenSize.height);
 
     // Draw the bitmap stretched to the size of the window
-    renderTarget_->DrawBitmap(bitmap_, rec);
+    renderTarget_->DrawBitmap(bitmap_[0], rec);
+	renderTarget_->DrawBitmap(bitmap_[1], rec);
 
 	//renderTarget_->DrawEllipse();
             
@@ -295,10 +312,16 @@ void KinectClass::destroy()
         CloseHandle(nextSkeletonFrameEvent_);
     }
 
-	if(bitmap_ != 0)
+	if(bitmap_[1] != 0)
     {
-        bitmap_->Release();
-        bitmap_ = 0;
+        bitmap_[1]->Release();
+        bitmap_[1] = 0;
+    }
+
+	if(bitmap_[0] != 0)
+    {
+        bitmap_[0]->Release();
+        bitmap_[0] = 0;
     }
 
 	if(renderTarget_ != 0)
@@ -313,10 +336,16 @@ void KinectClass::destroy()
         D2DFactory_ = 0;
     }
 
-	if(backgroundRemovalStream_ != 0)
+	if(backgroundRemovalStream_[1] != 0)
     {
-        backgroundRemovalStream_->Release();
-        backgroundRemovalStream_ = 0;
+        backgroundRemovalStream_[1]->Release();
+        backgroundRemovalStream_[1] = 0;
+    }
+
+	if(backgroundRemovalStream_[0] != 0)
+    {
+        backgroundRemovalStream_[0]->Release();
+        backgroundRemovalStream_[0] = 0;
     }
 
 	if(nuiSensor_ != 0)
@@ -363,7 +392,8 @@ HRESULT KinectClass::ProcessDepth()
     // Make sure we've received valid data, and then present it to the background removed color stream. 
 	if(LockedRect.Pitch != 0)
 	{
-		bghr = backgroundRemovalStream_->ProcessDepth(depthWidth_ * depthHeight_ * 4, LockedRect.pBits, depthTimeStamp);
+		bghr = backgroundRemovalStream_[0]->ProcessDepth(depthWidth_ * depthHeight_ * 4, LockedRect.pBits, depthTimeStamp);
+		bghr = backgroundRemovalStream_[1]->ProcessDepth(depthWidth_ * depthHeight_ * 4, LockedRect.pBits, depthTimeStamp);
 	}
 
     // We're done with the texture so unlock it. Even if above process failed, we still need to unlock and release.
@@ -406,7 +436,8 @@ HRESULT KinectClass::ProcessColor()
 	// Make sure we've received valid data. Then save a copy of color frame.
 	if(LockedRect.Pitch != 0)
 	{
-		bghr = backgroundRemovalStream_->ProcessColor(colorWidth_ * colorHeight_ * 4, LockedRect.pBits, colorTimeStamp);
+		bghr = backgroundRemovalStream_[0]->ProcessColor(colorWidth_ * colorHeight_ * 4, LockedRect.pBits, colorTimeStamp);
+		bghr = backgroundRemovalStream_[1]->ProcessColor(colorWidth_ * colorHeight_ * 4, LockedRect.pBits, colorTimeStamp);
     }
 
     // We're done with the texture so unlock it
@@ -442,7 +473,8 @@ HRESULT KinectClass::ProcessSkeleton()
         return hr;
     }
 
-    hr = backgroundRemovalStream_->ProcessSkeleton(NUI_SKELETON_COUNT, pSkeletonData, skeletonFrame.liTimeStamp);
+    hr = backgroundRemovalStream_[0]->ProcessSkeleton(NUI_SKELETON_COUNT, pSkeletonData, skeletonFrame.liTimeStamp);
+	hr = backgroundRemovalStream_[1]->ProcessSkeleton(NUI_SKELETON_COUNT, pSkeletonData, skeletonFrame.liTimeStamp);
 
 	detectSekeltonsJoints(skeletonFrame);
 
@@ -454,44 +486,10 @@ HRESULT KinectClass::ProcessSkeleton()
 
 	//There is one player
 	if(numPlayer==1){
-		
-		/*if(players[0].rightElbow.y < players[0].rightHand.y)
-		{
-			//Hand is rised
-			risedHand = true;
-			if(players[0].rightElbow.x < players[0].rightHand.x)
-			{
-				handPosition = 2;
-			}
-			else if(players[0].rightElbow.x > players[0].rightHand.x)
-			{
-				handPosition = 3;
-			}
-		}
-		//Hand is down
-		else
-		{
-			risedHand = false;
-			countSwipe = 0;
-		}
-
-		if(lastHandPosition != handPosition)
-		{
-			countSwipe++;
-		}
-
-		if(countSwipe == 4 && risedHand)
-		{
-			KinectStruct KinectStruct = {GREETINGS_KINECT};
-			notifyListeners(KinectStruct);
-			countSwipe = 0;
-		}
-
-		lastHandPosition = handPosition;*/
-
 		KinectStruct kinectTorso = {TORSO_POSITION, players[0].torsoScreenCord, Point(0, 0, 0), Point(0,0,0), 0};
 		KinectStruct kinectStruct = {FIRST_RIGHT_HAND_ROT, players[0].rightHandScreenCoord, players[0].rightElbowScreenCoord, Point(0,0,0), players[0].rightHandRot};
 		KinectStruct kinectStruct2 = {LEFT_HAND_ROT, players[0].leftHandScreenCoord, players[0].rightElbowScreenCoord, Point(0,0,0), players[0].rightHandRot};
+
 		notifyListeners(kinectTorso);
 		notifyListeners(kinectStruct);
 		notifyListeners(kinectStruct2);
@@ -506,11 +504,18 @@ HRESULT KinectClass::ProcessSkeleton()
 
 			handsDist =leftHandPoint.dist(rightHandPoint);
 			
+			KinectStruct kinectStruct = {HOLD_HANDS,players[0].leftHandScreenCoord,players[0].leftShoulderScreenCoord,players[1].rightShoulderScreenCoord,TRUE};
 			//Check distance between hands 
-			if (handsDist < 0.1) KinectStruct kinectStruct = {HOLD_HANDS,players[0].leftHandScreenCoord,players[0].leftShoulderScreenCoord,players[1].rightShoulderScreenCoord,TRUE};
-			else KinectStruct kinectStruct = {HOLD_HANDS,players[0].leftHandScreenCoord,players[0].leftShoulderScreenCoord,players[1].rightShoulderScreenCoord,FALSE};
-			notifyListeners(kinectStruct);
+			if (handsDist < 0.1)
+			{
+				kinectStruct.boolean = TRUE;
+			}
+			else 
+			{
+				kinectStruct.boolean = FALSE;
+			}
 
+			notifyListeners(kinectStruct);
 		}
 		else
 		{
@@ -519,8 +524,16 @@ HRESULT KinectClass::ProcessSkeleton()
 
 			handsDist = leftHandPoint.dist(rightHandPoint);
 
-			if (handsDist < 0.1)KinectStruct kinectStruct = {HOLD_HANDS,players[0].rightHandScreenCoord,players[1].leftShoulderScreenCoord,players[0].rightShoulderScreenCoord,TRUE};
-			else KinectStruct kinectStruct = {HOLD_HANDS,players[0].rightHandScreenCoord,players[1].leftShoulderScreenCoord,players[0].rightShoulderScreenCoord,FALSE};
+			KinectStruct kinectStruct = {HOLD_HANDS,players[0].rightHandScreenCoord,players[1].leftShoulderScreenCoord,players[0].rightShoulderScreenCoord,TRUE};
+			if (handsDist < 0.1)
+			{
+				kinectStruct.boolean = TRUE;
+			}
+			else 
+			{
+				kinectStruct.boolean = FALSE;
+			}
+
 			notifyListeners(kinectStruct);
 		}
 
@@ -568,11 +581,16 @@ void KinectClass::detectSekeltonsJoints(NUI_SKELETON_FRAME myFrame)
 	lastNumPlayer = numPlayer;
 	numPlayer = 0;
 
+	players[0].skeletonID = NUI_SKELETON_INVALID_TRACKING_ID;
+	players[1].skeletonID = NUI_SKELETON_INVALID_TRACKING_ID;
+
 	for (int i = 0; i < NUI_SKELETON_COUNT; i++){
 
 		NUI_SKELETON_TRACKING_STATE trackingState = myFrame.SkeletonData[i].eTrackingState;
 
 		if (NUI_SKELETON_TRACKED == trackingState){
+			players[numPlayer].skeletonID = myFrame.SkeletonData[i].dwTrackingID;
+
 			//First Skeleton on the LEFT, holds RIGHT hand
 			players[numPlayer].rightHand.x = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].x;
 			players[numPlayer].rightHand.y = myFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].y;
@@ -616,37 +634,64 @@ HRESULT KinectClass::ChooseSkeleton(NUI_SKELETON_DATA* pSkeletonData)
 	// First we go through the stream to find the closest skeleton, and also check whether our current tracked
 	// skeleton is still visibile in the stream
 	float closestSkeletonDistance = FLT_MAX;
+	float secondClosestSkeletonDistance = FLT_MAX;
+
 	DWORD closestSkeleton = NUI_SKELETON_INVALID_TRACKING_ID;
+	DWORD secondClosestSkeleton = NUI_SKELETON_INVALID_TRACKING_ID;
+
 	BOOL isTrackedSkeletonVisible = false;
+	BOOL isSecondTrackedSkeletonVisible = false;
+
 	for(int i = 0; i < NUI_SKELETON_COUNT; ++i)
 	{
 		NUI_SKELETON_DATA skeleton = pSkeletonData[i];
 		if(NUI_SKELETON_TRACKED == skeleton.eTrackingState)
 		{
-			if(trackedSkeleton_ == skeleton.dwTrackingID)
+			/*if(trackedSkeleton_[0] == skeleton.dwTrackingID)
 			{
 				isTrackedSkeletonVisible = true;
-				break;
+				//break;
 			}
+			if(trackedSkeleton_[1] == skeleton.dwTrackingID)
+			{
+				isSecondTrackedSkeletonVisible = true;
+				//break;
+			}*/
 
 			if(skeleton.Position.z < closestSkeletonDistance)
 			{
 				closestSkeleton = skeleton.dwTrackingID;
 				closestSkeletonDistance = skeleton.Position.z;
 			}
+			if(closestSkeleton != skeleton.dwTrackingID)
+			{
+				secondClosestSkeleton = skeleton.dwTrackingID;
+				secondClosestSkeletonDistance = skeleton.Position.z;
+			}
 		}
 	}
 
 	// Now we choose a new skeleton unless the currently tracked skeleton is still visible
-	if(!isTrackedSkeletonVisible && closestSkeleton != NUI_SKELETON_INVALID_TRACKING_ID)
+	if(/*!isTrackedSkeletonVisible && */players[0].skeletonID != NUI_SKELETON_INVALID_TRACKING_ID)
 	{
-		hr = backgroundRemovalStream_->SetTrackedPlayer(closestSkeleton);
+		hr = backgroundRemovalStream_[0]->SetTrackedPlayer(players[0].skeletonID);
 		if (FAILED(hr))
 		{
 			return hr;
 		}
 
-		trackedSkeleton_ = closestSkeleton;
+		trackedSkeleton_[0] = players[0].skeletonID;
+	}
+
+	if(/*!isSecondTrackedSkeletonVisible && */players[1].skeletonID != NUI_SKELETON_INVALID_TRACKING_ID)
+	{
+		hr = backgroundRemovalStream_[1]->SetTrackedPlayer(players[1].skeletonID);
+		if (FAILED(hr))
+		{
+			return hr;
+		}
+
+		trackedSkeleton_[1] = players[1].skeletonID;
 	}
 
 	return hr;
@@ -657,46 +702,116 @@ HRESULT KinectClass::ComposeImage()
     HRESULT hr;
     NUI_BACKGROUND_REMOVED_COLOR_FRAME bgRemovedFrame;
 
-	hr = backgroundRemovalStream_->GetNextFrame(0, &bgRemovedFrame);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
+	if(drawUser1_)
+	{
+		// We get the pointer to the background removal stream fro the second user
+		//const BYTE* pBackgroundRemovedColor = bgRemovedFrame.pBackgroundRemovedColorData;
 
-    const BYTE* pBackgroundRemovedColor = bgRemovedFrame.pBackgroundRemovedColorData;
+		// Create an integer variable that keeps the size in pixels of images
+		int dataLength = static_cast<int>(colorWidth_) * static_cast<int>(colorHeight_);
 
-    int dataLength = static_cast<int>(colorWidth_) * static_cast<int>(colorHeight_);
-    for (int i = 0; i < dataLength; ++i)
-    {
-		if(pBackgroundRemovedColor[i*4+3] < 128)
+		// We lock the frame for the first background removal
+		hr = backgroundRemovalStream_[0]->GetNextFrame(0, &bgRemovedFrame);
+		if (FAILED(hr))
 		{
-			outputRGBX_[i*4] = 0;
-			outputRGBX_[i*4+1] = 0;
-			outputRGBX_[i*4+2] = 0;
-			outputRGBX_[i*4+3] = 0;
+			return hr;
 		}
-		else
+
+		const BYTE* pBackgroundRemovedColor = bgRemovedFrame.pBackgroundRemovedColorData;
+
+		for (int i = 0; i < dataLength; ++i)
 		{
-			outputRGBX_[i*4] = pBackgroundRemovedColor[i*4]*userColor_.x;
-			outputRGBX_[i*4+1] = pBackgroundRemovedColor[i*4+1]*userColor_.y;
-			outputRGBX_[i*4+2] = pBackgroundRemovedColor[i*4+2]*userColor_.z;
-			outputRGBX_[i*4+3] = 256*userColor_.w;
+			if(pBackgroundRemovedColor[i*4+3] < 64)
+			{
+				// We don't erase the other data to avoid deleting the previous drawn user
+				// If we put the pixels to alpha 0 then we would be deleting the previous drawn pixels
+				outputRGBX_[i*4] = 0;
+				outputRGBX_[i*4+1] = 0;
+				outputRGBX_[i*4+2] = 0;
+				outputRGBX_[i*4+3] = 0;
+			}
+			else
+			{
+				outputRGBX_[i*4] = pBackgroundRemovedColor[i*4]*userColor_.x;
+				outputRGBX_[i*4+1] = pBackgroundRemovedColor[i*4+1]*userColor_.y;
+				outputRGBX_[i*4+2] = pBackgroundRemovedColor[i*4+2]*userColor_.z;
+				outputRGBX_[i*4+3] = 256*userColor_.w;
+			}
 		}
-    }
 
-    hr = backgroundRemovalStream_->ReleaseFrame(&bgRemovedFrame);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
+		// We remove the locks to the images of the backroung removal streams
+		hr = backgroundRemovalStream_[0]->ReleaseFrame(&bgRemovedFrame);
+		if (FAILED(hr))
+		{
+			return hr;
+		}
 
-	hr = bitmap_->CopyFromMemory(NULL, outputRGBX_, colorWidth_*4);
+		// We copy the generated image to the bitmap we will display to the screen
+		hr = bitmap_[0]->CopyFromMemory(NULL, outputRGBX_, colorWidth_*4);
 
-    if ( FAILED(hr) )
-    {
-		MessageBox(NULL, L"Could not copy data to bitmap.", L"Draw Error", MB_OK);
-        return hr;
-    }
+		if ( FAILED(hr) )
+		{
+			MessageBox(NULL, L"Could not copy data to bitmap.", L"Draw Error", MB_OK);
+			return hr;
+		}
+
+		drawUser1_ = false;
+	}
+	else
+	{
+		// We get the pointer to the background removal stream fro the second user
+		//const BYTE* pBackgroundRemovedColor = bgRemovedFrame.pBackgroundRemovedColorData;
+
+		// Create an integer variable that keeps the size in pixels of images
+		int dataLength = static_cast<int>(colorWidth_) * static_cast<int>(colorHeight_);
+
+		// We lock the frame for the first background removal
+		hr = backgroundRemovalStream_[1]->GetNextFrame(0, &bgRemovedFrame);
+		if (FAILED(hr))
+		{
+			return hr;
+		}
+
+		const BYTE* pBackgroundRemovedColor = bgRemovedFrame.pBackgroundRemovedColorData;
+
+		for (int i = 0; i < dataLength; ++i)
+		{
+			if(pBackgroundRemovedColor[i*4+3] < 64)
+			{
+				// We don't erase the other data to avoid deleting the previous drawn user
+				// If we put the pixels to alpha 0 then we would be deleting the previous drawn pixels
+				outputRGBX_[i*4] = 0;
+				outputRGBX_[i*4+1] = 0;
+				outputRGBX_[i*4+2] = 0;
+				outputRGBX_[i*4+3] = 0;
+			}
+			else
+			{
+				outputRGBX_[i*4] = pBackgroundRemovedColor[i*4]*userColor_.x;
+				outputRGBX_[i*4+1] = pBackgroundRemovedColor[i*4+1]*userColor_.y;
+				outputRGBX_[i*4+2] = pBackgroundRemovedColor[i*4+2]*userColor_.z;
+				outputRGBX_[i*4+3] = 256*userColor_.w;
+			}
+		}
+
+		// We remove the locks to the images of the backroung removal streams
+		hr = backgroundRemovalStream_[1]->ReleaseFrame(&bgRemovedFrame);
+		if (FAILED(hr))
+		{
+			return hr;
+		}
+
+		// We copy the generated image to the bitmap we will display to the screen
+		hr = bitmap_[1]->CopyFromMemory(NULL, outputRGBX_, colorWidth_*4);
+
+		if ( FAILED(hr) )
+		{
+			MessageBox(NULL, L"Could not copy data to bitmap.", L"Draw Error", MB_OK);
+			return hr;
+		}
+
+		drawUser1_ = true;
+	}
 
     //hr = drawBackgroundRemovalBasics->Draw(outputRGBX_, colorWidth_ * colorHeight_ * 4);
 
