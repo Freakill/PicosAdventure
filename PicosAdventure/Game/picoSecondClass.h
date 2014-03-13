@@ -84,7 +84,7 @@ class PicoSecondClass : public Listener<InputManager, InputStruct>, public Liste
 		virtual void notify(PieceClass* notifier, Point arg);
 
 		// Light for shaders
-		void setLightPositions(XMFLOAT4 pos1, XMFLOAT4 pos2);
+		void setLightPositions(XMFLOAT4 pos1, XMFLOAT4 pos2, XMFLOAT4 pos3);
 
 	private:
 		void loadConfiguration(GraphicsManager* graphicsManager);

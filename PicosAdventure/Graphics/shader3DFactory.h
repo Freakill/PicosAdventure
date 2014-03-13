@@ -7,7 +7,6 @@
 #include "diffuseShader3D.h"
 #include "multitextureShader3D.h"
 #include "pointlightDiffuseShader3D.h"
-#include "pointlightMultitextureShader3D.h"
 
 #include <map>
 

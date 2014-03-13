@@ -18,7 +18,7 @@ class ParticleSystem
 		{
 			Point position;
 			float red, green, blue;
-			float velocity;
+			Point velocity;
 			bool active;
 		};
 
@@ -33,6 +33,9 @@ class ParticleSystem
 		void destroy();
 
 		void setPosition(Point position);
+		void setParticlesDeviation(Point deviation);
+		void setParticlesVelocity(Point velocity, Point velocityVariation);
+		void setParticleSize(float size);
 
 		ID3D11ShaderResourceView* getTexture();
 		int getIndexCount();
@@ -56,7 +59,8 @@ class ParticleSystem
 
 		Point particleInitialPosition_;
 		Point particleDeviation_;
-		float particleVelocity_, particleVelocityVariation_;
+		Point particleVelocity_;
+		Point particleVelocityVariation_;
 		float particleSize_, particlesPerSecond_;
 		int maxParticles_;
 		float fallingDistance_;

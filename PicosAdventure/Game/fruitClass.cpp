@@ -169,7 +169,7 @@ void FruitClass::update(float elapsedTime)
 
 					shakenTime_ += elapsedTime;
 					shaken_ = false;
-					leafs_->update(elapsedTime*1000, true);
+					leafs_->update(elapsedTime, true);
 					return;
 				}
 
@@ -201,7 +201,7 @@ void FruitClass::update(float elapsedTime)
 			break;
 	}
 
-	leafs_->update(elapsedTime*1000, false);
+	leafs_->update(elapsedTime, false);
 }
 
 void FruitClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix, LightClass* light, bool debug)

@@ -83,7 +83,7 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 		void updateParticlesPositions();
 
 		void makeFirstStarFall();
-		void makeStarFall(int i);
+		void makeStarFall();
 		void makeShipIgnite(int level);
 
 		void loadConfigurationFromXML();
@@ -97,6 +97,8 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 		bool powerToUser(float elapsedTime);
 
 		void changeLevel(LevelState level);
+
+		ImageClass*					slashScreen_;
 
 		CameraClass*				camera_;
 		LightClass*					light_;
@@ -158,12 +160,14 @@ class SecondScreenState: public ApplicationState, public Listener<KinectClass, K
 		Point						picoScreenPos_;
 		LightClass*					picoLight_;
 
-		StarClass*					stars_[3];
+		StarClass*					star_;
+		bool						starsOrder_[20];
+		int							starIndex_;
 		float						timeToWaitFirstStar_;
 
 		// Pointlights
 		Object3D*					lightBody_;
-		XMFLOAT4					lightPos_[2];
+		XMFLOAT4					lightPos_[3];
 		ParticleSystem*				lightParticles_[2];
 
 		// Debug

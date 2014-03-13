@@ -68,6 +68,8 @@ class PieceClass : public Notifier<PieceClass, Point>
 	private:
 		SoundSecondClass* soundManager_;
 
+		ParticleSystem* sparks_;
+
 		Object3D*	model_;
 		SphereCollision* collisionTest_;
 

@@ -94,7 +94,7 @@ void SpaceShipClass::update(float elapsedTime)
 		case LAUNCHING:
 			{
 				spaceShipParticles_->setPosition(Point(position_.x, position_.y+0.1, position_.z));
-				spaceShipParticles_->update(elapsedTime*1000, true);
+				spaceShipParticles_->update(elapsedTime, true);
 
 				position_.y += velocity_.y*elapsedTime;
 
@@ -113,7 +113,7 @@ void SpaceShipClass::update(float elapsedTime)
 		case FLYING:
 			{
 				spaceShipParticles_->setPosition(Point(position_.x, position_.y+0.1, position_.z));
-				spaceShipParticles_->update(elapsedTime*1000, true);
+				spaceShipParticles_->update(elapsedTime, true);
 
 				fly(elapsedTime);
 			}
@@ -121,7 +121,7 @@ void SpaceShipClass::update(float elapsedTime)
 		case ENLARGING:
 			{
 				spaceShipParticles_->setPosition(Point(position_.x, position_.y+0.1, position_.z));
-				spaceShipParticles_->update(elapsedTime*1000, true);
+				spaceShipParticles_->update(elapsedTime, true);
 
 				enlargingElapsedTime_ += elapsedTime;
 
@@ -157,7 +157,7 @@ void SpaceShipClass::update(float elapsedTime)
 		case PREPARED:
 			{
 				spaceShipParticles_->setPosition(Point(position_.x, position_.y+0.1, position_.z));
-				spaceShipParticles_->update(elapsedTime*1000, true);
+				spaceShipParticles_->update(elapsedTime, true);
 			}
 		default:
 			{

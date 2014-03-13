@@ -32,10 +32,11 @@ bool PointlightDiffuseShader3DClass::setup(ID3D11Device* device)
 	return true;
 }
 
-void PointlightDiffuseShader3DClass::setPositions(XMFLOAT4 pos1, XMFLOAT4 pos2)
+void PointlightDiffuseShader3DClass::setPositions(XMFLOAT4 pos1, XMFLOAT4 pos2, XMFLOAT4 pos3)
 {
 	lightPos1_ = pos1;
 	lightPos2_ = pos2;
+	lightPos3_ = pos3;
 }
 
 bool PointlightDiffuseShader3DClass::setupShader(ID3D11Device* device, WCHAR* vsFilename, WCHAR* psFilename)
@@ -323,6 +324,7 @@ bool PointlightDiffuseShader3DClass::setShaderParameters(ID3D11DeviceContext* de
 	// Copy the light position variables into the constant buffer.
 	dataPtr3->lightPosition[0] = lightPos1_;
 	dataPtr3->lightPosition[1] = lightPos2_;
+	dataPtr3->lightPosition[2] = lightPos3_;
 
 	// Unlock the constant buffer.
 	deviceContext->Unmap(lightPositionBuffer_, 0);
@@ -344,8 +346,9 @@ bool PointlightDiffuseShader3DClass::setShaderParameters(ID3D11DeviceContext* de
 	dataPtr4 = (LightColorBufferType*)mappedResource.pData;
 
 	// Copy the light color variables into the constant buffer.
-	dataPtr4->diffuseColor[0] = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	dataPtr4->diffuseColor[1] = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	dataPtr4->diffuseColor[0] = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	dataPtr4->diffuseColor[1] = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	dataPtr4->diffuseColor[2] = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 
 	// Unlock the constant buffer.
 	deviceContext->Unmap(lightColorBuffer_, 0);

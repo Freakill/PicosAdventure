@@ -72,6 +72,20 @@ bool PieceClass::setup(GraphicsManager *graphicsManager, SoundSecondClass* sound
 	scaling_.y = initialScaling_.y;
 	scaling_.z = initialScaling_.z;
 
+	sparks_ = new ParticleSystem;
+	if(!sparks_)
+	{
+		MessageBoxA(NULL, "Could not create leafs instance", "Fruit - Error", MB_ICONERROR | MB_OK);
+	}
+
+	if(sparks_ && !sparks_->setup(graphicsManager, "star", position_, 0.8, 30, 90, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)))
+	{
+		MessageBoxA(NULL, "Could not setup leafs object", "Fruit - Error", MB_ICONERROR | MB_OK);
+	}
+	sparks_->setParticlesDeviation(Point(0.0f, 0.1f, 0.5f));
+	sparks_->setParticlesVelocity(Point(0.0f, 0.0f, 0.0f), Point(2.0f, 2.0f, 0.1f));
+	sparks_->setParticleSize(0.24f);
+
 	spawningTime_ = 2.0f;
 
 	lightLevel_ = 0.0f;
@@ -129,6 +143,7 @@ void PieceClass::update(float elapsedTime)
 				{
 					lightedTime_ += elapsedTime/2;
 					shaken_ = false;
+					sparks_->update(elapsedTime, true);
 					return;
 				}
 				else
@@ -138,6 +153,7 @@ void PieceClass::update(float elapsedTime)
 					{
 						lightedTime_ = 0.0f;
 					}
+					sparks_->update(elapsedTime, false);
 				}
 
 				lightLevel_ = lightedTime_/fallTime_;
@@ -157,17 +173,24 @@ void PieceClass::update(float elapsedTime)
 					pieceState_ = IN_FLOOR;
 					notifyListeners(position_);
 				}
+
+				sparks_->update(elapsedTime, false);
 			}
 			break;
 		case IN_FLOOR:
 			{
 				lightLevel_ = 1.0f;
+
+				sparks_->update(elapsedTime, false);
 			}
 			break;
 		case IN_SPACESHIP:
 			{
 				lightLevel_ = 1.0f;
+
+				sparks_->update(elapsedTime, false);
 			}
+			break;
 	}
 }
 
@@ -176,9 +199,15 @@ void PieceClass::draw(GraphicsManager* graphicsManager, XMFLOAT4X4 worldMatrix, 
 	if(debug)
 	{
 		graphicsManager->turnOnWireframeRasterizer();
-		collisionTest_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+			collisionTest_->draw(graphicsManager->getDevice(), graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
 		graphicsManager->turnOnSolidRasterizer();
 	}
+
+	graphicsManager->turnOnParticlesAlphaBlending();
+	graphicsManager->turnZBufferOff();
+		sparks_->draw(graphicsManager->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, light);
+	graphicsManager->turnZBufferOn();
+	graphicsManager->turnOffAlphaBlending();
 
 	XMFLOAT4X4 rotatingMatrixZ;
 	XMStoreFloat4x4(&rotatingMatrixZ, XMMatrixRotationZ(rotZ_));

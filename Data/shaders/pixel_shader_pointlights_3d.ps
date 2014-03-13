@@ -38,6 +38,7 @@ struct PixelInputType
 	float2 tex : TEXCOORD0;
 	float3 lightPos1 : TEXCOORD1;
     float3 lightPos2 : TEXCOORD2;
+	float3 lightPos3 : TEXCOORD3;
 };
 
 
@@ -47,10 +48,10 @@ struct PixelInputType
 float4 PixelShader3D(PixelInputType input) : SV_TARGET
 {
     float4 textureColor;
-	float  lightIntensity1, lightIntensity2;
-	float3 lightToPixelVec1, lightToPixelVec2;
-	float dist1, dist2;
-    float4 color, color1, color2;
+	float  lightIntensity1, lightIntensity2, lightIntensity3;
+	float3 lightToPixelVec1, lightToPixelVec2, lightToPixelVec3;
+	float dist1, dist2, dist3;
+    float4 color, color1, color2, color3;
 	
 	// Sample the texture pixel at this location.
     textureColor = shaderTexture.Sample(SampleType, input.tex);
@@ -58,14 +59,17 @@ float4 PixelShader3D(PixelInputType input) : SV_TARGET
 	//Create the vector between light position and pixels position
 	lightToPixelVec1 = input.lightPos1 - input.worldPos;
 	lightToPixelVec2 = input.lightPos2 - input.worldPos;
+	lightToPixelVec3 = input.lightPos3 - input.worldPos;
 	
     // Calculate the different amounts of light on this pixel based on the positions of the lights.
     lightIntensity1 = saturate(dot(input.normal, input.lightPos1));
     lightIntensity2 = saturate(dot(input.normal, input.lightPos2));
+	lightIntensity3 = saturate(dot(input.normal, input.lightPos3));
 	
 	//Find the distance between the light pos and pixel pos
 	dist1 = length(lightToPixelVec1);
 	dist2 = length(lightToPixelVec2);
+	dist3 = length(lightToPixelVec3);
 	
 	if(dist1 < RANGE){
 		//color1 = diffuseColor[0] * lightIntensity1;
@@ -85,9 +89,18 @@ float4 PixelShader3D(PixelInputType input) : SV_TARGET
 	}else{
 		color2 = ambientColor*textureColor;
 	}
+	if(dist3 < RANGE){
+		//color2 = diffuseColor[1] * lightIntensity2;
+		color3 = lightIntensity3 * textureColor * lightColor[1] * (RANGE-dist3)/RANGE;
+		color3 /= 0.01f + (0.01f * dist3) + (0.01f * (dist3*dist3));
+		if(color3.x < ambientColor.x)
+			color3 = ambientColor*textureColor;
+	}else{
+		color3 = ambientColor*textureColor;
+	}
 
     // Multiply the texture pixel by the combination of all four light colors to get the final result.
-    color = saturate(color1 + color2);// * textureColor;
+    color = saturate(color1 + color2 + color3);// * textureColor;
 	
     return color;
 }

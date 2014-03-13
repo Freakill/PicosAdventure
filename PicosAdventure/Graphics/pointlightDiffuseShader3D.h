@@ -5,7 +5,7 @@
 
 class GraphicsManager;
 
-#define NUM_LIGHTS 2
+#define NUM_LIGHTS 3
 
 class PointlightDiffuseShader3DClass : public Shader3DClass
 {
@@ -27,7 +27,7 @@ class PointlightDiffuseShader3DClass : public Shader3DClass
 
 		virtual bool setup(ID3D11Device* device);
 
-		void setPositions(XMFLOAT4 pos1, XMFLOAT4 pos2);
+		void setPositions(XMFLOAT4 pos1, XMFLOAT4 pos2, XMFLOAT4 pos3);
 
 		static Shader3DClass* __stdcall Create(GraphicsManager* graphicsManager);
 
@@ -41,6 +41,7 @@ class PointlightDiffuseShader3DClass : public Shader3DClass
 
 		XMFLOAT4	  lightPos1_;
 		XMFLOAT4	  lightPos2_;
+		XMFLOAT4	  lightPos3_;
 
 };
 

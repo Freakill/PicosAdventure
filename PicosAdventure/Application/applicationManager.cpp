@@ -4,6 +4,7 @@
 
 #include "../Game/firstScreenState.h"
 #include "../Game/secondScreenState.h"
+#include "../Game/thirdScreenState.h"
 
 ApplicationManager::ApplicationManager()
 {

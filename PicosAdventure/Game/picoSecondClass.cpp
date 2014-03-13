@@ -671,17 +671,14 @@ void PicoSecondClass::notify(PieceClass* notifier, Point arg)
 	fallenPieces_.push_back(notifier);
 }
 
-void PicoSecondClass::setLightPositions(XMFLOAT4 pos1, XMFLOAT4 pos2)
+void PicoSecondClass::setLightPositions(XMFLOAT4 pos1, XMFLOAT4 pos2, XMFLOAT4 pos3)
 {
 	PointlightDiffuseShader3DClass* pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>(body_->getShader3D());
-	pointlightShader->setPositions(pos1, pos2);
+	pointlightShader->setPositions(pos1, pos2, pos3);
 	pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>(eyes_->getShader3D());
-	pointlightShader->setPositions(pos1, pos2);
+	pointlightShader->setPositions(pos1, pos2, pos3);
 	pointlightShader = dynamic_cast<PointlightDiffuseShader3DClass*>(hat_->getShader3D());
-	pointlightShader->setPositions(pos1, pos2);
-
-	PointlightMultiTextureShader3DClass* pointlightMultitextureShader = dynamic_cast<PointlightMultiTextureShader3DClass*>(tips_->getShader3D());
-	pointlightMultitextureShader->setPositions(pos1, pos2);
+	pointlightShader->setPositions(pos1, pos2, pos3);
 }
 
 void PicoSecondClass::changeAnimation(std::string name, float time)

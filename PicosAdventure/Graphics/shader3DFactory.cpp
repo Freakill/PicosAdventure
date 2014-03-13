@@ -8,7 +8,6 @@ Shader3DFactory::Shader3DFactory()
 	Register("DiffuseShader3D", &DiffuseShader3DClass::Create);
 	Register("MultiTextureShader3D", &MultiTextureShader3DClass::Create);
 	Register("PointlightDiffuseShader3D", &PointlightDiffuseShader3DClass::Create);
-	Register("PointlightMultitextureShader3D", &PointlightMultiTextureShader3DClass::Create);
 
 	createdShaders_ = 0;
 }

@@ -5,7 +5,7 @@
 /////////////
 // DEFINES //
 /////////////
-#define NUM_LIGHTS 2
+#define NUM_LIGHTS 3
 
 /////////////
 // GLOBALS //
@@ -40,6 +40,7 @@ struct PixelInputType
 	float2 tex : TEXCOORD0;
 	float3 lightPos1 : TEXCOORD1;
     float3 lightPos2 : TEXCOORD2;
+	float3 lightPos3 : TEXCOORD3;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -73,6 +74,7 @@ PixelInputType VertexShader3D(VertexInputType input)
      // Determine the light positions based on the position of the lights and the position of the vertex in the world.
     output.lightPos1.xyz = lightPosition[0].xyz - worldPosition.xyz;
     output.lightPos2.xyz = lightPosition[1].xyz - worldPosition.xyz;
+	output.lightPos3.xyz = lightPosition[2].xyz - worldPosition.xyz;
     
     return output;
 }

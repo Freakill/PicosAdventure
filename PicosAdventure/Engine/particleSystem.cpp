@@ -106,6 +106,22 @@ void ParticleSystem::setPosition(Point position)
 	particleInitialPosition_.z = position.z;
 }
 
+void ParticleSystem::setParticlesDeviation(Point deviation)
+{
+	particleDeviation_ = deviation;
+}
+
+void ParticleSystem::setParticlesVelocity(Point velocity, Point velocityVariation)
+{
+	particleVelocity_ = velocity;
+	particleVelocityVariation_ = velocityVariation;
+}
+
+void ParticleSystem::setParticleSize(float size)
+{
+	particleSize_ = size;
+}
+
 ID3D11ShaderResourceView* ParticleSystem::getTexture()
 {
 	return textureArray_->getTexturesArray()[0];
@@ -170,8 +186,13 @@ bool ParticleSystem::setupParticleSystem(Point initialPosition, float fallDistan
 	particleDeviation_.z = 0.5f;
 
 	// Set the speed and speed variation of particles.
-	particleVelocity_ = 1.0f;
-	particleVelocityVariation_ = 0.2f;
+	particleVelocity_.x = 0.0f;
+	particleVelocity_.y = 1.0f;
+	particleVelocity_.z = 0.0f;
+
+	particleVelocityVariation_.x = 0.0f;
+	particleVelocityVariation_.y = 0.2f;
+	particleVelocityVariation_.z = 0.0f;
 
 	// Set the physical size of the particles.
 	particleSize_ = 0.12f;
@@ -329,9 +350,9 @@ void ParticleSystem::destroyBuffers()
 void ParticleSystem::emitParticles(float elapsedTime)
 {
 	bool emitParticle, found;
-	float positionX, positionY, positionZ, velocity, red, green, blue;
+	float positionX, positionY, positionZ, red, green, blue;
+	Point velocity;
 	int index, i, j;
-
 
 	// Increment the frame time.
 	accumulatedTime_ += elapsedTime;
@@ -356,7 +377,9 @@ void ParticleSystem::emitParticles(float elapsedTime)
 		positionY = ((((float)rand()-(float)rand())/RAND_MAX) * particleDeviation_.y)+particleInitialPosition_.y;
 		positionZ = ((((float)rand()-(float)rand())/RAND_MAX) * particleDeviation_.z)+particleInitialPosition_.z;
 
-		velocity = particleVelocity_ + (((float)rand()-(float)rand())/RAND_MAX) * particleVelocityVariation_;
+		velocity.x = particleVelocity_.x + (((float)rand()-(float)rand())/RAND_MAX) * particleVelocityVariation_.x;
+		velocity.y = particleVelocity_.y + (((float)rand()-(float)rand())/RAND_MAX) * particleVelocityVariation_.y;
+		velocity.z = particleVelocity_.z + (((float)rand()-(float)rand())/RAND_MAX) * particleVelocityVariation_.z;
 
 		red   = (((float)rand()-(float)rand())/RAND_MAX) + particleColor_.x;
 		green = (((float)rand()-(float)rand())/RAND_MAX) + particleColor_.y;
@@ -418,7 +441,9 @@ void ParticleSystem::updateParticles(float elapsedTime)
 	// Each frame we update all the particles by making them move downwards using their position, velocity, and the frame time.
 	for(i=0; i<currentParticleCount_; i++)
 	{
-		particleList_[i].position.y = particleList_[i].position.y - (particleList_[i].velocity * elapsedTime * 0.001f);
+		particleList_[i].position.x = particleList_[i].position.x - (particleList_[i].velocity.x * elapsedTime);
+		particleList_[i].position.y = particleList_[i].position.y - (particleList_[i].velocity.y * elapsedTime);
+		particleList_[i].position.z = particleList_[i].position.z - (particleList_[i].velocity.z * elapsedTime);
 	}
 
 	return;
@@ -432,7 +457,9 @@ void ParticleSystem::killParticles()
 	// Kill all the particles that have gone below a certain height range.
 	for(i=0; i<maxParticles_; i++)
 	{
-		if((particleList_[i].active == true) && (particleList_[i].position.y < particleInitialPosition_.y-fallingDistance_))
+		float dist2 = pow(particleList_[i].position.x - particleInitialPosition_.x, 2)+pow(particleList_[i].position.y - particleInitialPosition_.y, 2);
+
+		if((particleList_[i].active == true) && ((dist2 > pow(fallingDistance_, 2))))
 		{
 			particleList_[i].active = false;
 			currentParticleCount_--;

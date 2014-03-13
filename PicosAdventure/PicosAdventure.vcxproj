@@ -111,6 +111,7 @@ xcopy /e /i /y "$(KINECT_TOOLKIT_DIR)\bin\KinectBackgroundRemoval180_32.dll" "$(
     <ClCompile Include="Engine\StaticObject3D.cpp" />
     <ClCompile Include="Game\birdClass.cpp" />
     <ClCompile Include="Game\firstScreenState.cpp" />
+    <ClCompile Include="Game\friendSpaceShipClass.cpp" />
     <ClCompile Include="Game\fruitClass.cpp" />
     <ClCompile Include="Game\logClass.cpp" />
     <ClCompile Include="Game\picoFirstClass.cpp" />
@@ -121,6 +122,7 @@ xcopy /e /i /y "$(KINECT_TOOLKIT_DIR)\bin\KinectBackgroundRemoval180_32.dll" "$(
     <ClCompile Include="Game\soundSecondClass.cpp" />
     <ClCompile Include="Game\spaceShipClass.cpp" />
     <ClCompile Include="Game\starClass.cpp" />
+    <ClCompile Include="Game\thirdScreenState.cpp" />
     <ClCompile Include="Graphics\animatedCal3DModelClass.cpp" />
     <ClCompile Include="Graphics\Cal3DmodelClass.cpp" />
     <ClCompile Include="Graphics\cameraClass.cpp" />
@@ -134,7 +136,6 @@ xcopy /e /i /y "$(KINECT_TOOLKIT_DIR)\bin\KinectBackgroundRemoval180_32.dll" "$(
     <ClCompile Include="Graphics\multitextureShader3D.cpp" />
     <ClCompile Include="Graphics\OBJModelClass.cpp" />
     <ClCompile Include="Graphics\pointlightDiffuseShader3D.cpp" />
-    <ClCompile Include="Graphics\pointlightMultitextureShader3D.cpp" />
     <ClCompile Include="Graphics\shader2DClass.cpp" />
     <ClCompile Include="Graphics\shader3DClass.cpp" />
     <ClCompile Include="Graphics\shader3DFactory.cpp" />
@@ -165,6 +166,7 @@ xcopy /e /i /y "$(KINECT_TOOLKIT_DIR)\bin\KinectBackgroundRemoval180_32.dll" "$(
     <ClInclude Include="Engine\StaticObject3D.h" />
     <ClInclude Include="Game\birdClass.h" />
     <ClInclude Include="Game\firstScreenState.h" />
+    <ClInclude Include="Game\friendSpaceShipClass.h" />
     <ClInclude Include="Game\fruitClass.h" />
     <ClInclude Include="Game\logClass.h" />
     <ClInclude Include="Game\picoFirstClass.h" />
@@ -175,6 +177,7 @@ xcopy /e /i /y "$(KINECT_TOOLKIT_DIR)\bin\KinectBackgroundRemoval180_32.dll" "$(
     <ClInclude Include="Game\soundSecondClass.h" />
     <ClInclude Include="Game\spaceShipClass.h" />
     <ClInclude Include="Game\starClass.h" />
+    <ClInclude Include="Game\thirdScreenState.h" />
     <ClInclude Include="Graphics\animatedCal3DModelClass.h" />
     <ClInclude Include="Graphics\Cal3DmodelClass.h" />
     <ClInclude Include="Graphics\cameraClass.h" />
@@ -188,7 +191,6 @@ xcopy /e /i /y "$(KINECT_TOOLKIT_DIR)\bin\KinectBackgroundRemoval180_32.dll" "$(
     <ClInclude Include="Graphics\multitextureShader3D.h" />
     <ClInclude Include="Graphics\OBJModelClass.h" />
     <ClInclude Include="Graphics\pointlightDiffuseShader3D.h" />
-    <ClInclude Include="Graphics\pointlightMultitextureShader3D.h" />
     <ClInclude Include="Graphics\shader2DClass.h" />
     <ClInclude Include="Graphics\shader3DClass.h" />
     <ClInclude Include="Graphics\shader3DFactory.h" />
