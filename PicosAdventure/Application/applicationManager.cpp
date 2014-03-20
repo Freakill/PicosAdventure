@@ -2,8 +2,8 @@
 
 #include "applicationState.h"
 
-#include "../Game/firstScreenState.h"
-#include "../Game/secondScreenState.h"
+//#include "../Game/firstScreenState.h"
+//#include "../Game/secondScreenState.h"
 #include "../Game/thirdScreenState.h"
 
 ApplicationManager::ApplicationManager()
@@ -57,7 +57,7 @@ bool ApplicationManager::setup(HWND windowsHandler, InputManager* inputManager, 
 		return false;
 	}
 
-	if(!changeState(SecondScreenState::Instance()))
+	if(!changeState(ThirdScreenState::Instance()))
 	{
 		return false;
 	}

@@ -38,6 +38,7 @@ class SpaceShipClass
 		void makeBig(Point newPos, Vector newScale);
 
 		bool isPrepared();
+		bool checkArrivedObjective();
 
 		// Getters and setters
 		Object3D* getObject();
@@ -49,9 +50,10 @@ class SpaceShipClass
 		void setRotation(float x, float y, float z);
 		void setFloorHeight(float floor);
 
+		void setSpaceShipState(SpaceShipState state);
+
 	private:
 		void fly(float elapsedTime);
-		bool checkArrivedObjective();
 
 		SoundSecondClass* soundManager_;
 

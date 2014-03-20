@@ -252,6 +252,15 @@
     <ClCompile Include="Game\friendSpaceShipClass.cpp">
       <Filter>Source Files\Game\ThirdLevel</Filter>
     </ClCompile>
+    <ClCompile Include="Game\spriteAnimationClass.cpp">
+      <Filter>Source Files\Game\ThirdLevel</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\picoThirdClass.cpp">
+      <Filter>Source Files\Game\ThirdLevel</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\soundThirdClass.cpp">
+      <Filter>Source Files\Game\ThirdLevel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\systemClass.h">
@@ -417,6 +426,15 @@
       <Filter>Header Files\Game\ThirdLevel</Filter>
     </ClInclude>
     <ClInclude Include="Game\friendSpaceShipClass.h">
+      <Filter>Header Files\Game\ThirdLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\spriteAnimationClass.h">
+      <Filter>Header Files\Game\ThirdLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\picoThirdClass.h">
+      <Filter>Header Files\Game\ThirdLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\soundThirdClass.h">
       <Filter>Header Files\Game\ThirdLevel</Filter>
     </ClInclude>
   </ItemGroup>

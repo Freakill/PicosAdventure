@@ -172,7 +172,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	{
 		MessageBoxA(NULL, "Could not create light1 particles instance", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
-	if(lightParticles_[0] && !lightParticles_[0]->setup(graphicsManager, "star", Point(lightPos_[1].x, lightPos_[1].y, lightPos_[1].z) , 2.8, 30, 60, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)))
+	if(lightParticles_[0] && !lightParticles_[0]->setup(graphicsManager, "star", Point(lightPos_[1].x, lightPos_[1].y, lightPos_[1].z) , 2.8, 30, 60, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), true))
 	{
 		MessageBoxA(NULL, "Could not setup light1 particles object", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
@@ -183,7 +183,7 @@ bool SecondScreenState::setup(ApplicationManager* appManager, GraphicsManager* g
 	{
 		MessageBoxA(NULL, "Could not create light1 particles instance", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
-	if(lightParticles_[1] && !lightParticles_[1]->setup(graphicsManager, "star", Point(lightPos_[2].x, lightPos_[2].y, lightPos_[2].z) , 2.8, 30, 60, XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f)))
+	if(lightParticles_[1] && !lightParticles_[1]->setup(graphicsManager, "star", Point(lightPos_[2].x, lightPos_[2].y, lightPos_[2].z) , 2.8, 30, 60, XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), true))
 	{
 		MessageBoxA(NULL, "Could not setup light1 particles object", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}

@@ -550,29 +550,30 @@ HRESULT KinectClass::ProcessSkeleton()
 
 void KinectClass::jointsToScreen(){
 
-	for(int i=0; i < numPlayer; i++){
-	
-	players[i].rightHandScreenCoord = SkeletonToScreen(players[i].rightHand, 320, 240);
-	players[i].leftHandScreenCoord = SkeletonToScreen(players[i].leftHand, 320, 240);
-	players[i].rightShoulderScreenCoord = SkeletonToScreen(players[i].rightShoulder, 320, 240);
-	players[i].leftShoulderScreenCoord = SkeletonToScreen(players[i].leftShoulder, 320, 240);
-	players[i].torsoScreenCord = SkeletonToScreen(players[i].hipCenter, 320, 240);
-	players[i].rightElbowScreenCoord = SkeletonToScreen(players[i].rightElbow, 320, 240);
+	for(int i=0; i < numPlayer; i++)
+	{
+		players[i].rightHandScreenCoord = SkeletonToScreen(players[i].rightHand, 320, 240);
+		players[i].leftHandScreenCoord = SkeletonToScreen(players[i].leftHand, 320, 240);
+		players[i].rightShoulderScreenCoord = SkeletonToScreen(players[i].rightShoulder, 320, 240);
+		players[i].leftShoulderScreenCoord = SkeletonToScreen(players[i].leftShoulder, 320, 240);
+		players[i].torsoScreenCord = SkeletonToScreen(players[i].hipCenter, 320, 240);
+		players[i].rightElbowScreenCoord = SkeletonToScreen(players[i].rightElbow, 320, 240);
 
-	Vector armDirection;
-	armDirection.x = players[i].rightHandScreenCoord.x - players[i].rightElbowScreenCoord.x;
-	armDirection.y = players[i].rightHandScreenCoord.y - players[i].rightElbowScreenCoord.y;
-	Vector normalizedArmdDirection = armDirection.normalize();
+		Vector armDirection;
+		armDirection.x = players[i].rightHandScreenCoord.x - players[i].rightElbowScreenCoord.x;
+		armDirection.y = players[i].rightHandScreenCoord.y - players[i].rightElbowScreenCoord.y;
 
-	if(armDirection.x > 0)
+		// Calculate the angle of the forearm in radians
+		players[i].rightHandRot = atan2(armDirection.y, armDirection.x);// * 180 / XM_PI;
+		// Adjust value for having angle in polar coordinates
+		if(players[i].rightHandRot <0)
 		{
-			players[i].rightHandRot = -(atan(armDirection.y/armDirection.x)-XM_2PI/4);
+			players[i].rightHandRot *= -1;
 		}
 		else
 		{
-			players[i].rightHandRot = -(atan(armDirection.y/armDirection.x)-XM_2PI/4)-XM_2PI/2;
+			players[i].rightHandRot = XM_2PI - players[i].rightHandRot;
 		}
-
 	}
 }
 

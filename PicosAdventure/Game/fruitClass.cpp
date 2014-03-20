@@ -95,7 +95,7 @@ bool FruitClass::setup(GraphicsManager *graphicsManager, SoundFirstClass* soundM
 		MessageBoxA(NULL, "Could not create leafs instance", "Fruit - Error", MB_ICONERROR | MB_OK);
 	}
 
-	if(leafs_ && !leafs_->setup(graphicsManager, "hoja2", initialPosition_, 2.8, 30, 90, XMFLOAT4(0.15f, 0.5f, 0.15f, 1.0f)))
+	if(leafs_ && !leafs_->setup(graphicsManager, "hoja2", initialPosition_, 2.8, 30, 90, XMFLOAT4(0.15f, 0.5f, 0.15f, 1.0f), true))
 	{
 		MessageBoxA(NULL, "Could not setup leafs object", "Fruit - Error", MB_ICONERROR | MB_OK);
 	}

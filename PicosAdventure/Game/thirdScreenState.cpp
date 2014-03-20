@@ -19,6 +19,9 @@ ThirdScreenState::ThirdScreenState()
 
 	background_ = 0;
 
+	kinectHandRot_[0] = 0.0f;
+	kinectHandRot_[1] = 0.0f;
+
 	for(int i = 0; i < 5; i++)
 	{
 		friendSpacheShips_[0];
@@ -50,7 +53,7 @@ bool ThirdScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	// Change kinect settings to make user being drawn darker
 	kinectClass_ = kinectManager;
 
-	kinectClass_->setUserColor(XMFLOAT4(0.25f, 0.25f, 0.35f, 0.5f));
+	kinectClass_->setUserColor(XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f));
 	kinectClass_->addListener(*this);
 
 	// Create the camera object.
@@ -81,12 +84,12 @@ bool ThirdScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	}
 
 	// Initialize the light object.
-	light_->setAmbientColor(0.6f, 0.6f, 0.6f, 1.0f);
-	light_->setDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	light_->setAmbientColor(0.1f, 0.1f, 0.1f, 1.0f);
+	light_->setDiffuseColor(0.8f, 0.8f, 0.8f, 1.0f);
 	light_->setDirection(0.0f, -0.5f, 1.0f);
 
 	// SOUND
-	/*soundManager_ = new SoundSecondClass;
+	soundManager_ = new SoundThirdClass;
 	if(!soundManager_)
 	{
 		return false;
@@ -97,29 +100,52 @@ bool ThirdScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	{
 		MessageBox(NULL, L"Could not initialize Direct Sound.", L"SecondScreen - Error", MB_OK);
 		return false;
-	}*/
+	}
+	soundManager_->playFile("background_music", true);
 
 	// Load the first level scenario
 	loadScenario("level3");
+
+	// Create Pico
+	pico_ = new PicoThirdClass();
+	if(!pico_)
+	{
+		return false;
+	}
+	if(!pico_->setup(graphicsManager_, camera_, soundManager_))
+	{
+		MessageBoxA(NULL, "Could not initialize Pico :(.", "Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+	inputManager->addListener(*pico_);
 	
-	// Create the space ship.
-	spaceShip_ = new SpaceShipClass;
-	if(!spaceShip_)
+	if(!setupAllSpaceShips())
 	{
 		return false;
 	}
-	if(!spaceShip_->setup(graphicsManager_, soundManager_))
+
+	if(!setupRays())
 	{
-		MessageBoxA(NULL, "Could not initialize the SpaceShip.", "Error", MB_ICONERROR | MB_OK);
 		return false;
 	}
-	Shader3DClass* shaderTemp = Shader3DFactory::Instance()->CreateShader3D("PointlightDiffuseShader3D", graphicsManager_);
-	spaceShip_->getObject()->setShader3D(shaderTemp);
-	spaceShip_->setInitialPosition(Point(-4.0f, terrainHeight_+0.001f, -3.25f));
-	spaceShip_->setPosition(Point(-4.0f, terrainHeight_+0.001f, -3.25f));
-	spaceShip_->setScale(Vector(0.0115476f, 0.0110476f, 0.0115476f));
-	spaceShip_->setRotation(0.0f, 0.0f, XM_PI/2);
-	spaceShip_->setFloorHeight(terrainHeight_);
+	if(!setupRayInfo())
+	{
+		return false;
+	}
+	distanceThreshold_ = 180;
+	drawRays_ = false;
+	activeRay_ = GREEN;
+	bothTouching_ = false;
+
+	lastOutLeft_ = false;
+	subLevel4Freed_ = 0;
+
+	picoDanced_ = false;
+
+	spaceShipIntroWaitTime_ = 2.0f;
+	introFallTime_ = 3.0f;
+	introGreetTime_ = 3.0f;
+	introSpaceTime_ = 3.0f;
 
 	//soundManager_->playFile("background_music", true);
 
@@ -140,13 +166,36 @@ bool ThirdScreenState::setup(ApplicationManager* appManager, GraphicsManager* gr
 	}
 	gameClock_->reset();
 
-	// Set up game clock and debug
 	introClock_ = new ClockClass();
 	if(!introClock_)
 	{
 		return false;
 	}
 	introClock_->reset();
+
+	playClock_ = new ClockClass();
+	if(!playClock_)
+	{
+		return false;
+	}
+	playClock_->reset();
+
+	pointingClock_ = new ClockClass();
+	if(!pointingClock_)
+	{
+		return false;
+	}
+	pointingClock_->reset();
+	isPointing_ = false;
+
+	noClock_ = new ClockClass();
+	if(!noClock_)
+	{
+		return false;
+	}
+	noClock_->reset();
+
+	spaceShip_->goToPosition(Point(3.5f, 5.0f, -3.25f));
 
 	return true;
 }
@@ -162,19 +211,38 @@ void ThirdScreenState::update(float elapsedTime)
 		case INTRODUCTION:
 			{
 				updateIntroduction(elapsedTime);
+
+				friendSpacheShips_[0]->update(elapsedTime);
 			}
 			break;
 		case PLAYING:
 			{
-				for(int i = 0; i < 5; i++)
+				updatePlaying(elapsedTime);
+
+				for(int i = 0; i< 2; i++)
 				{
-					friendSpacheShips_[0]->update(elapsedTime);
+					blueRay_[i]->update();
+					greenRay_[i]->update();
+					redRay_[i]->update();
 				}
 			}
 			break;
 		case ENDING:
 			{
-				
+				if(!picoDanced_ && gameClock_->getTime() > 5.0f)
+				{
+					pico_->makeRest(true);
+					soundManager_->playBye();
+					pico_->changeAnimation("hola", 0.5f);
+
+					picoDanced_ = true;
+					gameClock_->reset();
+				}
+
+				if(picoDanced_ && gameClock_->getTime() > 5.0f)
+				{
+					pico_->makeLeave();
+				}
 			}
 			break;
 		default:
@@ -192,6 +260,7 @@ void ThirdScreenState::update(float elapsedTime)
 		FPS_->setText(FPSText.str(), graphicsManager_->getDeviceContext());
 
 		updateKinectHands();
+		updateRayInfo();
 	}
 }
 
@@ -221,20 +290,56 @@ void ThirdScreenState::draw()
 	{
 		case INTRODUCTION:
 			{
-				
+				spaceShip_->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
+				pico_->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
+
+				friendSpacheShips_[0]->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
 			}
 			break;
 		case PLAYING:
 			{
 				for(int i = 0; i < 5; i++)
 				{
-					friendSpacheShips_[0]->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
+					friendSpacheShips_[i]->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
+				}
+
+				pico_->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
+
+				if(drawRays_)
+				{
+					graphicsManager_->turnZBufferOff();
+					graphicsManager_->turnOnAlphaBlending();
+
+					switch(activeRay_)
+					{
+						case GREEN:
+							{
+								greenRay_[0]->draw(graphicsManager_, worldMatrix, viewMatrix, orthoMatrix, kinectHandViewPos_[0], kinectHandRot_[0], debug_);
+								greenRay_[1]->draw(graphicsManager_, worldMatrix, viewMatrix, orthoMatrix, kinectHandViewPos_[1], kinectHandRot_[1], debug_);
+							}
+							break;
+						case RED:
+							{
+								redRay_[0]->draw(graphicsManager_, worldMatrix, viewMatrix, orthoMatrix, kinectHandViewPos_[0], kinectHandRot_[0], debug_);
+								redRay_[1]->draw(graphicsManager_, worldMatrix, viewMatrix, orthoMatrix, kinectHandViewPos_[1], kinectHandRot_[1], debug_);
+							}
+							break;
+						case BLUE:
+							{
+								blueRay_[0]->draw(graphicsManager_, worldMatrix, viewMatrix, orthoMatrix, kinectHandViewPos_[0], kinectHandRot_[0], debug_);
+								blueRay_[1]->draw(graphicsManager_, worldMatrix, viewMatrix, orthoMatrix, kinectHandViewPos_[1], kinectHandRot_[1], debug_);
+							}
+							break;					
+					}
+
+					graphicsManager_->turnOffAlphaBlending();
+					graphicsManager_->turnZBufferOn();
 				}
 			}
 			break;
 		case ENDING:
 			{
-				
+				pico_->draw(graphicsManager_, worldMatrix, viewMatrix, projectionMatrix, light_, debug_);
 			}
 			break;
 		default:
@@ -254,6 +359,8 @@ void ThirdScreenState::draw()
 			kinectHands_[1]->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, orthoMatrix);
 			kinectHand_->draw(graphicsManager_->getDeviceContext(), ((screenWidth_/2)*-1)+kinectHandViewPos_[0].x, ((screenHeight_/2))-kinectHandViewPos_[0].y, worldMatrix, viewMatrix, orthoMatrix, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
 			kinectHand_->draw(graphicsManager_->getDeviceContext(), ((screenWidth_/2)*-1)+kinectHandViewPos_[1].x, ((screenHeight_/2))-kinectHandViewPos_[1].y, worldMatrix, viewMatrix, orthoMatrix, XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
+			rayInfo_[0]->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, orthoMatrix);
+			rayInfo_[1]->draw(graphicsManager_->getDeviceContext(), worldMatrix, viewMatrix, orthoMatrix);
 		graphicsManager_->turnOffAlphaBlending();
 		graphicsManager_->turnZBufferOn();
 	}
@@ -290,8 +397,25 @@ void ThirdScreenState::notify(InputManager* notifier, InputStruct arg)
 {
 	switch(arg.keyPressed){
 		case 49: //1
+		case 50: //2
+		case 51: //3
+		case 52: //4
+		case 53: //5
 			{
-
+				switch(levelState_)
+				{
+					case PLAYING:
+						{
+							switch(playLevelState_)
+							{
+								case LEVEL_3:
+									{
+										friendSpacheShips_[arg.keyPressed-49]->makeItFree();
+									}
+									break;
+							}
+						}
+				}
 			}
 			break;
 		case 68: //D
@@ -302,7 +426,43 @@ void ThirdScreenState::notify(InputManager* notifier, InputStruct arg)
 			break;
 		case 32: // Space
 			{
-				
+				switch(levelState_)
+				{
+					case PLAYING:
+						{
+							switch(playLevelState_)
+							{
+								case LEVEL_1:
+									{
+										friendSpacheShips_[actualFriendSpaceShip_]->makeItFree();
+									}
+									break;
+								case LEVEL_2:
+									{
+										switch(activeRay_)
+										{
+											case GREEN:
+												{
+													friendSpacheShips_[0]->makeItFree();
+												}
+												break;
+											case RED:
+												{
+													friendSpacheShips_[1]->makeItFree();
+												}
+												break;
+										}
+									}
+									break;
+								case LEVEL_4:
+									{
+										friendSpacheShips_[actualFriendSpaceShip_]->makeItFree();
+									}
+									break;
+							}
+						}
+						break;
+				}
 			}
 			break;
 		default:
@@ -344,6 +504,8 @@ void ThirdScreenState::notify(KinectClass* notifier, KinectStruct arg)
 		kinectHandWorldPos_[0].x = ((kinectHandViewPos_[0].x/screenWidth_)*8)-4;
 		kinectHandWorldPos_[0].y = (1-(kinectHandViewPos_[0].y/screenHeight_))*5;
 		kinectHandWorldPos_[0].z = 0;
+
+		kinectHandRot_[0] = arg.handRot;
 	}
 	
 	if(arg.type == SECOND_RIGHT_HAND_ROT)
@@ -355,7 +517,34 @@ void ThirdScreenState::notify(KinectClass* notifier, KinectStruct arg)
 		kinectHandWorldPos_[1].x = ((kinectHandViewPos_[1].x/screenWidth_)*8)-4;
 		kinectHandWorldPos_[1].y = (1-(kinectHandViewPos_[1].y/screenHeight_))*5;
 		kinectHandWorldPos_[1].z = 0;
+		kinectHandRot_[1] = arg.handRot;
 	}
+}
+
+bool ThirdScreenState::setupAllSpaceShips()
+{
+	// Create the space ship.
+	spaceShip_ = new SpaceShipClass;
+	if(!spaceShip_)
+	{
+		return false;
+	}
+	if(!spaceShip_->setup(graphicsManager_, NULL))
+	{
+		MessageBoxA(NULL, "Could not initialize the SpaceShip.", "Error", MB_ICONERROR | MB_OK);
+		return false;
+	}
+	Shader3DClass* shaderTemp = Shader3DFactory::Instance()->CreateShader3D("PointlightDiffuseShader3D", graphicsManager_);
+	spaceShip_->getObject()->setShader3D(shaderTemp);
+	spaceShip_->setPosition(Point(15.0f, 5.0f, -3.25f));
+	spaceShip_->setPosition(Point(15.0f, 5.0f, -3.25f));
+	spaceShip_->setScale(Vector(0.03f, 0.03f, 0.03f));
+	spaceShip_->setRotation(0.0f, 0.0f, XM_PI);
+	spaceShip_->setFloorHeight(terrainHeight_);
+
+	setupFriendSpaceShips();
+
+	return setupFriendSpaceShips();
 }
 
 bool ThirdScreenState::setupDebugOptions()
@@ -378,6 +567,30 @@ bool ThirdScreenState::setupDebugOptions()
 	if(!setupKinectHands())
 	{
 		return false;
+	}
+
+	return true;
+}
+
+bool ThirdScreenState::setupFriendSpaceShips()
+{
+	for(int i = 0; i < 5; i++)
+	{
+		friendSpacheShips_[i] = new FriendSpaceShipClass;
+		if(!friendSpacheShips_[i])
+		{
+			MessageBoxA(NULL, "Could not create friend spaceship instance.", "Error", MB_ICONERROR | MB_OK);
+			return false;
+		}
+
+		if(!friendSpacheShips_[i]->setup(graphicsManager_, soundManager_, "nave"))
+		{
+			MessageBoxA(NULL, "Could not setup the firend spaceship.", "Error", MB_ICONERROR | MB_OK);
+			return false;
+		}
+
+		friendSpacheShips_[i]->setPosition(Point(20.0f, 0.0f, 0.0f));
+		friendSpacheShips_[i]->addListener(*pico_);
 	}
 
 	return true;
@@ -425,6 +638,79 @@ bool ThirdScreenState::setupKinectHands()
 	return true;
 }
 
+bool ThirdScreenState::setupRayInfo()
+{
+	rayInfo_[0] = new TextClass();
+	if(!rayInfo_[0])
+	{
+		return false;
+	}
+	// Initialize the text object.
+	if(!rayInfo_[0]->setup(graphicsManager_->getDevice(), graphicsManager_->getDeviceContext(), graphicsManager_->getShader2D(), screenWidth_, screenHeight_, 20, 90, "Ray1: "))
+	{
+		MessageBoxA(NULL, "Could not initialize the Ray text object.", "SecondScreen - Error", MB_OK);
+		return false;
+	}
+
+	rayInfo_[1] = new TextClass();
+	if(!rayInfo_[1])
+	{
+		return false;
+	}
+	// Initialize the text object.
+	if(!rayInfo_[1]->setup(graphicsManager_->getDevice(), graphicsManager_->getDeviceContext(), graphicsManager_->getShader2D(), screenWidth_, screenHeight_, 20, 110, "Ray2: "))
+	{
+		MessageBoxA(NULL, "Could not initialize the Ray text object.", "SecondScreen - Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+bool ThirdScreenState::setupRays()
+{
+	for(int i = 0; i < 2; i++)
+	{
+		blueRay_[i] = new SpriteAnimationClass;
+		if(!blueRay_[i])
+		{
+			MessageBoxA(NULL, "Could not create blue ray instance.", "Error", MB_ICONERROR | MB_OK);
+			return false;
+		}
+		if(!blueRay_[i]->setup(graphicsManager_, "BlueInterf_", 4))
+		{
+			MessageBoxA(NULL, "Could not setup the blue ray.", "Error", MB_ICONERROR | MB_OK);
+			return false;
+		}
+
+		greenRay_[i] = new SpriteAnimationClass;
+		if(!greenRay_[i])
+		{
+			MessageBoxA(NULL, "Could not create green ray instance.", "Error", MB_ICONERROR | MB_OK);
+			return false;
+		}
+		if(!greenRay_[i]->setup(graphicsManager_, "GreenWave_", 4))
+		{
+			MessageBoxA(NULL, "Could not setup the green ray.", "Error", MB_ICONERROR | MB_OK);
+			return false;
+		}
+
+		redRay_[i] = new SpriteAnimationClass;
+		if(!redRay_[i])
+		{
+			MessageBoxA(NULL, "Could not create green ray instance.", "Error", MB_ICONERROR | MB_OK);
+			return false;
+		}
+		if(!redRay_[i]->setup(graphicsManager_, "redZigZag_", 3))
+		{
+			MessageBoxA(NULL, "Could not setup the green ray.", "Error", MB_ICONERROR | MB_OK);
+			return false;
+		}
+	}
+
+	return true;
+}
+
 bool ThirdScreenState::setupSplashScreen()
 {
 	// load splashscreen and calculate its position
@@ -448,22 +734,86 @@ void ThirdScreenState::updateIntroduction(float elapsedTime)
 {
 	introClock_->tick();
 
+	spaceShip_->update(elapsedTime);
+	pico_->update(elapsedTime);
 
 	switch(introLevelState_)
 	{
 		case ARRIBING:
 			{
-				
+				if(spaceShip_->checkArrivedObjective())
+				{
+					spaceShip_->setSpaceShipState(PREPARED);
+					introLevelState_ = LANDING;
+
+					introClock_->reset();
+				}
 			}
 			break;
 		case LANDING:
 			{
-				
+				if(introClock_->getTime() > spaceShipIntroWaitTime_)
+				{
+					pico_->setPosition(Point(0.0f, 5.0f, -3.25f));
+					introLevelState_ = PICO_APPEARS;
+					
+					introClock_->reset();
+				}
 			}
 			break;
+		case PICO_APPEARS:
+			{
+				float dist = (5.0f-terrainHeight_)*(introClock_->getTime()/introFallTime_);
+				pico_->setPosition(Point(0.0f, 5.0f-dist, -3.25f));
+
+				if(introClock_->getTime() > introFallTime_)
+				{
+					pico_->setPosition(Point(0.0f, terrainHeight_, -3.25f));
+					pico_->makeGreeting();
+					spaceShip_->goToPosition(Point(-10.0f, 5.0f, -3.25f));
+					kinectClass_->setUserColor(XMFLOAT4(1.0f, 1.0f, 1.0f, 0.5f));
+					
+					introLevelState_ = LEAVING;
+
+					introClock_->reset();
+				}
+			}
+			break;
+		case LEAVING:
+			{
+				if(spaceShip_->checkArrivedObjective())
+				{
+					spaceShip_->setSpaceShipState(PREPARED);
+					introLevelState_ = GREETING;
+
+					introClock_->reset();
+				}
+			}
+			break;
+		case GREETING:
+			{
+				if(introClock_->getTime() > introGreetTime_)
+				{
+					pico_->makePointing(false);
+					friendSpacheShips_[0]->setPosition(Point(-8.75f, 5.0f, 0.0f));
+					friendSpacheShips_[0]->goToPosition(Point(0.0f, 5.0f, 0.0f));
+					introLevelState_ = TRANSITION;
+
+					introClock_->reset();
+				}
+			}
 		case TRANSITION:
 			{
-				
+				if(introClock_->getTime() > introSpaceTime_)
+				{
+					pico_->makeRest(false);
+
+					levelState_ = PLAYING;
+					playLevelState_ = LEVEL_1;
+					actualFriendSpaceShip_ = 0;
+
+					gameClock_->reset();
+				}
 			}
 			break;
 		default:
@@ -474,15 +824,721 @@ void ThirdScreenState::updateIntroduction(float elapsedTime)
 	}
 }
 
+void ThirdScreenState::updatePlaying(float elapsedTime)
+{	
+	playClock_->tick();
+	noClock_->tick();
+
+	spaceShip_->update(elapsedTime);
+	pico_->update(elapsedTime);
+
+	switch(playLevelState_)
+	{
+		case LEVEL_1:
+			{
+				updatePlayingSublevel1(elapsedTime);
+			}
+			break;
+		case LEVEL_2:
+			{
+				updatePlayingSublevel2(elapsedTime);
+			}
+			break;
+		case LEVEL_3:
+			{
+				updatePlayingSublevel3(elapsedTime);
+			}
+			break;
+		case LEVEL_4:
+			{
+				updatePlayingSublevel4(elapsedTime);
+			}
+			break;
+		default:
+			{
+
+			}
+			break;
+	}
+}
+
+void ThirdScreenState::updatePlayingSublevel1(float elapsedTime)
+{
+	// Updtae ships
+	for(int i = 0; i < 3; i++)
+	{
+		friendSpacheShips_[i]->update(elapsedTime);
+	}
+
+	if(isPointing_)
+	{
+		pointingClock_->tick();
+
+		if(pointingClock_->getTime() > 2.0f)
+		{
+			pico_->makeRest(false);
+			isPointing_ = false;
+		}
+	}
+				
+	// If first ship is waiting release it and say to draw the rays
+	if(!friendSpacheShips_[0]->isWaiting())
+	{
+		drawRays_ = true;
+	}
+
+	// When first ship is out but second is still waiting, make second start
+	if(friendSpacheShips_[0]->isOut() && friendSpacheShips_[1]->isWaiting())
+	{
+		pico_->makePointing(true);
+		pointingClock_->reset();
+		isPointing_ = true;
+
+		// Launch second spaceship
+		friendSpacheShips_[1]->setPosition(Point(8.75f, 5.0f, 0.0f));
+		friendSpacheShips_[1]->goToPosition(Point(0.0f, 5.0f, 0.0f));
+		actualFriendSpaceShip_ = 1;
+	}
+	// Same as above but for second and third
+	if(friendSpacheShips_[1]->isOut() && friendSpacheShips_[2]->isWaiting())
+	{
+		pico_->makePointing(false);
+		pointingClock_->reset();
+		isPointing_ = true;
+
+		// launch third spaceship
+		friendSpacheShips_[2]->setPosition(Point(-8.75f, 5.0f, 0.0f));
+		friendSpacheShips_[2]->goToPosition(Point(0.0f, 5.0f, 0.0f));
+		actualFriendSpaceShip_ = 2;
+	}
+
+	// Check whenever rays are overlaping the sips
+	if(greenRay_[0]->getPointDistance(kinectHandViewPos_[0], friendSpacheShips_[actualFriendSpaceShip_]->getViewportPosition()) < distanceThreshold_ ||
+		greenRay_[1]->getPointDistance(kinectHandViewPos_[1], friendSpacheShips_[actualFriendSpaceShip_]->getViewportPosition()) < distanceThreshold_)
+	{
+		bothTouching_ = true;
+
+		noClock_->reset();
+		noClock_->stop();
+
+		friendSpacheShips_[actualFriendSpaceShip_]->freeIt(elapsedTime);
+	}
+	else
+	{
+		if(bothTouching_ && friendSpacheShips_[actualFriendSpaceShip_]->isStuck())
+		{
+			noClock_->reset();
+		}
+		if(noClock_->getTime() > 1.0f)
+		{
+			pico_->makeNo();
+
+			noClock_->reset();
+			noClock_->stop();
+		}
+		bothTouching_ = false;
+	}
+
+	// When the three shisp have been freed
+	if(friendSpacheShips_[0]->isOut() && friendSpacheShips_[1]->isOut() && friendSpacheShips_[2]->isOut())
+	{
+		pico_->makeCelebrate();
+		soundManager_->playFile("fanfare", false);
+
+		friendSpacheShips_[0]->setPosition(Point(8.75f, 5.5f, 0.0f));
+		friendSpacheShips_[1]->setPosition(Point(-8.75f, 4.5f, 0.0f));
+
+		playClock_->reset();
+		playLevelState_ = LEVEL_2;
+		activeRay_ = RED;
+		secondLevelIteration_ = 0;
+	}
+}
+
+void ThirdScreenState::updatePlayingSublevel2(float elapsedTime)
+{
+	// Updtae ships
+	for(int i = 0; i < 2; i++)
+	{
+		friendSpacheShips_[i]->update(elapsedTime);
+	}
+
+	if(isPointing_)
+	{
+		pointingClock_->tick();
+
+		if(pointingClock_->getTime() > 2.0f)
+		{
+			pico_->makeRest(false);
+			isPointing_ = false;
+		}
+	}
+
+	// When 9 seconds pass, launch the spaceships for the sublevel
+	if(playClock_->getTime() > 9.0f)
+	{
+		switch(secondLevelIteration_)
+		{
+			case 0:
+				{
+					pico_->makePointing(true);
+					pointingClock_->reset();
+					isPointing_ = true;
+
+					friendSpacheShips_[0]->goToPosition(Point(-1.0f, 5.5f, 0.0f));
+					friendSpacheShips_[0]->setType(GREEN);
+
+					friendSpacheShips_[1]->goToPosition(Point(3.0f, 4.5f, 0.0f));
+					friendSpacheShips_[1]->setType(RED);
+
+					playClock_->reset();
+					playClock_->stop();
+				}
+				break;
+			case 1:
+				{
+					pico_->makePointing(true);
+					pointingClock_->reset();
+					isPointing_ = true;
+
+					friendSpacheShips_[0]->goToPosition(Point(-1.0f, 5.5f, 0.0f));
+					friendSpacheShips_[0]->setType(GREEN);
+
+					friendSpacheShips_[1]->goToPosition(Point(3.0f, 4.5f, 0.0f));
+					friendSpacheShips_[1]->setType(RED);
+
+					playClock_->reset();
+					playClock_->stop();
+				}
+				break;
+			case 2:
+				{
+					pico_->makePointing(true);
+					pointingClock_->reset();
+					isPointing_ = true;
+
+					friendSpacheShips_[0]->goToPosition(Point(-1.0f, 5.5f, 0.0f));
+					friendSpacheShips_[0]->setType(GREEN);
+
+					friendSpacheShips_[1]->goToPosition(Point(3.0f, 4.5f, 0.0f));
+					friendSpacheShips_[1]->setType(RED);
+
+					playClock_->reset();
+					playClock_->stop();
+				}
+				break;
+		}
+	}
+
+	// Check whenever rays are overlaping the sips depending on color
+	switch(activeRay_)
+	{
+		case RED:
+			{
+				// If it is the green, we work with friendSpaceShip 1
+				if(redRay_[0]->getPointDistance(kinectHandViewPos_[0], friendSpacheShips_[1]->getViewportPosition()) < distanceThreshold_ ||
+					redRay_[1]->getPointDistance(kinectHandViewPos_[1], friendSpacheShips_[1]->getViewportPosition()) < distanceThreshold_)
+				{
+					bothTouching_ = true;
+
+					noClock_->reset();
+					noClock_->stop();
+
+					friendSpacheShips_[1]->freeIt(elapsedTime);
+				}
+				else
+				{
+					if(bothTouching_ && friendSpacheShips_[1]->isStuck())
+					{
+						noClock_->reset();
+					}
+					if(noClock_->getTime() > 1.0f)
+					{
+						pico_->makeNo();
+
+						noClock_->reset();
+						noClock_->stop();
+					}
+					bothTouching_ = false;
+				}
+
+				if(friendSpacheShips_[1]->isOut())
+				{
+					activeRay_ = GREEN;
+				}
+			}
+			break;
+		case GREEN:
+			{
+				// If it is the green, we work with friendSpaceShip 0
+				if(greenRay_[0]->getPointDistance(kinectHandViewPos_[0], friendSpacheShips_[0]->getViewportPosition()) < distanceThreshold_ ||
+					greenRay_[1]->getPointDistance(kinectHandViewPos_[1], friendSpacheShips_[0]->getViewportPosition()) < distanceThreshold_)
+				{
+					bothTouching_ = true;
+
+					noClock_->reset();
+					noClock_->stop();
+
+					friendSpacheShips_[0]->freeIt(elapsedTime);
+				}
+				else
+				{
+					if(bothTouching_ && friendSpacheShips_[0]->isStuck())
+					{
+						noClock_->reset();
+					}
+					if(noClock_->getTime() > 1.0f)
+					{
+						pico_->makeNo();
+
+						noClock_->reset();
+						noClock_->stop();
+					}
+					bothTouching_ = false;
+				}
+
+				// When Green SpaceShip leaves means that the sublevel or level has finished
+				if(friendSpacheShips_[0]->isOut())
+				{
+					// If we are in the last sublevel iteration, we advance to the third part of the playing leve
+					if(secondLevelIteration_ == 2)
+					{
+						pico_->makeCelebrate();
+						soundManager_->playFile("fanfare", false);
+
+						playClock_->reset();
+						playLevelState_ = LEVEL_3;
+						activeRay_ = RED;
+
+						friendSpacheShips_[0]->setPosition(Point(8.75f, 5.5f, 0.0f));
+						friendSpacheShips_[1]->setPosition(Point(-8.75f, 4.5f, 0.0f));
+						friendSpacheShips_[2]->setPosition(Point(8.75f, 4.5f, 0.0f));
+						friendSpacheShips_[3]->setPosition(Point(8.75f, 4.5f, 0.0f));
+						friendSpacheShips_[4]->setPosition(Point(-8.75f, 4.5f, 0.0f));
+					}
+					// Otherwise we advance one sublevel
+					else
+					{
+						// Reset to red ray
+						activeRay_ = RED;
+						secondLevelIteration_++;
+
+						// Set spaceship positions depending on sublevel state
+						if(secondLevelIteration_ == 1)
+						{
+							friendSpacheShips_[0]->setPosition(Point(8.75f, 5.5f, 0.0f));
+							friendSpacheShips_[1]->setPosition(Point(-8.75f, 4.5f, 0.0f));
+						}
+						else
+						{
+							friendSpacheShips_[0]->setPosition(Point(8.75f, 5.5f, 0.0f));
+							friendSpacheShips_[1]->setPosition(Point(-8.75f, 4.5f, 0.0f));
+						}
+						playClock_->reset();
+					}
+				}
+			}
+			break;
+	}
+}
+
+void ThirdScreenState::updatePlayingSublevel3(float elapsedTime)
+{
+	// Updtae ships
+	for(int i = 0; i < 5; i++)
+	{
+		friendSpacheShips_[i]->update(elapsedTime);
+	}
+
+	// Control pointing behaviour from Pico
+	if(isPointing_)
+	{
+		pointingClock_->tick();
+
+		if(pointingClock_->getTime() > 2.0f)
+		{
+			pico_->makeRest(false);
+			isPointing_ = false;
+		}
+	}
+
+	// Set FriendSpaceShips to appear after 9 seconds
+	if(playClock_->getTime() > 9.0f)
+	{
+		pico_->makePointing(true);
+		pointingClock_->reset();
+		isPointing_ = true;
+
+		friendSpacheShips_[0]->goToPosition(Point(-3.0f, 5.5f, 0.0f));
+		friendSpacheShips_[0]->setType(RED);
+		friendSpacheShips_[1]->goToPosition(Point(-1.0f, 5.5f, 0.0f));
+		friendSpacheShips_[1]->setType(RED);
+		friendSpacheShips_[2]->goToPosition(Point(0.0f, 5.5f, 0.0f));
+		friendSpacheShips_[2]->setType(GREEN);
+		friendSpacheShips_[3]->goToPosition(Point(3.0f, 4.5f, 0.0f));
+		friendSpacheShips_[3]->setType(GREEN);
+		friendSpacheShips_[4]->goToPosition(Point(4.0f, 5.5f, 0.0f));
+		friendSpacheShips_[4]->setType(BLUE);
+
+		playClock_->reset();
+		playClock_->stop();
+	}
+
+	// Check whenever rays are overlaping the sips depending on color
+	switch(activeRay_)
+	{
+		case RED:
+			{
+				// If it is the green, we work with friendSpaceShips 0 and 1
+				if(redRay_[0]->getPointDistance(kinectHandViewPos_[0], friendSpacheShips_[0]->getViewportPosition()) < distanceThreshold_ ||
+				   redRay_[1]->getPointDistance(kinectHandViewPos_[1], friendSpacheShips_[0]->getViewportPosition()) < distanceThreshold_)
+				{
+					bothTouching_ = true;
+					
+					noClock_->reset();
+					noClock_->stop();
+
+					friendSpacheShips_[0]->freeIt(elapsedTime);
+				}
+				else
+				{
+					if(bothTouching_ && friendSpacheShips_[0]->isStuck())
+					{
+						noClock_->reset();
+					}
+					if(noClock_->getTime() > 1.0f)
+					{
+						pico_->makeNo();
+
+						noClock_->reset();
+						noClock_->stop();
+					}
+					bothTouching_ = false;
+				}
+				if(redRay_[0]->getPointDistance(kinectHandViewPos_[0], friendSpacheShips_[1]->getViewportPosition()) < distanceThreshold_ ||
+				   redRay_[1]->getPointDistance(kinectHandViewPos_[1], friendSpacheShips_[1]->getViewportPosition()) < distanceThreshold_)
+				{
+					bothTouching_ = true;
+					
+					noClock_->reset();
+					noClock_->stop();
+
+					friendSpacheShips_[1]->freeIt(elapsedTime);
+				}
+				else
+				{
+					if(bothTouching_ && friendSpacheShips_[1]->isStuck())
+					{
+						noClock_->reset();
+					}
+					if(noClock_->getTime() > 1.0f)
+					{
+						pico_->makeNo();
+
+						noClock_->reset();
+						noClock_->stop();
+					}
+					bothTouching_ = false;
+				}
+
+				if(friendSpacheShips_[0]->isOut() && friendSpacheShips_[1]->isOut())
+				{
+					activeRay_ = GREEN;
+				}
+			}
+			break;
+		case GREEN:
+			{
+				// If it is the green, we work with friendSpaceShips 2 and 3
+				if(greenRay_[0]->getPointDistance(kinectHandViewPos_[0], friendSpacheShips_[2]->getViewportPosition()) < distanceThreshold_ ||
+				   greenRay_[1]->getPointDistance(kinectHandViewPos_[1], friendSpacheShips_[2]->getViewportPosition()) < distanceThreshold_)
+				{
+					bothTouching_ = true;
+					
+					noClock_->reset();
+					noClock_->stop();
+
+					friendSpacheShips_[2]->freeIt(elapsedTime);
+				}
+				else
+				{
+					if(bothTouching_ && friendSpacheShips_[2]->isStuck())
+					{
+						noClock_->reset();
+					}
+					if(noClock_->getTime() > 1.0f)
+					{
+						pico_->makeNo();
+
+						noClock_->reset();
+						noClock_->stop();
+					}
+					bothTouching_ = false;
+				}
+				if(greenRay_[0]->getPointDistance(kinectHandViewPos_[0], friendSpacheShips_[3]->getViewportPosition()) < distanceThreshold_ ||
+				   greenRay_[1]->getPointDistance(kinectHandViewPos_[1], friendSpacheShips_[3]->getViewportPosition()) < distanceThreshold_)
+				{
+					bothTouching_ = true;
+					
+					noClock_->reset();
+					noClock_->stop();
+
+					friendSpacheShips_[3]->freeIt(elapsedTime);
+				}
+				else
+				{
+					if(bothTouching_ && friendSpacheShips_[3]->isStuck())
+					{
+						noClock_->reset();
+					}
+					if(noClock_->getTime() > 1.0f)
+					{
+						pico_->makeNo();
+
+						noClock_->reset();
+						noClock_->stop();
+					}
+					bothTouching_ = false;
+				}
+
+				if(friendSpacheShips_[2]->isOut() && friendSpacheShips_[3]->isOut())
+				{
+					activeRay_ = BLUE;
+				}
+			}
+			break;
+		case BLUE:
+			{
+				// If it is the green, we work with friendSpaceShip 1
+				if(blueRay_[0]->getPointDistance(kinectHandViewPos_[0], friendSpacheShips_[4]->getViewportPosition()) < distanceThreshold_ ||
+				   blueRay_[1]->getPointDistance(kinectHandViewPos_[1], friendSpacheShips_[4]->getViewportPosition()) < distanceThreshold_)
+				{
+					bothTouching_ = true;
+					
+					noClock_->reset();
+					noClock_->stop();
+
+					friendSpacheShips_[4]->freeIt(elapsedTime);
+				}
+				else
+				{
+					if(bothTouching_ && friendSpacheShips_[4]->isStuck())
+					{
+						noClock_->reset();
+					}
+					if(noClock_->getTime() > 1.0f)
+					{
+						pico_->makeNo();
+
+						noClock_->reset();
+						noClock_->stop();
+					}
+					bothTouching_ = false;
+				}
+
+				if(friendSpacheShips_[4]->isOut())
+				{
+					pico_->makeCelebrate();
+					soundManager_->playFile("fanfare", false);
+
+					playClock_->reset();
+					playLevelState_ = LEVEL_4;
+					activeRay_ = RED;
+
+					friendSpacheShips_[0]->setPosition(Point(8.75f, 5.5f, 0.0f));
+					friendSpacheShips_[1]->setPosition(Point(-8.75f, 4.5f, 0.0f));
+					friendSpacheShips_[2]->setPosition(Point(8.75f, 4.5f, 0.0f));
+					friendSpacheShips_[3]->setPosition(Point(8.75f, 4.5f, 0.0f));
+					friendSpacheShips_[4]->setPosition(Point(-8.75f, 4.5f, 0.0f));
+				}
+			}
+			break;
+	}
+}
+
+void ThirdScreenState::updatePlayingSublevel4(float elapsedTime)
+{
+	// Updtae ships
+	for(int i = 0; i < 5; i++)
+	{
+		friendSpacheShips_[i]->update(elapsedTime);
+	}
+
+	// Control pointing behaviour from Pico
+	if(isPointing_)
+	{
+		pointingClock_->tick();
+
+		if(pointingClock_->getTime() > 2.0f)
+		{
+			pico_->makeRest(false);
+			isPointing_ = false;
+		}
+	}
+
+	// Set FriendSpaceShips to appear after 9 seconds
+	if(playClock_->getTime() > 9.0f)
+	{
+		launchRandomFriendSpaceShip();
+
+		playClock_->reset();
+		playClock_->stop();
+	}
+
+	if(subLevel4Freed_ > 5)
+	{
+		pico_->makeCelebrate();
+		soundManager_->playFile("fanfare", false);
+		pico_->changeAnimation("DanceAss", 0.6f);
+
+		playClock_->reset();
+		playClock_->stop();
+
+		gameClock_->reset();
+
+		levelState_ = ENDING;
+	}
+
+	// Check whenever rays are overlaping the sips depending on color
+	switch(activeRay_)
+	{
+		case RED:
+			{
+				// If it is the green, we work with friendSpaceShips 0
+				if(redRay_[0]->getPointDistance(kinectHandViewPos_[0], friendSpacheShips_[actualFriendSpaceShip_]->getViewportPosition()) < distanceThreshold_ ||
+				   redRay_[1]->getPointDistance(kinectHandViewPos_[1], friendSpacheShips_[actualFriendSpaceShip_]->getViewportPosition()) < distanceThreshold_)
+				{
+					bothTouching_ = true;
+					
+					noClock_->reset();
+					noClock_->stop();
+
+					friendSpacheShips_[actualFriendSpaceShip_]->freeIt(elapsedTime);
+				}
+				else
+				{
+					if(bothTouching_ && friendSpacheShips_[actualFriendSpaceShip_]->isStuck())
+					{
+						noClock_->reset();
+					}
+					if(noClock_->getTime() > 1.0f)
+					{
+						pico_->makeNo();
+
+						noClock_->reset();
+						noClock_->stop();
+					}
+					bothTouching_ = false;
+				}
+				// When first ship is out but second is still waiting, make second start
+				if(friendSpacheShips_[actualFriendSpaceShip_]->isOut())
+				{
+					subLevel4Freed_++;
+					launchRandomFriendSpaceShip();
+				}
+			}
+			break;
+		case GREEN:
+			{
+				// If it is the green, we work with friendSpaceShips 0
+				if(greenRay_[0]->getPointDistance(kinectHandViewPos_[0], friendSpacheShips_[actualFriendSpaceShip_]->getViewportPosition()) < distanceThreshold_ ||
+				   greenRay_[1]->getPointDistance(kinectHandViewPos_[1], friendSpacheShips_[actualFriendSpaceShip_]->getViewportPosition()) < distanceThreshold_)
+				{
+					bothTouching_ = true;
+					
+					noClock_->reset();
+					noClock_->stop();
+
+					friendSpacheShips_[actualFriendSpaceShip_]->freeIt(elapsedTime);
+				}
+				else
+				{
+					if(bothTouching_ && friendSpacheShips_[actualFriendSpaceShip_]->isStuck())
+					{
+						noClock_->reset();
+					}
+					if(noClock_->getTime() > 1.0f)
+					{
+						pico_->makeNo();
+
+						noClock_->reset();
+						noClock_->stop();
+					}
+					bothTouching_ = false;
+				}
+				// When first ship is out but second is still waiting, make second start
+				if(friendSpacheShips_[actualFriendSpaceShip_]->isOut())
+				{
+					subLevel4Freed_++;
+					launchRandomFriendSpaceShip();
+				}
+			}
+			break;
+		case BLUE:
+			{
+				// If it is the green, we work with friendSpaceShips 0
+				if(blueRay_[0]->getPointDistance(kinectHandViewPos_[0], friendSpacheShips_[actualFriendSpaceShip_]->getViewportPosition()) < distanceThreshold_ ||
+				   blueRay_[1]->getPointDistance(kinectHandViewPos_[1], friendSpacheShips_[actualFriendSpaceShip_]->getViewportPosition()) < distanceThreshold_)
+				{
+					bothTouching_ = true;
+					
+					noClock_->reset();
+					noClock_->stop();
+
+					friendSpacheShips_[actualFriendSpaceShip_]->freeIt(elapsedTime);
+				}
+				else
+				{
+					if(bothTouching_ && friendSpacheShips_[actualFriendSpaceShip_]->isStuck())
+					{
+						noClock_->reset();
+					}
+					if(noClock_->getTime() > 1.0f)
+					{
+						pico_->makeNo();
+
+						noClock_->reset();
+						noClock_->stop();
+					}
+					bothTouching_ = false;
+				}
+				// When first ship is out but second is still waiting, make second start
+				if(friendSpacheShips_[actualFriendSpaceShip_]->isOut())
+				{
+					subLevel4Freed_++;
+					launchRandomFriendSpaceShip();
+				}
+			}
+			break;
+	}
+}
+
 void ThirdScreenState::updateKinectHands()
 {
-	std::stringstream kinectext1;
-	kinectext1 << "Kinect 1: " << kinectHandWorldPos_[0].x << "x" << kinectHandWorldPos_[0].y;
-	kinectHands_[0]->setText(kinectext1.str(), graphicsManager_->getDeviceContext());
+	for(int i = 0; i < 2; i++)
+	{
+		std::stringstream kinectext;
+		kinectext << "Kinect" << i+1 << ":  " << kinectHandViewPos_[i].x << "x" << kinectHandViewPos_[i].y << "  rot: " << kinectHandRot_[i];
+		kinectHands_[i]->setText(kinectext.str(), graphicsManager_->getDeviceContext());
+	}
+}
 
-	std::stringstream kinectext2;
-	kinectext2 << "Kinect 2: " << kinectHandWorldPos_[1].x << "x" << kinectHandWorldPos_[1].y;
-	kinectHands_[1]->setText(kinectext2.str(), graphicsManager_->getDeviceContext());
+void ThirdScreenState::updateRayInfo()
+{
+	for(int i = 0; i < 2; i++)
+	{
+		Point endHand;
+		endHand.x = greenRay_[i]->getEndRayPosition().x+kinectHandViewPos_[i].x;
+		endHand.y = kinectHandViewPos_[i].y-greenRay_[i]->getEndRayPosition().y;
+
+		Point spaceShip1 = friendSpacheShips_[0]->getViewportPosition();
+
+		int dist = sqrt(pow(endHand.x -spaceShip1.x ,2)+pow(endHand.y -spaceShip1.y ,2));
+
+		std::stringstream raytext;
+		raytext << "Ray" << i+1 << ":  " << greenRay_[i]->getPointDistance(kinectHandViewPos_[i], spaceShip1) << "  " << endHand.x  << "x" << endHand.y << "  " << spaceShip1.x << "x" << spaceShip1.y;
+		rayInfo_[i]->setText(raytext.str(), graphicsManager_->getDeviceContext());
+	}
 }
 
 void ThirdScreenState::drawSplashScreen()
@@ -500,6 +1556,57 @@ void ThirdScreenState::drawSplashScreen()
 			splashScreen_->draw(graphicsManager_->getDeviceContext(), (screenWidth_/2)*-1, (screenHeight_/2)+2, worldMatrix, viewMatrix, orthoMatrix, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 		graphicsManager_->turnZBufferOn();
 	graphicsManager_->endDraw();
+}
+
+void ThirdScreenState::launchRandomFriendSpaceShip()
+{
+	if(lastOutLeft_)
+	{
+		pico_->makePointing(true);
+		pointingClock_->reset();
+		isPointing_ = true;
+
+		friendSpacheShips_[0]->setPosition(Point(8.5f, 5.0f, 0.0f));
+		friendSpacheShips_[0]->flyToPosition(Point(0.0f, 0.0f, 0.0f));
+
+		lastOutLeft_ = false;
+	}
+	else
+	{
+		pico_->makePointing(false);
+		pointingClock_->reset();
+		isPointing_ = true;
+
+		friendSpacheShips_[0]->setPosition(Point(-8.5f, 5.0f, 0.0f));
+		friendSpacheShips_[0]->flyToPosition(Point(-8.5f, 5.0f, 0.0f));
+
+		lastOutLeft_ = true;
+	}
+
+	switch(activeRay_)
+	{
+	case RED:
+		{
+			friendSpacheShips_[0]->setType(GREEN);
+			activeRay_ = GREEN;
+			actualFriendSpaceShip_ = 0;
+		}
+		break;
+	case GREEN:
+		{
+			friendSpacheShips_[0]->setType(BLUE);
+			activeRay_ = BLUE;
+			actualFriendSpaceShip_ = 0;
+		}
+		break;
+	case BLUE:
+		{
+			friendSpacheShips_[0]->setType(RED);
+			activeRay_ = RED;
+			actualFriendSpaceShip_ = 0;
+		}
+		break;
+	}
 }
 
 void ThirdScreenState::loadConfigurationFromXML()

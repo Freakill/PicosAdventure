@@ -68,7 +68,7 @@ bool SpaceShipClass::setup(GraphicsManager* graphicsManager, SoundSecondClass* s
 	{
 		MessageBoxA(NULL, "Could not create light1 particles instance", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
-	if(spaceShipParticles_ && !spaceShipParticles_->setup(graphicsManager, "star", getPosition(), 1.5, 200, 200, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)))
+	if(spaceShipParticles_ && !spaceShipParticles_->setup(graphicsManager, "star", getPosition(), 1.5, 200, 200, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), true))
 	{
 		MessageBoxA(NULL, "Could not setup light1 particles object", "SecondScreen - Error", MB_ICONERROR | MB_OK);
 	}
@@ -302,6 +302,11 @@ void SpaceShipClass::setFloorHeight(float floor)
 	floorHeight_ = floor;
 }
 
+void SpaceShipClass::setSpaceShipState(SpaceShipState state)
+{
+	spaceShipState_ = state;
+}
+
 void SpaceShipClass::fly(float elapsedTime)
 {
 	velocity_.x = objective_.x - position_.x;
@@ -309,7 +314,7 @@ void SpaceShipClass::fly(float elapsedTime)
 	velocity_.z = objective_.z - position_.z;
 
 	Vector normalizedVelocity = velocity_.normalize();
-	velocity_ = normalizedVelocity*7;
+	velocity_ = normalizedVelocity*2;
 
 	//rotY_ = acos(normalizedVelocity.z);
 	/*if(normalizedVelocity.x < 0)

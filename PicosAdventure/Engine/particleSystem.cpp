@@ -18,13 +18,15 @@ ParticleSystem::~ParticleSystem()
 {
 
 }
-bool ParticleSystem::setup(GraphicsManager* graphicsManager, std::string textureFilename, Point initialPosition, float fallDistance, float particlesPerSecond, float maxParticles, XMFLOAT4 color)
+bool ParticleSystem::setup(GraphicsManager* graphicsManager, std::string textureFilename, Point initialPosition, 
+						   float fallDistance, float particlesPerSecond, float maxParticles, XMFLOAT4 color, bool randColor)
 {
 	bool result;
 
 	graphicsManager_ = graphicsManager;
 
 	particleColor_ = color;
+	randColor_ = randColor;
 
 	// Load the texture that is used for the particles.
 	result = loadTexture(graphicsManager->getDevice(), textureFilename);
@@ -106,9 +108,26 @@ void ParticleSystem::setPosition(Point position)
 	particleInitialPosition_.z = position.z;
 }
 
+void ParticleSystem::setParticleColor(XMFLOAT4 color)
+{
+	particleColor_ = color;
+
+	for(int i=0; i < currentParticleCount_; i++)
+	{
+		particleList_[i].red = color.x;
+		particleList_[i].green = color.y;
+		particleList_[i].blue = color.z;
+	}
+}
+
 void ParticleSystem::setParticlesDeviation(Point deviation)
 {
 	particleDeviation_ = deviation;
+}
+
+void ParticleSystem::setParticleDistance(float distance)
+{
+	fallingDistance_ = distance;
 }
 
 void ParticleSystem::setParticlesVelocity(Point velocity, Point velocityVariation)
@@ -381,9 +400,18 @@ void ParticleSystem::emitParticles(float elapsedTime)
 		velocity.y = particleVelocity_.y + (((float)rand()-(float)rand())/RAND_MAX) * particleVelocityVariation_.y;
 		velocity.z = particleVelocity_.z + (((float)rand()-(float)rand())/RAND_MAX) * particleVelocityVariation_.z;
 
-		red   = (((float)rand()-(float)rand())/RAND_MAX) + particleColor_.x;
-		green = (((float)rand()-(float)rand())/RAND_MAX) + particleColor_.y;
-		blue  = (((float)rand()-(float)rand())/RAND_MAX) + particleColor_.z;
+		if(randColor_)
+		{
+			red   = (((float)rand()-(float)rand())/RAND_MAX) + particleColor_.x;
+			green = (((float)rand()-(float)rand())/RAND_MAX) + particleColor_.y;
+			blue  = (((float)rand()-(float)rand())/RAND_MAX) + particleColor_.z;
+		}
+		else
+		{
+			red   = particleColor_.x;
+			green = particleColor_.y;
+			blue  = particleColor_.z;
+		}
 
 		// Now since the particles need to be rendered from back to front for blending we have to sort the particle array.
 		// We will sort using Z depth so we need to find where in the list the particle should be inserted.
